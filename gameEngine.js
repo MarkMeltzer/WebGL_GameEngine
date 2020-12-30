@@ -25,7 +25,7 @@ var GameEngine = function(canvas, gl) {
 
 /**
  * Creates Scene object and sets 'this.scene'. Also sets up the input handeling
- * for the scene.
+ * for the scene. Also starts the texture and mesh loading.
  *
  * @param {JSON} sceneJson the JSON object to create the scene from.
  */
@@ -37,6 +37,19 @@ GameEngine.prototype.loadScene = function(sceneJson) {
 
     // set the scene for the renderengine
     this.renderEngine.setScene(this.scene);
+
+    // start loading the textures and meshes
+    for (var i = 0; i < this.scene.models.length; i++) {
+        const model = this.scene.models[i];
+
+        if (model.texture) {
+            this.loadTextureImage(model.id, model.texture);
+        }
+
+        if (model.type == "obj" && model.filePath) {
+            this.loadOBJFile(model.id, model.filePath);
+        }
+    }
     
     // set up input handeling
     this.mouseChange = [0, 0];
@@ -57,21 +70,31 @@ GameEngine.prototype.parseSceneJSON = function(jsonObj) {
     for (var i = 0; i < jsonObj.objects.length; i++) {
         const model = jsonObj.objects[i];
 
-        var boxData = createBox(
-            model.sizes[0],
-            model.sizes[1],
-            model.sizes[2]
-        );
-        const box = {
+        var meshData;
+        if (model.type == "box") {
+            meshData = createBox(
+                model.sizes[0],
+                model.sizes[1],
+                model.sizes[2]
+            );
+        } else {
+            meshData = null;
+        }
+
+        const object = {
+            id: model.id,
+            type: model.type,
+            filePath: model.file_path,
             position: model.position,
-            numVertices: boxData.vertexIndices.length,
-            // TODO data -> meshdata
-            data: boxData,
-            animate: model.animate,
+            texture: model.texture,
+            // TODO data -> meshData or vertexData
+            data: meshData,
+            animateTrans: model.animateTrans,
+            animateRot: model.animateRot,
             rotSpeedFactor: model.rotSpeedFactor,
             rotAxis: model.rotAxis
         };
-        modelArray.push(box);
+        modelArray.push(object);
     }
 
     const scene = new Scene();
@@ -186,7 +209,7 @@ GameEngine.prototype.updateMousePosition = function() {
 GameEngine.prototype.handleMouseInput = function() {
     const currentMouseChange = this.mouseChange;
     this.mouseChange = [0, 0];
-    this.scene.camera.turnCamera(currentMouseChange);
+    this.scene.camera.turnCamera(currentMouseChange, this.deltaTime);
 }
 
 /**
@@ -195,7 +218,34 @@ GameEngine.prototype.handleMouseInput = function() {
 GameEngine.prototype.handleKeyboardInput = function() {
     for (var key in this.keyTracker) {
         if (this.keyTracker[key].pressed) {
-            this.keyTracker[key].func();
+            this.keyTracker[key].func(this.deltaTime);
         }
     }
+}
+
+/**
+ * Loads an image and sets it as a texture.
+ * 
+ * @param {string} modelId the Id of the model the texture belongs to.
+ * @param {string} url the url to load the image from.
+ */
+GameEngine.prototype.loadTextureImage = function(modelId, url) {
+    const image = new Image();
+    image.onload = () => {
+        this.renderEngine.setTexture(modelId, image);
+    }
+    image.crossOrigin = "";
+    image.src = url;
+}
+
+/**
+ * Loads and parses an OBJFile and sets it as the mesh of a given model.
+ * 
+ * @param {string} modelId the Id of the model the mesh belongs to.
+ * @param {string} url the url to load the .obj file from.
+ */
+GameEngine.prototype.loadOBJFile = function(modelId, url) {
+    loadOBJ(url, (OBJFile) => {
+        this.renderEngine.setMesh(modelId, parseOBJFile(OBJFile));
+    });
 }

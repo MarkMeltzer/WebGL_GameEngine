@@ -13,6 +13,26 @@ var RenderEngine = function(canvas, gl, opts) {
 
     // intialize empty scene
     this.scene = null;
+
+    // create the default texture
+    this.defaultTextureBuffer = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, this.defaultTextureBuffer);
+    gl.texImage2D(
+        gl.TEXTURE_2D, 
+        0, 
+        gl.RGBA, 
+        1, 
+        1, 
+        0, 
+        gl.RGBA, 
+        gl.UNSIGNED_BYTE, 
+        new Uint8Array([0, 0, 255, 255])
+    );
+
+    // create the default mesh
+    this.defaultMeshData = createBox(2, 2, 2);
+    this.defaultMeshBuffers = this.createBuffersFromModelData(this.defaultMeshData);
+
 }
 
 /**
@@ -22,20 +42,20 @@ RenderEngine.prototype.getVsSource = function() {
     const vsSource = `
         attribute vec4 aVertexPosition;
         attribute vec3 aVertexNormal;
-        attribute vec4 aVertexColor;
+        attribute vec2 atextureCoord;
 
         uniform mat4 uNormalMatrix;
         uniform mat4 uModelViewMatrix;
         uniform mat4 uProjectionMatrix;
         uniform vec3 uLightDirection;
 
-        varying highp vec4 vColor;
+        varying highp vec2 vTextureCoord;
         varying highp vec3 vLighting;
 
         void main() {
             gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
 
-            highp vec3 ambientLight = vec3(0.3, 0.3, 0.3);
+            highp vec3 ambientLight = vec3(0.2, 0.2, 0.2);
             highp vec3 directionalLightColor = vec3(1, 1, 1);
             highp vec3 directionalVector = normalize(uLightDirection);
 
@@ -44,7 +64,7 @@ RenderEngine.prototype.getVsSource = function() {
             highp float directional = max(dot(transformedNormal.xyz, directionalVector), 0.0);
             vLighting = ambientLight + (directionalLightColor * directional);
             
-            vColor = aVertexColor;
+            vTextureCoord = atextureCoord;
         }
     `;
     return vsSource;
@@ -55,11 +75,14 @@ RenderEngine.prototype.getVsSource = function() {
  */
 RenderEngine.prototype.getFsSource = function() {
     const fsSource = `
+        uniform sampler2D uTexture;
+
         varying highp vec4 vColor;
         varying highp vec3 vLighting;
+        varying highp vec2 vTextureCoord;
 
         void main() {
-            highp vec4 color = vColor;
+            highp vec4 color = texture2D(uTexture, vTextureCoord);
             gl_FragColor = vec4(color.xyz * vLighting, color.w);
         }
     `;
@@ -137,13 +160,15 @@ RenderEngine.prototype.drawScene = function(time) {
             model.position
         );
 
-        if (model.animate) {
+        if (model.animateTrans) {
             mat4.translate(
                 modelMatrix,
                 modelMatrix,
                 [6 * sinAnim - 3, 0, 6 * cosAnim - 3]
             );
+        }
 
+        if (model.animateRot) {
             mat4.rotate(
                 modelMatrix,
                 modelMatrix,
@@ -192,21 +217,21 @@ RenderEngine.prototype.drawScene = function(time) {
 
         // tell webgl how it should pull information out of vertex color buffer
         {
-            const numComponents = 4;
+            const numComponents = 2;
             const type = gl.FLOAT;
             const normalize = false;
             const stride = 0;
             const offset = 0;
-            gl.bindBuffer(gl.ARRAY_BUFFER, model.buffers.color);
+            gl.bindBuffer(gl.ARRAY_BUFFER, model.buffers.textureCoord);
             gl.vertexAttribPointer(
-                this.shaderVarLocs.attribLocations.aVertexColor,
+                this.shaderVarLocs.attribLocations.atextureCoord,
                 numComponents,
                 type,
                 normalize,
                 stride,
                 offset
             );
-            gl.enableVertexAttribArray(this.shaderVarLocs.attribLocations.aVertexColor);
+            gl.enableVertexAttribArray(this.shaderVarLocs.attribLocations.atextureCoord);
         }
 
         // TODO: reorder stuff below if possible
@@ -235,6 +260,13 @@ RenderEngine.prototype.drawScene = function(time) {
             [0.85, 0.8, 0.75]
         );
 
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, model.buffers.texture);
+        gl.uniform1i(
+            this.shaderVarLocs.uniformLocations.uTexture,
+            0
+        );
+
         // create normalmatrix
         // TODO: (move this up)
         const normalMatrix = mat4.create();
@@ -250,7 +282,7 @@ RenderEngine.prototype.drawScene = function(time) {
         {
             const offset = 0;
             const type = gl.UNSIGNED_SHORT;
-            const vertexCount = model.numVertices;
+            const vertexCount = model.data.vertexIndices.length;
             gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
         }
     }
@@ -306,13 +338,14 @@ RenderEngine.prototype.getShaderVarLocations = function() {
         attribLocations: {
             aVertexPosition: gl.getAttribLocation(this.shaderProgram, 'aVertexPosition'),
             aVertexNormal: gl.getAttribLocation(this.shaderProgram, 'aVertexNormal'),
-            aVertexColor: gl.getAttribLocation(this.shaderProgram, 'aVertexColor')
+            atextureCoord: gl.getAttribLocation(this.shaderProgram, 'atextureCoord')
         },
         uniformLocations: {
             uProjectionMatrix: gl.getUniformLocation(this.shaderProgram, 'uProjectionMatrix'),
             uModelViewMatrix: gl.getUniformLocation(this.shaderProgram, 'uModelViewMatrix'),
             uNormalMatrix: gl.getUniformLocation(this.shaderProgram, 'uNormalMatrix'),
-            uLightDirection: gl.getUniformLocation(this.shaderProgram, 'uLightDirection')
+            uLightDirection: gl.getUniformLocation(this.shaderProgram, 'uLightDirection'),
+            uTexture: gl.getUniformLocation(this.shaderProgram, 'uTexture')
         }
     }
 
@@ -320,10 +353,21 @@ RenderEngine.prototype.getShaderVarLocations = function() {
 }
 
 RenderEngine.prototype.setScene = function(scene) {
+    const gl = this.gl;
+
     for (var i = 0; i < scene.models.length; i++) {
-        scene.models[i].buffers = this.createBuffersFromModelData(
-            scene.models[i].data
-        );
+        const model = scene.models[i];
+
+        // create and save the vertex buffers
+        if (model.data) {
+            model.buffers = this.createBuffersFromModelData(model.data);
+        } else {
+            model.data = this.defaultMeshData;
+            model.buffers = this.defaultMeshBuffers;
+        }
+
+        // fill texture buffer with default texture (single pixel color)
+        scene.models[i].buffers.texture = this.defaultTextureBuffer;
     }
 
     this.scene = scene;
@@ -348,11 +392,11 @@ RenderEngine.prototype.createBuffersFromModelData = function(modelData) {
         gl.STATIC_DRAW
     );
 
-    const colorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    const textureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
     gl.bufferData(
         gl.ARRAY_BUFFER,
-        new Float32Array(modelData.vertexColors),
+        new Float32Array(modelData.textureCoords),
         gl.STATIC_DRAW
     );
 
@@ -367,7 +411,75 @@ RenderEngine.prototype.createBuffersFromModelData = function(modelData) {
     return {
         position: positionBuffer,
         normal: normalBuffer,
-        color: colorBuffer,
+        textureCoord: textureCoordBuffer,
         index: indexBuffer
     };
+}
+
+
+RenderEngine.prototype.setTexture = function(modelId, image) {
+    const gl = this.gl;
+    
+    // Find the model corresponding to the modelId
+    // TODO do this via dictionary lookup
+    var model = null;
+    for (var i = 0; i < this.scene.models.length; i++) {
+        if (this.scene.models[i].id == modelId) {
+            model = this.scene.models[i];
+            break;
+        }
+    }
+    if (!model) {
+        console.log("Model not found during call to setTexture. ModelId: " + modelId);
+        return null;
+    }
+
+    // create a new buffer and set the new texture
+    const textureBuffer = gl.createTexture();
+    model.buffers.texture = textureBuffer;
+    gl.bindTexture(gl.TEXTURE_2D, model.buffers.texture);
+    gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        image
+    );
+    
+    // No power of 2? No mipmap for you!
+    if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+        gl.generateMipmap(gl.TEXTURE_2D);
+    } else {
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    }
+}
+
+RenderEngine.prototype.setMesh = function(modelId, meshData) {
+    const gl = this.gl;
+    
+    // Find the model corresponding to the modelId
+    // TODO do this via dictionary lookup
+    var model = null;
+    for (var i = 0; i < this.scene.models.length; i++) {
+        if (this.scene.models[i].id == modelId) {
+            model = this.scene.models[i];
+            break;
+        }
+    }
+    if (!model) {
+        console.log("Model not found during call to setMesh. ModelId: " + modelId);
+        return null;
+    }
+
+    // set the new mesh
+    model.data = meshData;
+    model.numVertices = meshData.vertexIndices.length;
+
+    // fill the buffers with the new data
+    const tempTextureBuffer = model.buffers.texture;
+    model.buffers = this.createBuffersFromModelData(meshData);
+    model.buffers.texture = tempTextureBuffer;
 }

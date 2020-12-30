@@ -1,39 +1,84 @@
 {
   "objects": [
     {
-        "sizes" : [100, 0.1, 200],
-        "position": [0, -2, 0],
-        "rotAxis" : [1, 1, 0],
-        "rotSpeedFactor" : 1,
-        "animate": false
-    },
-    {
-        "sizes" : [1, 1, 1],
-        "position": [0, 2, 0],
-        "rotAxis" : [1, 0, 1],
-        "rotSpeedFactor" : 0.5,
-        "animate": true
-    },
-    {
-        "sizes" : [1, 10, 1],
-        "position": [-2, -2, 0],
-        "rotAxis" : [1, 0, 1],
-        "rotSpeedFactor" : 1,
-        "animate": false
-    },
-    {
-        "sizes" : [1, 1, 1],
-        "position": [1.5, -1.5, -10],
-        "rotAxis" : [1, 1, 0],
-        "rotSpeedFactor" : 1,
-        "animate": false
-    },
-    {
-      "sizes" : [0.5, 0.5, 0.5],
-      "position": [0, 0, 0],
+      "id": "floor",
+      "type": "box",
+      "position": [0, -2, 0],
+      "texture": "imgs/pastelgreen.png",
+      "sizes" : [100, 0.1, 200],
       "rotAxis" : [1, 1, 0],
       "rotSpeedFactor" : 1,
-      "animate": false
-  }
+      "animateRot": false
+    },
+    {
+      "id": "2",
+      "type": "box",
+      "position": [0, 2, 0],
+      "texture": "imgs/texture.png",
+      "sizes" : [1, 1, 1],
+      "rotAxis" : [1, 0, 1],
+      "rotSpeedFactor" : 0.5,
+      "animateRot": true,
+      "animateTrans": true
+    },
+    {
+      "id": "3",
+      "type": "box",
+      "position": [-2, 0, 0],
+      "texture": "imgs/texture.png",
+      "sizes" : [1, 5, 1],
+      "rotAxis" : [1, 0, 1],
+      "rotSpeedFactor" : 1,
+      "animateRot": false
+    },
+    {
+      "id": "4",
+      "type": "box",
+      "position": [1.5, -1.5, -10],
+      "texture": "imgs/texture.png",
+      "sizes" : [1, 1, 1],
+      "rotAxis" : [1, 1, 0],
+      "rotSpeedFactor" : 1,
+      "animateRot": false
+    },
+    {
+      "id": "5",
+      "type": "box",
+      "position": [-5, 2, -1.5],
+      "texture": "imgs/colors.png",
+      "sizes" : [0.5, 0.5, 0.5],
+      "rotAxis" : [1, 1, 0],
+      "rotSpeedFactor" : 1,
+      "animateRot": false
+    },
+    {
+      "id": "6",
+      "type": "box",
+      "position": [20, 2, 0],
+      "texture": "imgs/ijsbeer.jpg",
+      "sizes" : [10, 5, 0.5],
+      "rotAxis" : [1, 1, 0],
+      "rotSpeedFactor" : 1,
+      "animateRot": true
+    },
+    {
+      "id": "7",
+      "type": "obj",
+      "file_path":  "objs/testOBJ.obj",
+      "texture": "imgs/lighterpurple.png",
+      "position": [0, 0, 1],
+      "rotAxis" : [1, 1, 1],
+      "rotSpeedFactor" : 1,
+      "animateRot": true
+    },
+    {
+      "id": "8",
+      "type": "obj",
+      "file_path":  "objs/sphere.obj",
+      "position": [-5, 2, 0],
+      "rotAxis" : [1, 1, 0],
+      "rotSpeedFactor" : 1,
+      "animateRot": false
+    }
   ]
 }

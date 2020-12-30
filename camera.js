@@ -4,8 +4,8 @@ var Camera = function() {
     this.yaw = -90;
     this.pitch = 0;
     this.front = [0,0,-1];
-    this.movementSpeed = 0.1;
-    this.turnSpeed = 2.5;
+    this.movementSpeed = 10;
+    this.turnSpeed = 6;
 
     // Bind 'this' in the methods to this camera object because javascript
     this.moveLeft = this.moveLeft.bind(this);
@@ -42,33 +42,37 @@ Camera.prototype.getViewMatrix = function(out) {
     mat4.lookAt(out, this.position, target, this.up);
 }
 
-Camera.prototype.moveForward = function() {
-    this.position[0] += this.front[0] * this.movementSpeed;
-    this.position[1] += this.front[1] * this.movementSpeed;
-    this.position[2] += this.front[2] * this.movementSpeed;
+Camera.prototype.moveForward = function(deltaTime) {
+    const change = this.movementSpeed * deltaTime;
+    this.position[0] += this.front[0] * change;
+    this.position[1] += this.front[1] * change;
+    this.position[2] += this.front[2] * change;
 }
 
-Camera.prototype.moveBackward = function() {
-    this.position[0] -= this.front[0] * this.movementSpeed;
-    this.position[1] -= this.front[1] * this.movementSpeed;
-    this.position[2] -= this.front[2] * this.movementSpeed;
+Camera.prototype.moveBackward = function(deltaTime) {
+    const change = this.movementSpeed * deltaTime;
+    this.position[0] -= this.front[0] * change;
+    this.position[1] -= this.front[1] * change;
+    this.position[2] -= this.front[2] * change;
 }
 
-Camera.prototype.moveRight = function() {
-    this.position[0] += this.right[0] * this.movementSpeed;
-    this.position[1] += this.right[1] * this.movementSpeed;
-    this.position[2] += this.right[2] * this.movementSpeed;
+Camera.prototype.moveRight = function(deltaTime) {
+    const change = this.movementSpeed * deltaTime;
+    this.position[0] += this.right[0] * change;
+    this.position[1] += this.right[1] * change;
+    this.position[2] += this.right[2] * change;
 }
 
-Camera.prototype.moveLeft = function() {
-    this.position[0] -= this.right[0] * this.movementSpeed;
-    this.position[1] -= this.right[1] * this.movementSpeed;
-    this.position[2] -= this.right[2] * this.movementSpeed;
+Camera.prototype.moveLeft = function(deltaTime) {
+    const change = this.movementSpeed * deltaTime;
+    this.position[0] -= this.right[0] * change;
+    this.position[1] -= this.right[1] * change;
+    this.position[2] -= this.right[2] * change;
 }
 
-Camera.prototype.turnCamera = function(mouseChange) {
-    const xChange = mouseChange[0] * this.turnSpeed * 0.05;
-    const yChange = mouseChange[1] * this.turnSpeed * 0.05;
+Camera.prototype.turnCamera = function(mouseChange, deltaTime) {
+    const xChange = mouseChange[0] * this.turnSpeed * deltaTime;
+    const yChange = mouseChange[1] * this.turnSpeed * deltaTime;
 
     this.yaw += xChange;
     this.pitch -= yChange;

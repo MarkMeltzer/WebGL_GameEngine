@@ -13,6 +13,22 @@ function loadJSON(path, callback) {
     xmlhttp.send(); 
 }
 
+function loadOBJ(path, callback) {
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+        if (this.readyState == 4) {
+            if (this.status == 200) {
+                callback(this.responseText);
+            } else {
+                console.log("Error loading OBJ file! :(, status: " + this.statusText);
+            }
+        }
+    };
+    xmlhttp.open("GET", path, true);
+    xmlhttp.send(); 
+}
+
+
 function createBox(width, height, depth) {
     const positions = [
         // Front face
@@ -91,14 +107,44 @@ function createBox(width, height, depth) {
         -1.0,  0.0,  0.0
     ];
 
-    const color = [Math.random(), Math.random(), Math.random()];
-    var colors = [];
-    for (var i=0; i<24; i++) {
-        colors.push(color[0]);
-        colors.push(color[1]);
-        colors.push(color[2]);
-        colors.push(1.0);
-    }
+    // Texture coordinates
+    const textureCoords = [
+        // Front
+        1.0,  1.0,
+        1.0,  0.0,
+        0.0,  0.0,  
+        0.0,  1.0,
+    
+        // Back
+        0.0,  0.0,  
+        1.0,  0.0,
+        1.0,  1.0,
+        0.0,  1.0,
+    
+        // Top
+        0.0,  0.0,  
+        1.0,  0.0,
+        1.0,  1.0,
+        0.0,  1.0,
+    
+        // Bottom
+        0.0,  0.0,  
+        1.0,  0.0,
+        1.0,  1.0,
+        0.0,  1.0,
+    
+        // Right
+        0.0,  0.0,  
+        1.0,  0.0,
+        1.0,  1.0,
+        0.0,  1.0,
+    
+        // Left
+        0.0,  0.0,  
+        1.0,  0.0,
+        1.0,  1.0,
+        0.0,  1.0,
+    ];
 
     // Face->vertex indices
     const indices = [
@@ -114,6 +160,109 @@ function createBox(width, height, depth) {
         vertexPositions: positions,
         vertexNormals: normals,
         vertexIndices: indices,
-        vertexColors: colors
+        textureCoords: textureCoords
     };
+}
+
+function parseOBJFile(OBJFile) {
+    // Assumptions and limitations:
+    // - Each face consists of a single triangle.
+    // - For each vertex in a coord a vertex, texcoord and normal is defined (so v/vt/n).
+    // - No actual support for materials.
+
+    // Step 1: load the v, vt's and vn
+    // Go over the vertices (v), vertex texture coordinates (vt) and vertex normals (vn)
+    // and add these to their respective arrays (convert them to float arrays). Lets call
+    // these input arrays
+    //
+    // Step 2: create and fill the index array
+    // Have new empty vertex, texcoord, normal and index array.
+    // Have a index counter start at 0.
+    // Have an dict to keep track of identical vertex/texCoord/normal triplet and it's associated index.
+    // For each v/vt/vn triplet in a face:
+        // if (triplet in dict):
+            // append the associated index into the index array
+        // else:
+            // Use the v/vt/vn to index into the input arrays (remember to convert from 1 indexed to 0 indexed),
+            // and append the v, vt and vn to their respective output arrays.
+            //
+            // Append the index to the index array.
+            //
+            // Add the v/vt/vn triplet to the dict and associate it with an index (the index counter).
+            //
+            // Increment the index counter. 
+
+    const lines = OBJFile.toString().split("\n");
+
+    // Iterate over the file and collect vertices, texture coordinates and
+    // vertex normals.
+    var inputVertices = [];
+    var inputTexCoords = [];
+    var inputNormals = [];
+    var counter = 0;
+    for (var i = 0; i < lines.length; i++) {
+        const line = lines[i].split(" ");
+
+        switch (line[0]) {
+            case "v":
+                counter++;
+                inputVertices.push(line.slice(1).map(x => parseFloat(x)));
+                break
+            case "vt":
+                inputTexCoords.push(line.slice(1).map(x => parseFloat(x)));
+                break;
+            case "vn":
+                inputNormals.push(line.slice(1).map(x => parseFloat(x)));
+                break;
+        }
+    }
+
+    // Iterate of the faces and process the vertex triplets
+    var outputVertices = [];
+    var outputTexCoords = [];
+    var outputNormals = [];
+    var outputIndices = [];
+    var indexCounter = 0;
+    var indexDict = {};
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].split(" ");
+
+        if (line[0] == "f") {
+            line = line.slice(1);
+
+            // iterate over vertices in face
+            for (var j = 0; j < line.length; j++) {
+                const tripletStr = line[j];
+
+                if (tripletStr in indexDict) {
+                    // If triplet is associated with index already use that
+                    outputIndices.push(indexDict[tripletStr]);
+                } else {
+                    const triplet = tripletStr.split("/").map(x => parseInt(x));
+                    
+                    // Add the v, vt, vn and index to output arrays
+                    outputVertices.push(inputVertices[triplet[0] - 1]);
+                    outputTexCoords.push(inputTexCoords[triplet[1] - 1]);
+                    outputNormals.push(inputNormals[triplet[2] - 1]);
+                    outputIndices.push(indexCounter);
+
+                    // Associate triplet with index and increment index
+                    indexDict[tripletStr] = indexCounter;
+                    indexCounter++;
+                }   
+            }
+        }
+    }
+    
+    return {
+        vertexPositions: outputVertices.flat(),
+        vertexNormals: outputNormals.flat(),
+        vertexIndices: outputIndices.flat(),
+        textureCoords: outputTexCoords.flat()
+    };
+}
+
+function isPowerOf2(value) {
+    // source: https://webglfundamentals.org/webgl/lessons/webgl-3d-textures.html
+    return (value & (value - 1)) == 0;
 }

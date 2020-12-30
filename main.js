@@ -1,3 +1,5 @@
+debugGlobal = null;
+
 function main() {
     loadJSON("objects.json", demo);
 }
@@ -14,6 +16,7 @@ function demo(sceneJson) {
     }
 
     let engine = new GameEngine(canvas, gl);
+    debugGlobal = engine;
     engine.loadScene(sceneJson);
     engine.startGameLoop();
 
