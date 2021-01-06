@@ -26,7 +26,7 @@ var RenderEngine = function(canvas, gl, opts) {
         0, 
         gl.RGBA, 
         gl.UNSIGNED_BYTE, 
-        new Uint8Array([0, 0, 255, 255])
+        new Uint8Array([0, 0, 255, 255,])
     );
 
     // create the default mesh
@@ -44,16 +44,17 @@ RenderEngine.prototype.getVsSource = function() {
         attribute vec3 aVertexNormal;
         attribute vec2 atextureCoord;
 
-        uniform mat4 uNormalMatrix;
-        uniform mat4 uModelViewMatrix;
         uniform mat4 uProjectionMatrix;
+        uniform mat4 uCameraMatrix;
+        uniform mat4 uModelViewMatrix;
+        uniform mat4 uNormalMatrix;
         uniform vec3 uLightDirection;
 
         varying highp vec2 vTextureCoord;
         varying highp vec3 vLighting;
 
         void main() {
-            gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+            gl_Position = uProjectionMatrix * uCameraMatrix * uModelViewMatrix * aVertexPosition;
 
             highp vec3 ambientLight = vec3(0.2, 0.2, 0.2);
             highp vec3 directionalLightColor = vec3(1, 1, 1);
@@ -115,8 +116,15 @@ RenderEngine.prototype.drawScene = function(time) {
 
     // clear the screen
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    
+    // tell webgl which shader program to use
+    gl.useProgram(this.shaderProgram);
 
-    // create projection matrix
+    /**************************************************************************
+    * Set all uniforms which are indepentent of mesh being drawn.
+    **************************************************************************/
+
+    // create the projection matrix and set it as uniform in the shader
     const fieldOfView = glMatrix.toRadian(this.fov);
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
     const zNear = 0.1;
@@ -129,26 +137,39 @@ RenderEngine.prototype.drawScene = function(time) {
         zNear,
         zFar
     );
+    gl.uniformMatrix4fv(
+        this.shaderVarLocs.uniformLocations.uProjectionMatrix, 
+        false, 
+        projectionMatrix
+    );
 
-    // get the camera matrix
+    // create the camera matrix and set it as uniform in the shader
     const cameraMatrix = mat4.create();
     this.scene.camera.getViewMatrix(cameraMatrix);
-
-    // combine projection and camera matrix
-    // TODO: seperate these and do matrix multiplication in shader
-    mat4.mul(
-        projectionMatrix,
-        projectionMatrix,
+    gl.uniformMatrix4fv(
+        this.shaderVarLocs.uniformLocations.uCameraMatrix, 
+        false,
         cameraMatrix
+    );
+
+    // set the lightdirection uniform in the shader
+    gl.uniform3fv(
+        this.shaderVarLocs.uniformLocations.uLightDirection, 
+        [0.85, 0.8, 0.75]
     );
 
     // use sinus and cosinus for some simple animation
     const sinAnim = Math.sin(time) / 2 + 0.5;
     const cosAnim = Math.cos(time) / 2 + 0.5;
 
+    /**************************************************************************
+    * For all meshes:
+    * Set uniforms which are specific to a mesh and issue it's draw call.
+    **************************************************************************/
+
     // iterate over all models in the scene
-    for (var i = 0; i < this.scene.models.length; i++) {
-        const model = this.scene.models[i];
+    for (let modelId in this.scene.models) {
+        const model = this.scene.models[modelId];
         
         // create model matrix
         const modelMatrix = mat4.create()
@@ -160,6 +181,7 @@ RenderEngine.prototype.drawScene = function(time) {
             model.position
         );
 
+        // animate model translation, if applicable
         if (model.animateTrans) {
             mat4.translate(
                 modelMatrix,
@@ -168,15 +190,33 @@ RenderEngine.prototype.drawScene = function(time) {
             );
         }
 
+        // animate model rotation, if applicable
         if (model.animateRot) {
             mat4.rotate(
                 modelMatrix,
                 modelMatrix,
                 time * model.rotSpeedFactor,
                 model.rotAxis
-            );
+                );
         }
 
+        // set the model matrix uniform in the shader
+        gl.uniformMatrix4fv(
+            this.shaderVarLocs.uniformLocations.uModelViewMatrix, 
+            false,
+            modelMatrix
+        );
+
+        // create the normal matrix and set it as uniform in the shader
+        const normalMatrix = mat4.create();
+        mat4.invert(normalMatrix, modelMatrix);
+        mat4.transpose(normalMatrix, normalMatrix);
+        gl.uniformMatrix4fv(
+            this.shaderVarLocs.uniformLocations.uNormalMatrix, 
+            false,
+            normalMatrix
+        );
+            
         // tell webgl how it should pull information out of vertex position buffer
         {
             const numComponents = 3;
@@ -215,7 +255,7 @@ RenderEngine.prototype.drawScene = function(time) {
             gl.enableVertexAttribArray(this.shaderVarLocs.attribLocations.aVertexNormal);
         }
 
-        // tell webgl how it should pull information out of vertex color buffer
+        // tell webgl how it should pull information out of the texture coordinate buffer
         {
             const numComponents = 2;
             const type = gl.FLOAT;
@@ -234,32 +274,7 @@ RenderEngine.prototype.drawScene = function(time) {
             gl.enableVertexAttribArray(this.shaderVarLocs.attribLocations.atextureCoord);
         }
 
-        // TODO: reorder stuff below if possible
-
-        // bind indices for rendering (move this down)
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.buffers.index);
-
-        // tell webgl which shader program to use
-        gl.useProgram(this.shaderProgram);
-
-        // set the uniforms
-        gl.uniformMatrix4fv(
-            this.shaderVarLocs.uniformLocations.uProjectionMatrix, 
-            false, 
-            projectionMatrix
-        );
-        
-        gl.uniformMatrix4fv(
-            this.shaderVarLocs.uniformLocations.uModelViewMatrix, 
-            false,
-            modelMatrix
-        );
-
-        gl.uniform3fv(
-            this.shaderVarLocs.uniformLocations.uLightDirection, 
-            [0.85, 0.8, 0.75]
-        );
-
+        // set the texture uniform in the shader
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, model.buffers.texture);
         gl.uniform1i(
@@ -267,22 +282,14 @@ RenderEngine.prototype.drawScene = function(time) {
             0
         );
 
-        // create normalmatrix
-        // TODO: (move this up)
-        const normalMatrix = mat4.create();
-        mat4.invert(normalMatrix, modelMatrix);
-        mat4.transpose(normalMatrix, normalMatrix);
-        gl.uniformMatrix4fv(
-            this.shaderVarLocs.uniformLocations.uNormalMatrix, 
-            false,
-            normalMatrix
-        );
+        // bind indices for rendering (move this down)
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.buffers.index);
 
         // issue the draw call for the current object
         {
             const offset = 0;
             const type = gl.UNSIGNED_SHORT;
-            const vertexCount = model.data.vertexIndices.length;
+            const vertexCount = model.vertexData.vertexIndices.length;
             gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
         }
     }
@@ -342,6 +349,7 @@ RenderEngine.prototype.getShaderVarLocations = function() {
         },
         uniformLocations: {
             uProjectionMatrix: gl.getUniformLocation(this.shaderProgram, 'uProjectionMatrix'),
+            uCameraMatrix: gl.getUniformLocation(this.shaderProgram, 'uCameraMatrix'),
             uModelViewMatrix: gl.getUniformLocation(this.shaderProgram, 'uModelViewMatrix'),
             uNormalMatrix: gl.getUniformLocation(this.shaderProgram, 'uNormalMatrix'),
             uLightDirection: gl.getUniformLocation(this.shaderProgram, 'uLightDirection'),
@@ -355,19 +363,19 @@ RenderEngine.prototype.getShaderVarLocations = function() {
 RenderEngine.prototype.setScene = function(scene) {
     const gl = this.gl;
 
-    for (var i = 0; i < scene.models.length; i++) {
-        const model = scene.models[i];
+    for (let modelId in scene.models) {
+        const model = scene.models[modelId];
 
         // create and save the vertex buffers
-        if (model.data) {
-            model.buffers = this.createBuffersFromModelData(model.data);
+        if (model.vertexData) {
+            model.buffers = this.createBuffersFromModelData(model.vertexData);
         } else {
-            model.data = this.defaultMeshData;
+            model.vertexData = this.defaultMeshData;
             model.buffers = this.defaultMeshBuffers;
         }
 
         // fill texture buffer with default texture (single pixel color)
-        scene.models[i].buffers.texture = this.defaultTextureBuffer;
+        model.buffers.texture = this.defaultTextureBuffer;
     }
 
     this.scene = scene;
@@ -421,14 +429,7 @@ RenderEngine.prototype.setTexture = function(modelId, image) {
     const gl = this.gl;
     
     // Find the model corresponding to the modelId
-    // TODO do this via dictionary lookup
-    var model = null;
-    for (var i = 0; i < this.scene.models.length; i++) {
-        if (this.scene.models[i].id == modelId) {
-            model = this.scene.models[i];
-            break;
-        }
-    }
+    const model = this.scene.models[modelId];
     if (!model) {
         console.log("Model not found during call to setTexture. ModelId: " + modelId);
         return null;
@@ -461,21 +462,14 @@ RenderEngine.prototype.setMesh = function(modelId, meshData) {
     const gl = this.gl;
     
     // Find the model corresponding to the modelId
-    // TODO do this via dictionary lookup
-    var model = null;
-    for (var i = 0; i < this.scene.models.length; i++) {
-        if (this.scene.models[i].id == modelId) {
-            model = this.scene.models[i];
-            break;
-        }
-    }
+    const model = this.scene.models[modelId];
     if (!model) {
         console.log("Model not found during call to setMesh. ModelId: " + modelId);
         return null;
     }
 
     // set the new mesh
-    model.data = meshData;
+    model.vertexData = meshData;
     model.numVertices = meshData.vertexIndices.length;
 
     // fill the buffers with the new data

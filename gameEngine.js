@@ -32,22 +32,20 @@ var GameEngine = function(canvas, gl) {
 GameEngine.prototype.loadScene = function(sceneJson) {
     // create and set the scene for the game engine
     this.scene = this.parseSceneJSON(sceneJson);
-    const camera = new Camera();
-    this.scene.camera = camera;
 
     // set the scene for the renderengine
     this.renderEngine.setScene(this.scene);
 
     // start loading the textures and meshes
-    for (var i = 0; i < this.scene.models.length; i++) {
-        const model = this.scene.models[i];
+    for (let modelId in this.scene.models) {
+        const model = this.scene.models[modelId];
 
         if (model.texture) {
-            this.loadTextureImage(model.id, model.texture);
+            this.loadTextureImage(modelId, model.texture);
         }
 
         if (model.type == "obj" && model.filePath) {
-            this.loadOBJFile(model.id, model.filePath);
+            this.loadOBJFile(modelId, model.filePath);
         }
     }
     
@@ -64,8 +62,7 @@ GameEngine.prototype.loadScene = function(sceneJson) {
  * @return {Scene} the Scene object.
  */
 GameEngine.prototype.parseSceneJSON = function(jsonObj) {
-    // TODO make this also create the camera object
-    var modelArray = [];
+    var modelDict = {};
 
     for (var i = 0; i < jsonObj.objects.length; i++) {
         const model = jsonObj.objects[i];
@@ -82,23 +79,24 @@ GameEngine.prototype.parseSceneJSON = function(jsonObj) {
         }
 
         const object = {
-            id: model.id,
             type: model.type,
             filePath: model.file_path,
             position: model.position,
             texture: model.texture,
-            // TODO data -> meshData or vertexData
-            data: meshData,
+            vertexData: meshData,
             animateTrans: model.animateTrans,
             animateRot: model.animateRot,
             rotSpeedFactor: model.rotSpeedFactor,
             rotAxis: model.rotAxis
         };
-        modelArray.push(object);
+        modelDict[model.id] = object;
     }
 
     const scene = new Scene();
-    scene.models = modelArray;
+    scene.models = modelDict;
+
+    const cam = new Camera();
+    scene.camera = cam;
     
     return scene;
 }
