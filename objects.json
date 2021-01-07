@@ -62,7 +62,7 @@
       "animateRot": true
     },
     {
-      "id": "7",
+      "id": "crownring thing",
       "type": "obj",
       "file_path":  "objs/testOBJ.obj",
       "texture": "imgs/lighterpurple.png",

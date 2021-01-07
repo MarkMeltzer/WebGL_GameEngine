@@ -21,7 +21,7 @@ function demo(sceneJson) {
     engine.startGameLoop();
 
     window.setInterval( () => {
-        document.getElementById("debug_output").innerHTML = "fps: "  + (1 / engine.deltaTime).toFixed(2);
+        document.getElementById("overlay_content").innerHTML = "fps: "  + (1 / engine.deltaTime).toFixed(2);
     }, 100);
 
     console.log("Main done!")

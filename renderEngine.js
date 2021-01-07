@@ -467,11 +467,11 @@ RenderEngine.prototype.setMesh = function(modelId, meshData) {
         console.log("Model not found during call to setMesh. ModelId: " + modelId);
         return null;
     }
-
+    
     // set the new mesh
     model.vertexData = meshData;
     model.numVertices = meshData.vertexIndices.length;
-
+    
     // fill the buffers with the new data
     const tempTextureBuffer = model.buffers.texture;
     model.buffers = this.createBuffersFromModelData(meshData);
