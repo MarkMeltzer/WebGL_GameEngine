@@ -59,7 +59,7 @@
       "sizes" : [10, 5, 0.5],
       "rotAxis" : [0, 1, 0],
       "rotSpeedFactor" : 2,
-      "animateRot": true
+      "animateRot": false
     },
     {
       "id": "crownring thing",
@@ -88,7 +88,16 @@
       "rotAxis" : [0, 1, 0],
       "rotSpeedFactor" : 1,
       "animateRot": true
-    }
-    
+    },
+    {
+      "id": "light",
+      "type": "box",
+      "texture": "imgs/yellow.png",
+      "position": [20,5,10],
+      "sizes" : [1, 1, 1],
+      "rotAxis" : [0, 1, 0],
+      "rotSpeedFactor" : 2,
+      "animateRot": false
+    } 
   ]
 }

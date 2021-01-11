@@ -119,7 +119,7 @@ GameEngine.prototype.startGameLoop = function() {
         self.handleMouseInput();
 
         // draw the scene
-        self.renderEngine.drawScene(self.time);
+        self.renderEngine.render(self.time);
 
         // update total time
         self.time += self.deltaTime;

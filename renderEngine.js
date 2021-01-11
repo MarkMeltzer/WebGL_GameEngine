@@ -6,10 +6,23 @@ var RenderEngine = function(canvas, gl, opts) {
     // set options
     this.clearColor = opts.clearColor;
     this.fov = opts.fov;
+    this.shadowmapSettings = {
+        res: 4096,
+        fov: 81,
+        zNear: 1,
+        zFar: 100,
+        bias: 0.0002,
+        lightPosition: [20,14,10]
+    }
 
-    // intialize program and save info
-    this.shaderProgram = this.initShaderProgram();
+    // intialize shader program and save info
+    this.shaderProgram = this.initShaderProgram(this.getVsSource(), this.getFsSource());
     this.shaderVarLocs = this.getShaderVarLocations();
+
+    // initialize depthMap shader program
+    this.depthMapShaderProgram = this.initShaderProgram(this.getDepthMapVsSource(), this.getDepthMapFsSource());
+    this.depthMapShaderVarLocs = this.getDepthMapShaderVarLocations();
+    this.initDepthmap();
 
     // intialize empty scene
     this.scene = null;
@@ -47,11 +60,17 @@ RenderEngine.prototype.getVsSource = function() {
         uniform mat4 uProjectionMatrix;
         uniform mat4 uCameraMatrix;
         uniform mat4 uModelViewMatrix;
+
+        uniform mat4 uLightSpaceProjection;
+        uniform mat4 uLightSpaceCamera;
+
         uniform mat4 uNormalMatrix;
+
         uniform vec3 uLightDirection;
 
         varying highp vec2 vTextureCoord;
         varying highp vec3 vLighting;
+        varying highp vec4 vLightSpaceVertex;
 
         void main() {
             gl_Position = uProjectionMatrix * uCameraMatrix * uModelViewMatrix * aVertexPosition;
@@ -65,6 +84,8 @@ RenderEngine.prototype.getVsSource = function() {
             highp float directional = max(dot(transformedNormal.xyz, directionalVector), 0.0);
             vLighting = ambientLight + (directionalLightColor * directional);
             
+            vLightSpaceVertex = uLightSpaceProjection * uLightSpaceCamera * uModelViewMatrix * aVertexPosition;
+
             vTextureCoord = atextureCoord;
         }
     `;
@@ -77,17 +98,249 @@ RenderEngine.prototype.getVsSource = function() {
 RenderEngine.prototype.getFsSource = function() {
     const fsSource = `
         uniform sampler2D uTexture;
+        uniform sampler2D uShadowmap;
+        uniform highp float uShadowBias;
 
-        varying highp vec4 vColor;
         varying highp vec3 vLighting;
         varying highp vec2 vTextureCoord;
+        varying highp vec4 vLightSpaceVertex;
+
+        bool inShadow() {
+            // Manually do the perspective division
+            highp vec3 vLightSpaceVertex = vLightSpaceVertex.xyz / vLightSpaceVertex.w;
+
+            // shift the values from NDC to [0,1] range
+            vLightSpaceVertex = vLightSpaceVertex * 0.5 + 0.5;
+
+            // set everything outside the the shadowmap to not be in shadow
+            if (
+                vLightSpaceVertex.x > 1.0 ||
+                vLightSpaceVertex.x < 0.0 ||
+                vLightSpaceVertex.y > 1.0 ||
+                vLightSpaceVertex.y < 0.0
+            ) {
+                return false;
+            }
+
+            // sample the shadow map
+            highp vec4 shadowmapSample = texture2D(uShadowmap, vLightSpaceVertex.xy);
+            
+            // the distance to the closest fragment from the pov of the light
+            highp float closestDist = shadowmapSample.r;
+
+            // the distance of the current fragment from the pov of the light
+            highp float currentDist = vLightSpaceVertex.z;
+
+            return (closestDist + uShadowBias <= currentDist);
+        }
 
         void main() {
             highp vec4 color = texture2D(uTexture, vTextureCoord);
-            gl_FragColor = vec4(color.xyz * vLighting, color.w);
+            
+            highp float shadowFactor = inShadow() ? 0.3 : 1.0;
+            
+            gl_FragColor = vec4(color.xyz * vLighting * shadowFactor, color.w);
         }
     `;
     return fsSource;
+}
+
+/**
+ * Returns the GLSL source code for the depth map vertex shader.
+ */
+RenderEngine.prototype.getDepthMapVsSource = function() {
+    const vsSource = `
+        attribute vec4 aVertexPosition;
+
+        uniform mat4 uProjectionMatrix;
+        uniform mat4 uCameraMatrix;
+        uniform mat4 uModelViewMatrix;
+
+        void main() {
+            gl_Position = uProjectionMatrix * uCameraMatrix * uModelViewMatrix * aVertexPosition;
+        }
+    `;
+    return vsSource;
+}
+
+/**
+ * Returns the GLSL source code for the fragment shader.
+ */
+RenderEngine.prototype.getDepthMapFsSource = function() {
+    const fsSource = `
+        void main() {
+            gl_FragColor = vec4(gl_FragCoord.z);
+        }
+    `;
+    return fsSource;
+}
+
+RenderEngine.prototype.render = function(time) {
+    const gl = this.gl;
+
+    this.drawShadowmap(time, this.depthFrameBuffer);
+    this.drawScene(time);
+}
+
+
+/**
+ * Draws the shadow map to a depth texture.
+ * 
+ * @param {number} time the elapsed time since starting demo in seconds.
+ */
+RenderEngine.prototype.drawShadowmap = function(time, frameBuffer) {
+    if (this.scene == null) {
+        alert("No scene loaded!");
+        return null;
+    }
+
+    const gl = this.gl;
+
+    // render to framebuffer
+    gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+
+    // set gl settings
+    gl.clearColor(
+        this.clearColor[0],
+        this.clearColor[1],
+        this.clearColor[2],
+        this.clearColor[3],
+    );
+    gl.clearDepth(1.0);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+    
+    // set viewport to the dimensions of the texture we are rendering to
+    gl.viewport(0, 0, this.shadowmapSettings.res, this.shadowmapSettings.res);
+
+    // clear the screen
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    
+    // tell webgl which shader program to use
+    gl.useProgram(this.depthMapShaderProgram);
+
+    /**************************************************************************
+    * Set all uniforms which are indepentent of mesh being drawn.
+    **************************************************************************/
+
+    // create the projection matrix and set it as uniform in the shader
+    const fieldOfView = glMatrix.toRadian(this.shadowmapSettings.fov);
+    const aspect = 1;
+    const zNear = this.shadowmapSettings.zNear;
+    const zFar = this.shadowmapSettings.zFar;
+    const projectionMatrix = mat4.create();
+    mat4.perspective(
+        projectionMatrix,
+        fieldOfView,
+        aspect,
+        zNear,
+        zFar
+    );
+    gl.uniformMatrix4fv(
+        this.depthMapShaderVarLocs.uniformLocations.uProjectionMatrix, 
+        false, 
+        projectionMatrix
+    );
+    
+    // save the projection matrix for the canvas render pass
+    this.shadowmapProjection = projectionMatrix;
+
+    // create the camera matrix and set it as uniform in the shader
+    const cameraMatrix = mat4.create();
+    mat4.lookAt(
+        cameraMatrix, 
+        this.shadowmapSettings.lightPosition, // position
+        [0,0,0], // target
+        [0,1,0]  // up
+    );
+    gl.uniformMatrix4fv(
+        this.depthMapShaderVarLocs.uniformLocations.uCameraMatrix, 
+        false,
+        cameraMatrix
+    );
+
+    // save the camera matrix for the canvas render pass
+    this.shadowmapCamera = cameraMatrix;
+
+    // use sinus and cosinus for some simple animation
+    const sinAnim = Math.sin(time) / 2 + 0.5;
+    const cosAnim = Math.cos(time) / 2 + 0.5;
+
+    /**************************************************************************
+    * For all meshes:
+    * Set uniforms which are specific to a mesh and issue it's draw call.
+    **************************************************************************/
+
+    // iterate over all models in the scene
+    for (let modelId in this.scene.models) {
+        const model = this.scene.models[modelId];
+        
+        // create model matrix
+        const modelMatrix = mat4.create()
+
+        // translate model to it's world position
+        mat4.translate(
+            modelMatrix,
+            modelMatrix,
+            model.position
+        );
+
+        // animate model translation, if applicable
+        if (model.animateTrans) {
+            mat4.translate(
+                modelMatrix,
+                modelMatrix,
+                [6 * sinAnim - 3, 0, 6 * cosAnim - 3]
+            );
+        }
+
+        // animate model rotation, if applicable
+        if (model.animateRot) {
+            mat4.rotate(
+                modelMatrix,
+                modelMatrix,
+                time * model.rotSpeedFactor,
+                model.rotAxis
+                );
+        }
+
+        // set the model matrix uniform in the shader
+        gl.uniformMatrix4fv(
+            this.depthMapShaderVarLocs.uniformLocations.uModelViewMatrix, 
+            false,
+            modelMatrix
+        );
+            
+        // tell webgl how it should pull information out of vertex position buffer
+        {
+            const numComponents = 3;
+            const type = gl.FLOAT;
+            const normalize = false;
+            const stride = 0;
+            const offset = 0;
+            gl.bindBuffer(gl.ARRAY_BUFFER, model.buffers.position);
+            gl.vertexAttribPointer(
+                this.depthMapShaderVarLocs.attribLocations.aVertexPosition,
+                numComponents,
+                type,
+                normalize,
+                stride,
+                offset
+            );
+            gl.enableVertexAttribArray(this.depthMapShaderVarLocs.attribLocations.aVertexPosition);
+        }
+
+        // bind indices for rendering (move this down)
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.buffers.index);
+
+        // issue the draw call for the current object
+        {
+            const offset = 0;
+            const type = gl.UNSIGNED_SHORT;
+            const vertexCount = model.vertexData.vertexIndices.length;
+            gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
+        }
+    }
 }
 
 /**
@@ -103,6 +356,9 @@ RenderEngine.prototype.drawScene = function(time) {
 
     const gl = this.gl;
 
+    // render to canvas not to framebuffer
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
     // set gl settings
     gl.clearColor(
         this.clearColor[0],
@@ -113,6 +369,9 @@ RenderEngine.prototype.drawScene = function(time) {
     gl.clearDepth(1.0);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
+
+    // set the viewport to the whole canvas dimensions
+    gl.viewport(0,0, gl.canvas.width, gl.canvas.height);
 
     // clear the screen
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -155,7 +414,35 @@ RenderEngine.prototype.drawScene = function(time) {
     // set the lightdirection uniform in the shader
     gl.uniform3fv(
         this.shaderVarLocs.uniformLocations.uLightDirection, 
-        [0.85, 0.8, 0.75]
+        this.scene.light
+    );
+
+    // set the shadowmap texture uniform
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.shadowmap);
+    gl.uniform1i(
+        this.shaderVarLocs.uniformLocations.uShadowmap,
+        1
+    );
+
+    // set the light space transformation uniform for shadowmapping
+    gl.uniformMatrix4fv(
+        this.shaderVarLocs.uniformLocations.uLightSpaceCamera, 
+        false,
+        this.shadowmapCamera
+    );
+    
+    // set the light space projection uniform for shadowmapping
+    gl.uniformMatrix4fv(
+        this.shaderVarLocs.uniformLocations.uLightSpaceProjection, 
+        false,
+        this.shadowmapProjection
+    );
+
+    // set the shadow bias which is used to combat shadow acne
+    gl.uniform1f(
+        this.shaderVarLocs.uniformLocations.uShadowBias,
+        this.shadowmapSettings.bias
     );
 
     // use sinus and cosinus for some simple animation
@@ -295,12 +582,12 @@ RenderEngine.prototype.drawScene = function(time) {
     }
 }
 
-RenderEngine.prototype.initShaderProgram = function() {
+RenderEngine.prototype.initShaderProgram = function(vsSource, fsSource) {
     const gl = this.gl;
     
     // load shaders
-    const vertexShader = this.loadShader(gl.VERTEX_SHADER, this.getVsSource());
-    const fragmentShader = this.loadShader(gl.FRAGMENT_SHADER, this.getFsSource());
+    const vertexShader = this.loadShader(gl.VERTEX_SHADER, vsSource);
+    const fragmentShader = this.loadShader(gl.FRAGMENT_SHADER, fsSource);
 
     // create program and attach shaders
     const shaderProgram = gl.createProgram();
@@ -327,7 +614,7 @@ RenderEngine.prototype.loadShader = function(type, source) {
 
     // check for compilation success
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        alert('An error occured while compiling the shader: ' + gl.getShaderInfoLog(shader));
+        alert('An error occured while compiling the shader: ' + gl.getShaderInfoLog(shader) + source);
         gl.deleteShader(shader);
         return null;
     }
@@ -353,12 +640,102 @@ RenderEngine.prototype.getShaderVarLocations = function() {
             uModelViewMatrix: gl.getUniformLocation(this.shaderProgram, 'uModelViewMatrix'),
             uNormalMatrix: gl.getUniformLocation(this.shaderProgram, 'uNormalMatrix'),
             uLightDirection: gl.getUniformLocation(this.shaderProgram, 'uLightDirection'),
-            uTexture: gl.getUniformLocation(this.shaderProgram, 'uTexture')
+            uTexture: gl.getUniformLocation(this.shaderProgram, 'uTexture'),
+            uShadowmap: gl.getUniformLocation(this.shaderProgram, 'uShadowmap'),
+            uLightSpaceCamera: gl.getUniformLocation(this.shaderProgram, 'uLightSpaceCamera'),
+            uLightSpaceProjection: gl.getUniformLocation(this.shaderProgram, 'uLightSpaceProjection'),
+            uShadowBias: gl.getUniformLocation(this.shaderProgram, 'uShadowBias'),
         }
     }
 
     return shaderVarLocs;
 }
+
+RenderEngine.prototype.getDepthMapShaderVarLocations = function() {
+    //
+    // Requires 'this.depthMapShaderProgram' to be set!
+    //
+    const gl = this.gl;
+
+    const shaderVarLocs = {
+        attribLocations: {
+            aVertexPosition: gl.getAttribLocation(this.depthMapShaderProgram, 'aVertexPosition')
+        },
+        uniformLocations: {
+            uProjectionMatrix: gl.getUniformLocation(this.depthMapShaderProgram, 'uProjectionMatrix'),
+            uCameraMatrix: gl.getUniformLocation(this.depthMapShaderProgram, 'uCameraMatrix'),
+            uModelViewMatrix: gl.getUniformLocation(this.depthMapShaderProgram, 'uModelViewMatrix')
+        }
+    }
+
+    return shaderVarLocs;
+}
+
+RenderEngine.prototype.initDepthmap = function() {
+    const gl = this.gl;
+
+    // create and set up depth texture
+    const depthTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, depthTexture);
+    gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.DEPTH_COMPONENT,
+        this.shadowmapSettings.res,
+        this.shadowmapSettings.res,
+        0,
+        gl.DEPTH_COMPONENT,
+        gl.UNSIGNED_INT,
+        null
+    );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    // create framebuffer to render depth information to
+    const depthFrameBuffer = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, depthFrameBuffer);
+
+    // attach the depth texture
+    gl.framebufferTexture2D(
+        gl.FRAMEBUFFER, 
+        gl.DEPTH_ATTACHMENT, 
+        gl.TEXTURE_2D,
+        depthTexture, 
+        0
+    );
+
+    // create and attach a unused color texture
+    const unusedTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, unusedTexture);
+    gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        this.shadowmapSettings.res,
+        this.shadowmapSettings.res,
+        0,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        null
+    );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.framebufferTexture2D(
+        gl.FRAMEBUFFER, 
+        gl.COLOR_ATTACHMENT0, 
+        gl.TEXTURE_2D, 
+        unusedTexture, 
+        0
+    );
+
+    this.depthFrameBuffer = depthFrameBuffer;
+    this.shadowmap = depthTexture;
+}
+
 
 RenderEngine.prototype.setScene = function(scene) {
     const gl = this.gl;

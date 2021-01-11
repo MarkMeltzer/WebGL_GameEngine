@@ -8,13 +8,81 @@
     <body>
         Here be canvas:
         <br>
-        <div id="canvas_container" style="position: relative;">
+        <div id="canvas_container" style="position: relative; display: inline-block">
             <canvas id="glCanvas" width="640" height="480" tabindex="0"></canvas>
             <div id="overlay" style="position: absolute; left: 10px; top: 10px;">
                 <span id="overlay_content"></span>
             </div>
         </div>
-
+        <div id="shadow_settings_container" style="
+                                            vertical-align: top; 
+                                            display: inline-block;
+                                            background-color: rgb(190, 253, 255);
+                                            padding: 5px;
+                                            "
+        >   
+            <p style="font-size: 1.3em; margin: 0;"><b>Shadow settings:</b></p>
+            <div id="light_coordinates_container">
+                <div class="slider_container" style="display: inline-block; padding: 2px">
+                    <p style="display: inline-block">Light X coordinate: </p>
+                    <p id="X_value" style="display: inline-block">20</p>
+                    <input type="range" min="-30" max="30" value="20" id="X_slider" style="display: block">
+                </div>
+                <div class="slider_container" style="display: inline-block; padding: 2px">
+                    <p style="display: inline-block">Light Y coordinate: </p>
+                    <p id="Y_value" style="display: inline-block">14</p>
+                    <input type="range" min="0" max="30" value="14" id="Y_slider" style="display: block">
+                </div>
+                <div class="slider_container" style="display: inline-block; padding: 2px">
+                    <p style="display: inline-block">Light Z coordinate: </p>
+                    <p id="Z_value" style="display: inline-block">10</p>
+                    <input type="range" min="-30" max="30" value="10" id="Z_slider" style="display: block">
+                </div>
+            </div>
+            <div id="light_fov_container">
+                <div class="slider_container" style="display: inline-block; padding: 2px">
+                    <p style="display: inline-block">Light field of view: </p>
+                    <p id="light_fov_value" style="display: inline-block">81</p>
+                    <input type="range" min="0" max="100" value="81" id="light_fov_slider" style="display: block">
+                </div>
+            </div>
+            <div id="bias_container">
+                <div class="slider_container" style="display: inline-block; padding: 2px">
+                    <p style="display: inline-block">Shadow bias: </p>
+                    <p id="shadow_bias_value" style="display: inline-block">0.0002</p>
+                    <input type="range" min="0" max="0.0005" step="0.00001" value="0.0002" id="shadow_bias_slider" style="display: block">
+                </div>
+            </div>
+            <div id="clipping_plane_container">
+                <div class="slider_container" style="display: inline-block; padding: 2px">
+                    <p style="display: inline-block">Light near clipping plane: </p>
+                    <p id="zNear_value" style="display: inline-block">1</p>
+                    <input type="range" min="0" max="100" value="1" id="zNear_slider" style="display: block">
+                </div>
+                <div class="slider_container" style="display: inline-block; padding: 2px">
+                    <p style="display: inline-block">Light far clipping plane: </p>
+                    <p id="zFar_value" style="display: inline-block">100</p>
+                    <input type="range" min="0" max="100" value="100" id="zFar_slider" style="display: block">
+                </div>
+            </div>
+        </div>
+        <div id="player_settings_container" style="
+                                            vertical-align: top; 
+                                            display: inline-block;
+                                            background-color: rgb(192, 255, 190);
+                                            padding: 5px;
+                                            "
+        >
+            <p style="font-size: 1.3em; margin: 0;"><b>Players settings:</b></p>
+            <div id="player_fov_container">
+                <div class="slider_container" style="display: inline-block; padding: 2px">
+                    <p style="display: inline-block">Field of view: </p>
+                    <p id="player_fov_value" style="display: inline-block">45</p>
+                    <input type="range" min="0" max="100" value="45" id="player_fov_slider" style="display: block">
+                </div>
+            </div>
+        </div>
+        
         <p id="debug_output"></p>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"
