@@ -6,6 +6,8 @@ var RenderEngine = function(canvas, gl, opts) {
     // set options
     this.clearColor = opts.clearColor;
     this.fov = opts.fov;
+    this.zNear = 0.1;
+    this.zFar = 100;
     this.shadowmapSettings = {
         res: 4096,
         fov: 81,
@@ -386,8 +388,8 @@ RenderEngine.prototype.drawScene = function(time) {
     // create the projection matrix and set it as uniform in the shader
     const fieldOfView = glMatrix.toRadian(this.fov);
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-    const zNear = 0.1;
-    const zFar = 100.0;
+    const zNear = this.zNear;
+    const zFar = this.zFar;
     const projectionMatrix = mat4.create();
     mat4.perspective(
         projectionMatrix,
