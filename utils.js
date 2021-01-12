@@ -10,7 +10,7 @@ function loadJSON(path, callback) {
         }
     };
     xmlhttp.open("GET", path, true);
-    xmlhttp.send(); 
+    xmlhttp.send();
 }
 
 function loadOBJ(path, callback) {
