@@ -1,0 +1,103 @@
+{
+  "objects": [
+    {
+      "id": "floor",
+      "type": "box",
+      "position": [0, -2, 0],
+      "texture": "imgs/pastelgreen.png",
+      "sizes" : [100, 0.1, 200],
+      "rotAxis" : [1, 1, 0],
+      "rotSpeedFactor" : 1,
+      "animateRot": false
+    },
+    {
+      "id": "2",
+      "type": "box",
+      "position": [0, 2, 0],
+      "texture": "imgs/texture.png",
+      "sizes" : [1, 1, 1],
+      "rotAxis" : [1, 0, 1],
+      "rotSpeedFactor" : 0.5,
+      "animateRot": true,
+      "animateTrans": true
+    },
+    {
+      "id": "pillar",
+      "type": "box",
+      "position": [-2, 0, 0],
+      "texture": "imgs/pastelgreen.png",
+      "sizes" : [1, 5, 1],
+      "rotAxis" : [1, 0, 1],
+      "rotSpeedFactor" : 1,
+      "animateRot": false
+    },
+    {
+      "id": "4",
+      "type": "box",
+      "position": [1.5, -1.5, -10],
+      "texture": "imgs/texture.png",
+      "sizes" : [1, 1, 1],
+      "rotAxis" : [1, 1, 0],
+      "rotSpeedFactor" : 1,
+      "animateRot": false
+    },
+    {
+      "id": "5",
+      "type": "box",
+      "position": [-5, 2, -1.5],
+      "texture": "imgs/colors.png",
+      "sizes" : [0.5, 0.5, 0.5],
+      "rotAxis" : [1, 1, 0],
+      "rotSpeedFactor" : 1,
+      "animateRot": false
+    },
+    {
+      "id": "ijsbeer",
+      "type": "box",
+      "position": [10, 2, 0],
+      "texture": "imgs/ijsbeer.jpg",
+      "sizes" : [10, 5, 0.5],
+      "rotAxis" : [0, 1, 0],
+      "rotSpeedFactor" : 2,
+      "animateRot": false
+    },
+    {
+      "id": "crownring thing",
+      "type": "obj",
+      "file_path":  "objs/testOBJ.obj",
+      "texture": "imgs/lighterpurple.png",
+      "position": [0, 0, 1],
+      "rotAxis" : [1, 1, 1],
+      "rotSpeedFactor" : 1,
+      "animateRot": true
+    },
+    {
+      "id": "sphere",
+      "type": "obj",
+      "file_path":  "objs/sphere.obj",
+      "position": [-5, 3, 0],
+      "rotAxis" : [1, 1, 0],
+      "rotSpeedFactor" : 1,
+      "animateRot": false
+    },
+    {
+      "id": "clothsim",
+      "type": "obj",
+      "file_path":  "objs/cloththing.obj",
+      "position": [-5, 1, 0],
+      "rotAxis" : [0, 1, 0],
+      "rotSpeedFactor" : 1,
+      "animateRot": true
+    },
+    {
+      "id": "light",
+      "type": "box",
+      "texture": "imgs/yellow.png",
+      "position": [20,5,10],
+      "sizes" : [1, 1, 1],
+      "rotAxis" : [0, 1, 0],
+      "rotSpeedFactor" : 2,
+      "animateRot": false
+    } 
+  ]
+}

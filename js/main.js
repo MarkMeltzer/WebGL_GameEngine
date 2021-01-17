@@ -1,7 +1,12 @@
 debugGlobal = null;
 
+sceneDescriptions = [
+    "scenes/scene1.json",
+    "scenes/scene2.json"
+];
+
 function main() {
-    loadJSON("objects.json", demo);
+    loadJSON("scenes/scene1.json", demo);
 }
 
 function demo(sceneJson) {
@@ -36,6 +41,7 @@ function demo(sceneJson) {
 }
 
 function setupSettings() {
+    // setup sliders
     document.getElementById("X_slider").oninput = function() {
         debugGlobal.renderEngine.scene.light[0] = this.value;
         debugGlobal.scene.models["light"].position[0] = this.value;
@@ -78,6 +84,28 @@ function setupSettings() {
     document.getElementById("player_zFar_slider").oninput = function() {
         debugGlobal.renderEngine.zFar = parseFloat(this.value);
         document.getElementById("player_zFar_value").innerHTML = this.value;
+    }
+
+
+    // setup dropdowns
+    for (var i = 0; i < sceneDescriptions.length; i++){
+        const sceneDescription = sceneDescriptions[i];
+        const option = document.createElement("option");
+        option.value = sceneDescription;
+        option.text = sceneDescription;
+        document.getElementById("scene_dropdown").add(option);
+    }
+
+    document.getElementById("scene_dropdown").onchange = function() {
+        loadJSON(this.value, function(sceneJson) {
+            debugGlobal.loadScene(sceneJson);
+        })
+    }
+
+    document.getElementById("reload_button").onclick = function() {
+        loadJSON(document.getElementById("scene_dropdown").value, function(sceneJson) {
+            debugGlobal.loadScene(sceneJson);
+        })
     }
 }
 

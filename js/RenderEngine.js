@@ -5,9 +5,6 @@ var RenderEngine = function(canvas, gl, opts) {
 
     // set options
     this.clearColor = opts.clearColor;
-    this.fov = opts.fov;
-    this.zNear = 0.1;
-    this.zFar = 100;
     this.shadowmapSettings = {
         res: 4096,
         fov: 81,
@@ -63,13 +60,14 @@ RenderEngine.prototype.render = function(time) {
     const gl = this.gl;
 
     this.drawShadowmap(time, this.depthFrameBuffer);
-    this.drawScene(time);
+    this.drawScene(this.scene.camera, time);
 }
 
 /**
  * Draws the shadow map to a depth texture.
  * 
  * @param {number} time the elapsed time since starting demo in seconds.
+ * @param {object} frameBuffer frameBuffer to draw to.
  */
 RenderEngine.prototype.drawShadowmap = function(time, frameBuffer) {
     if (this.scene == null) {
@@ -229,9 +227,10 @@ RenderEngine.prototype.drawShadowmap = function(time, frameBuffer) {
 /**
  * Draws the scene set in 'this.scene' to the canvas.
  * 
+ * @param {object} camera camera to render with.
  * @param {number} time the elapsed time since starting demo in seconds.
  */
-RenderEngine.prototype.drawScene = function(time) {
+RenderEngine.prototype.drawScene = function(camera, time) {
     if (this.scene == null) {
         alert("No scene loaded!");
         return null;
@@ -267,18 +266,8 @@ RenderEngine.prototype.drawScene = function(time) {
     **************************************************************************/
 
     // create the projection matrix and set it as uniform in the shader
-    const fieldOfView = glMatrix.toRadian(this.fov);
-    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-    const zNear = this.zNear;
-    const zFar = this.zFar;
     const projectionMatrix = mat4.create();
-    mat4.perspective(
-        projectionMatrix,
-        fieldOfView,
-        aspect,
-        zNear,
-        zFar
-    );
+    camera.getProjectionMatrix(projectionMatrix);
     gl.uniformMatrix4fv(
         this.mainShader.uniformLocations.uProjectionMatrix, 
         false, 
@@ -287,7 +276,7 @@ RenderEngine.prototype.drawScene = function(time) {
 
     // create the camera matrix and set it as uniform in the shader
     const cameraMatrix = mat4.create();
-    this.scene.camera.getViewMatrix(cameraMatrix);
+    camera.getViewMatrix(cameraMatrix);
     gl.uniformMatrix4fv(
         this.mainShader.uniformLocations.uCameraMatrix, 
         false,

@@ -21,7 +21,7 @@
                                             padding: 5px;
                                             "
         >   
-            <p style="font-size: 1.3em; margin: 0;"><b>Shadow settings:</b></p>
+            <p style="font-size: 1.3em; margin: 0; background-color: rgba(0, 0, 0, 0.25);text-align: center;"><b>Shadow settings:</b></p>
             <div id="light_coordinates_container">
                 <div class="slider_container" style="display: inline-block; padding: 2px">
                     <p style="display: inline-block">Light X coordinate: </p>
@@ -73,7 +73,7 @@
                                             padding: 5px;
                                             "
         >
-            <p style="font-size: 1.3em; margin: 0;"><b>Players settings:</b></p>
+            <p style="font-size: 1.3em; margin: 0;background-color: rgba(0, 0, 0, 0.25);text-align: center;"><b>Players settings:</b></p>
             <div id="player_fov_container">
                 <div class="slider_container" style="display: inline-block; padding: 2px">
                     <p style="display: inline-block">Field of view: </p>
@@ -94,6 +94,26 @@
                 </div>
             </div>
         </div>
+        <div id="scene_settings_container" style="
+                                            vertical-align: top; 
+                                            display: inline-block;
+                                            background-color: rgb(237, 190, 255);
+                                            padding: 5px;
+                                            "
+        >
+            <p style="font-size: 1.3em; margin: 0;background-color: rgba(0, 0, 0, 0.25); text-align: center;"><b>Scene settings:</b></p>
+            <div id="scene_selector_container">
+                <div class="dropdown_container" style="display: inline-block; padding: 2px">
+                    <p style="display: inline-block">Select scene: </p>
+                    <select name="scene" id="scene_dropdown" style="display: block"></select>
+                </div>
+            </div>
+            <div id="reload_button_container">
+                <div class="reload_container" style="display: inline-block; padding: 2px">
+                    <button id="reload_button">Reload!</button>
+                </div>
+            </div>
+        </div>
         
         <p id="debug_output"></p>
 
@@ -109,5 +129,6 @@
         <script src="js/main.js" defer></script>
         <script src="js/Shader.js" defer></script>
         <script src="js/shaderSources.js" defer></script>
+        <script src="js/Controller.js" defer></script>
     </body>
 </html>

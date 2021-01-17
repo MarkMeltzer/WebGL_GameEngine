@@ -7,6 +7,7 @@ var GameEngine = function(canvas, gl) {
     this.scene = null;
 
     // input globals
+    this.controller = null;
     this.mouseChange = [0, 0];
     this.keyTracker = null;
     this.boundUpdateMousePosition = this.updateMousePosition.bind(this);
@@ -17,7 +18,6 @@ var GameEngine = function(canvas, gl) {
 
     // set render settings and create render engine
     const opts = {
-        fov: 45,
         clearColor: [0.75, 0.88, 0.92, 1.0]
     };
     this.renderEngine = new RenderEngine(canvas, gl, opts);
@@ -95,8 +95,17 @@ GameEngine.prototype.parseSceneJSON = function(jsonObj) {
     const scene = new Scene();
     scene.models = modelDict;
 
-    const cam = new Camera();
+    this.controller = new Controller()
+
+    const cam = new Camera(
+        [0,0,10],
+        45,
+        this.gl.canvas.clientWidth / this.gl.canvas.clientHeight,
+        0.1,
+        100
+    );
     scene.camera = cam;
+    this.controller.parent(cam);
     
     return scene;
 }
@@ -117,6 +126,7 @@ GameEngine.prototype.startGameLoop = function() {
         // handle input
         self.handleKeyboardInput();
         self.handleMouseInput();
+        self.controller.update();
 
         // draw the scene
         self.renderEngine.render(self.time);
@@ -138,10 +148,10 @@ GameEngine.prototype.startGameLoop = function() {
  */
 GameEngine.prototype.getKeyTracker = function() {
     return {
-        'a' : {pressed: false, func: this.scene.camera.moveLeft},
-        'd' : {pressed: false, func: this.scene.camera.moveRight},
-        'w' : {pressed: false, func: this.scene.camera.moveForward},
-        's' : {pressed: false, func: this.scene.camera.moveBackward}
+        'a' : {pressed: false, func: this.controller.moveLeft},
+        'd' : {pressed: false, func: this.controller.moveRight},
+        'w' : {pressed: false, func: this.controller.moveForward},
+        's' : {pressed: false, func: this.controller.moveBackward}
     };
 }
 
@@ -207,7 +217,7 @@ GameEngine.prototype.updateMousePosition = function() {
 GameEngine.prototype.handleMouseInput = function() {
     const currentMouseChange = this.mouseChange;
     this.mouseChange = [0, 0];
-    this.scene.camera.turnCamera(currentMouseChange, this.deltaTime);
+    this.controller.turnCamera(currentMouseChange, this.deltaTime);
 }
 
 /**
