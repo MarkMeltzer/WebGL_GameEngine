@@ -6,21 +6,29 @@ var Controller = function() {
 
     this.yaw = -90;
     this.pitch = 0;
-    this.velocity = [0,0,0];
+    this.velocity = vec3.fromValues(0,0,0);
 
+    // whether the controller is currently airborne
+    this.airborne = true;
+
+    // the object which is parented to this controller
+    this.child = null;
+    
+    // controller settings
+    this.flying = false;
     this.movementSpeed = 10;
     this.turnSpeed = 6;
-    
-    this.child = null;
-
-    this.airborne = false;
+    this.jumpHeight = 30;
+    this.gravity = 0.03;
+    this.frictionFactor = 0.5;
 
     // Bind 'this' in the methods to this camera object because javascript
     this.moveLeft = this.moveLeft.bind(this);
     this.moveRight = this.moveRight.bind(this);
     this.moveForward = this.moveForward.bind(this);
     this.moveBackward = this.moveBackward.bind(this);
-    this.turnCamera = this.turnCamera.bind(this);
+    this.turn = this.turn.bind(this);
+    this.jump = this.jump.bind(this);
 }
 
 /**
@@ -46,32 +54,56 @@ Controller.prototype.updateVectors = function() {
 Controller.prototype.moveForward = function(deltaTime) {
     const change = this.movementSpeed * deltaTime;
     this.velocity[0] += this.front[0] * change;
-    this.velocity[1] += this.front[1] * change;
     this.velocity[2] += this.front[2] * change;
+
+    // if flying, allow moving in the y direction
+    if (this.flying) {
+        this.velocity[1] += this.front[1] * change;
+    }
 }
 
 Controller.prototype.moveBackward = function(deltaTime) {
     const change = this.movementSpeed * deltaTime;
     this.velocity[0] -= this.front[0] * change;
-    this.velocity[1] -= this.front[1] * change;
     this.velocity[2] -= this.front[2] * change;
+
+    // if flying, allow moving in the y direction
+    if (this.flying) {
+        this.velocity[1] -= this.front[1] * change;
+    }
 }
 
 Controller.prototype.moveRight = function(deltaTime) {
     const change = this.movementSpeed * deltaTime;
     this.velocity[0] += this.right[0] * change;
-    this.velocity[1] += this.right[1] * change;
     this.velocity[2] += this.right[2] * change;
+
+    // if flying, allow moving in the y direction
+    if (this.flying) {
+        this.velocity[1] += this.right[1] * change;
+    }
 }
 
 Controller.prototype.moveLeft = function(deltaTime) {
     const change = this.movementSpeed * deltaTime;
     this.velocity[0] -= this.right[0] * change;
-    this.velocity[1] -= this.right[1] * change;
     this.velocity[2] -= this.right[2] * change;
+
+    // if flying, allow moving in the y direction
+    if (this.flying) {
+        this.velocity[1] -= this.right[1] * change;
+    }
 }
 
-Controller.prototype.turnCamera = function(mouseChange, deltaTime) {
+Controller.prototype.jump = function(deltaTime) {
+    if (!this.airborne && !this.flying) {
+        this.airborne = true;
+
+        this.velocity[1] += this.jumpHeight * deltaTime;
+    }
+}
+
+Controller.prototype.turn = function(mouseChange, deltaTime) {
     const xChange = mouseChange[0] * this.turnSpeed * deltaTime;
     const yChange = mouseChange[1] * this.turnSpeed * deltaTime;
 
@@ -87,11 +119,23 @@ Controller.prototype.update = function() {
     this.position[0] += this.velocity[0];
     this.position[1] += this.velocity[1];
     this.position[2] += this.velocity[2];
+    
+    // add fake collision with the ground
+    if (this.position[1] <= 0 && !this.flying) {
+        this.position[1] = 0;
+        this.airborne = false;
+        this.velocity[1] = 0;
+    }
 
     // update velocity
-    this.velocity[0] *= 0.5;
-    this.velocity[1] *= 0.5;
-    this.velocity[2] *= 0.5;
+    this.velocity[0] *= this.frictionFactor;
+    if (this.flying) {this.velocity[1] *= this.frictionFactor;}
+    this.velocity[2] *= this.frictionFactor;
+
+    // apply gravity
+    if (this.airborne && !this.flying){
+        this.velocity[1] -= this.gravity;
+    }
 
     // update rotations
     this.front[0] = Math.cos(glMatrix.toRadian(this.yaw)) * Math.cos(glMatrix.toRadian(this.pitch));
@@ -126,4 +170,13 @@ Controller.prototype.updateChild = function() {
         this.child.right = this.right;
         this.child.up = this.up;
     }
+}
+
+Controller.prototype.startFlying = function() {
+    this.flying = true;
+}
+
+Controller.prototype.stopFlying = function() {
+    this.flying = false;
+    this.airborne = true;
 }

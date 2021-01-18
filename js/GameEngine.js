@@ -151,7 +151,8 @@ GameEngine.prototype.getKeyTracker = function() {
         'a' : {pressed: false, func: this.controller.moveLeft},
         'd' : {pressed: false, func: this.controller.moveRight},
         'w' : {pressed: false, func: this.controller.moveForward},
-        's' : {pressed: false, func: this.controller.moveBackward}
+        's' : {pressed: false, func: this.controller.moveBackward},
+        ' ' : {pressed: false, func: this.controller.jump}
     };
 }
 
@@ -217,7 +218,7 @@ GameEngine.prototype.updateMousePosition = function() {
 GameEngine.prototype.handleMouseInput = function() {
     const currentMouseChange = this.mouseChange;
     this.mouseChange = [0, 0];
-    this.controller.turnCamera(currentMouseChange, this.deltaTime);
+    this.controller.turn(currentMouseChange, this.deltaTime);
 }
 
 /**
