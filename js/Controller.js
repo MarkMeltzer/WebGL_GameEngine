@@ -21,6 +21,7 @@ var Controller = function() {
     this.jumpHeight = 30;
     this.gravity = 0.03;
     this.frictionFactor = 0.5;
+    this.floorHeight = 0;
 
     // Bind 'this' in the methods to this camera object because javascript
     this.moveLeft = this.moveLeft.bind(this);
@@ -121,8 +122,8 @@ Controller.prototype.update = function() {
     this.position[2] += this.velocity[2];
     
     // add fake collision with the ground
-    if (this.position[1] <= 0 && !this.flying) {
-        this.position[1] = 0;
+    if (this.position[1] <= this.floorHeight && !this.flying) {
+        this.position[1] = this.floorHeight;
         this.airborne = false;
         this.velocity[1] = 0;
     }

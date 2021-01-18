@@ -11,7 +11,7 @@
       "animateRot": false
     },
     {
-      "id": "2",
+      "id": "flying box",
       "type": "box",
       "position": [0, 2, 0],
       "texture": "imgs/texture.png",
@@ -32,7 +32,7 @@
       "animateRot": false
     },
     {
-      "id": "4",
+      "id": "textured box",
       "type": "box",
       "position": [1.5, -1.5, -10],
       "texture": "imgs/texture.png",
@@ -42,7 +42,7 @@
       "animateRot": false
     },
     {
-      "id": "5",
+      "id": "color texture box",
       "type": "box",
       "position": [-5, 2, -1.5],
       "texture": "imgs/colors.png",
@@ -90,7 +90,7 @@
       "animateRot": true
     },
     {
-      "id": "light",
+      "id": "light model",
       "type": "box",
       "texture": "imgs/yellow.png",
       "position": [20,5,10],

@@ -88,7 +88,6 @@ function setupSettings() {
         document.getElementById("player_zFar_value").innerHTML = this.value;
     }
 
-
     // scene dropdown
     for (var i = 0; i < sceneDescriptions.length; i++){
         const sceneDescription = sceneDescriptions[i];
@@ -97,10 +96,10 @@ function setupSettings() {
         option.text = sceneDescription;
         document.getElementById("scene_dropdown").add(option);
     }
-
     document.getElementById("scene_dropdown").onchange = function() {
         loadJSON(this.value, function(sceneJson) {
             debugGlobal.loadScene(sceneJson);
+            populateObjectDropdown();
         })
     }
 
@@ -108,6 +107,7 @@ function setupSettings() {
     document.getElementById("reload_button").onclick = function() {
         loadJSON(document.getElementById("scene_dropdown").value, function(sceneJson) {
             debugGlobal.loadScene(sceneJson);
+            populateObjectDropdown();
         })
     }
 
@@ -140,6 +140,39 @@ function setupSettings() {
     document.getElementById("friction_slider").oninput = function() {
         debugGlobal.controller.frictionFactor = parseFloat(this.value);
         document.getElementById("friction_value").innerHTML = this.value;
+    }
+
+    // controller child dropdown
+    populateObjectDropdown()
+    document.getElementById("controller_child_dropdown").onchange = function() {
+        if (this.value == "camera") {
+            debugGlobal.controller.parent(debugGlobal.scene.camera)
+        } else {
+            debugGlobal.controller.parent(debugGlobal.scene.models[this.value]);
+        }   
+    }
+}
+
+function populateObjectDropdown() {
+    // clear the dropdown list
+    const len = document.getElementById("controller_child_dropdown").options.length;
+    for (var i = len - 1; i >= 0; i--) {
+        document.getElementById("controller_child_dropdown").remove(i);
+    }
+
+    // add camera
+    const option = document.createElement("option");
+    option.value = "camera";
+    option.text = "Player Camera";
+    document.getElementById("controller_child_dropdown").add(option);
+
+    // add all model
+    const keys = Object.keys(debugGlobal.scene.models);
+    for (var i = 0; i < keys.length; i++) {
+        const option = document.createElement("option");
+        option.value = keys[i];
+        option.text = keys[i];
+        document.getElementById("controller_child_dropdown").add(option);
     }
 }
 
