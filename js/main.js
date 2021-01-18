@@ -76,15 +76,15 @@ function setupSettings() {
 
     // player sliders
     document.getElementById("player_fov_slider").oninput = function() {
-        debugGlobal.renderEngine.fov = this.value;
+        debugGlobal.renderEngine.scene.camera.fieldOfView = parseInt(this.value);
         document.getElementById("player_fov_value").innerHTML = this.value;
     }
     document.getElementById("player_zNear_slider").oninput = function() {
-        debugGlobal.renderEngine.zNear = parseFloat(this.value);
+        debugGlobal.renderEngine.scene.camera.zNear = parseFloat(this.value);
         document.getElementById("player_zNear_value").innerHTML = this.value;
     }
     document.getElementById("player_zFar_slider").oninput = function() {
-        debugGlobal.renderEngine.zFar = parseFloat(this.value);
+        debugGlobal.renderEngine.scene.camera.zFar = parseFloat(this.value);
         document.getElementById("player_zFar_value").innerHTML = this.value;
     }
 

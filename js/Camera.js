@@ -14,7 +14,7 @@ var Camera = function(position, fieldOfView, aspect, zNear, zFar) {
 Camera.prototype.getProjectionMatrix = function(out) {
     mat4.perspective(
         out,
-        this.fieldOfView,
+        glMatrix.toRadian(this.fieldOfView),
         this.aspect,
         this.zNear,
         this.zFar
