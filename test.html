@@ -3,114 +3,134 @@
     <head>
         <meta charset="UTF-8">
         <title>A page :)</title>
-
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
         Here be canvas:
         <br>
-        <div id="canvas_container" style="position: relative; display: inline-block">
+        <div id="canvas_container" height="100%">
             <canvas id="glCanvas" width="640" height="480" tabindex="0"></canvas>
-            <div id="overlay" style="position: absolute; left: 10px; top: 10px;">
+            <div id="overlay">
                 <span id="overlay_content"></span>
             </div>
         </div>
-        <div id="shadow_settings_container" style="
-                                            vertical-align: top; 
-                                            display: inline-block;
-                                            background-color: rgb(190, 253, 255);
-                                            padding: 5px;
-                                            "
-        >   
-            <p style="font-size: 1.3em; margin: 0; background-color: rgba(0, 0, 0, 0.25);text-align: center;"><b>Shadow settings:</b></p>
+        <div id="shadow_settings_container" class="settings_container">   
+            <p class="settings_title"><b>Shadow settings:</b></p>
             <div id="light_coordinates_container">
-                <div class="slider_container" style="display: inline-block; padding: 2px">
-                    <p style="display: inline-block">Light X coordinate: </p>
-                    <p id="X_value" style="display: inline-block">20</p>
-                    <input type="range" min="-30" max="30" value="20" id="X_slider" style="display: block">
+                <div class="slider_container">
+                    <p class="value_title">Light X coordinate: </p>
+                    <p id="X_value" class="value">20</p>
+                    <input type="range" min="-30" max="30" value="20" id="X_slider" class="input">
                 </div>
-                <div class="slider_container" style="display: inline-block; padding: 2px">
-                    <p style="display: inline-block">Light Y coordinate: </p>
-                    <p id="Y_value" style="display: inline-block">14</p>
-                    <input type="range" min="0" max="30" value="14" id="Y_slider" style="display: block">
+                <div class="slider_container">
+                    <p class="value_title">Light Y coordinate: </p>
+                    <p id="Y_value" class="value">14</p>
+                    <input type="range" min="0" max="30" value="14" id="Y_slider" class="input">
                 </div>
-                <div class="slider_container" style="display: inline-block; padding: 2px">
-                    <p style="display: inline-block">Light Z coordinate: </p>
-                    <p id="Z_value" style="display: inline-block">10</p>
-                    <input type="range" min="-30" max="30" value="10" id="Z_slider" style="display: block">
+                <div class="slider_container">
+                    <p class="value_title">Light Z coordinate: </p>
+                    <p id="Z_value" class="value">10</p>
+                    <input type="range" min="-30" max="30" value="10" id="Z_slider" class="input">
                 </div>
             </div>
             <div id="light_fov_container">
-                <div class="slider_container" style="display: inline-block; padding: 2px">
-                    <p style="display: inline-block">Light field of view: </p>
-                    <p id="light_fov_value" style="display: inline-block">81</p>
-                    <input type="range" min="0" max="100" value="81" id="light_fov_slider" style="display: block">
+                <div class="slider_container">
+                    <p class="value_title">Light field of view: </p>
+                    <p id="light_fov_value" class="value">81</p>
+                    <input type="range" min="0" max="100" value="81" id="light_fov_slider" class="input">
                 </div>
             </div>
             <div id="bias_container">
-                <div class="slider_container" style="display: inline-block; padding: 2px">
-                    <p style="display: inline-block">Shadow bias: </p>
-                    <p id="shadow_bias_value" style="display: inline-block">0.0002</p>
-                    <input type="range" min="0" max="0.0005" step="0.00001" value="0.0002" id="shadow_bias_slider" style="display: block">
+                <div class="slider_container">
+                    <p class="value_title">Shadow bias: </p>
+                    <p id="shadow_bias_value" class="value">0.0002</p>
+                    <input type="range" min="0" max="0.0005" step="0.00001" value="0.0002" id="shadow_bias_slider" class="input">
                 </div>
             </div>
             <div id="clipping_plane_container">
-                <div class="slider_container" style="display: inline-block; padding: 2px">
-                    <p style="display: inline-block">Light near clipping plane: </p>
-                    <p id="light_zNear_value" style="display: inline-block">1</p>
-                    <input type="range" min="0" max="100" value="1" id="light_zNear_slider" style="display: block">
+                <div class="slider_container">
+                    <p class="value_title">Light near clipping plane: </p>
+                    <p id="light_zNear_value" class="value">1</p>
+                    <input type="range" min="0" max="100" value="1" id="light_zNear_slider" class="input">
                 </div>
-                <div class="slider_container" style="display: inline-block; padding: 2px">
-                    <p style="display: inline-block">Light far clipping plane: </p>
-                    <p id="light_zFar_value" style="display: inline-block">100</p>
-                    <input type="range" min="0" max="100" value="100" id="light_zFar_slider" style="display: block">
+                <div class="slider_container">
+                    <p class="value_title">Light far clipping plane: </p>
+                    <p id="light_zFar_value" class="value">100</p>
+                    <input type="range" min="0" max="100" value="100" id="light_zFar_slider" class="input">
                 </div>
             </div>
         </div>
-        <div id="player_settings_container" style="
-                                            vertical-align: top; 
-                                            display: inline-block;
-                                            background-color: rgb(192, 255, 190);
-                                            padding: 5px;
-                                            "
-        >
-            <p style="font-size: 1.3em; margin: 0;background-color: rgba(0, 0, 0, 0.25);text-align: center;"><b>Players settings:</b></p>
+        <div id="player_settings_container" class="settings_container">
+            <p class="settings_title"><b>Players settings:</b></p>
             <div id="player_fov_container">
-                <div class="slider_container" style="display: inline-block; padding: 2px">
-                    <p style="display: inline-block">Field of view: </p>
-                    <p id="player_fov_value" style="display: inline-block">45</p>
-                    <input type="range" min="0" max="100" value="45" id="player_fov_slider" style="display: block">
+                <div class="slider_container">
+                    <p class="value_title">Field of view: </p>
+                    <p id="player_fov_value" class="value">45</p>
+                    <input type="range" min="0" max="100" value="45" id="player_fov_slider" class="input">
                 </div>
             </div>
             <div id="clipping_plane_container">
-                <div class="slider_container" style="display: inline-block; padding: 2px">
-                    <p style="display: inline-block">Near clipping plane: </p>
-                    <p id="player_zNear_value" style="display: inline-block">0.1</p>
-                    <input type="range" min="0.1" max="100" step="0.1" value="0.1" id="player_zNear_slider" style="display: block">
+                <div class="slider_container">
+                    <p class="value_title">Near clipping plane: </p>
+                    <p id="player_zNear_value" class="value">0.1</p>
+                    <input type="range" min="0.1" max="100" step="0.1" value="0.1" id="player_zNear_slider" class="input">
                 </div>
-                <div class="slider_container" style="display: inline-block; padding: 2px">
-                    <p style="display: inline-block">Far clipping plane: </p>
-                    <p id="player_zFar_value" style="display: inline-block">100</p>
-                    <input type="range" min="0.1" max="100" step="0.1" value="100" id="player_zFar_slider" style="display: block">
+                <div class="slider_container">
+                    <p class="value_title">Far clipping plane: </p>
+                    <p id="player_zFar_value" class="value">100</p>
+                    <input type="range" min="0.1" max="100" step="0.1" value="100" id="player_zFar_slider" class="input">
                 </div>
             </div>
         </div>
-        <div id="scene_settings_container" style="
-                                            vertical-align: top; 
-                                            display: inline-block;
-                                            background-color: rgb(237, 190, 255);
-                                            padding: 5px;
-                                            "
-        >
-            <p style="font-size: 1.3em; margin: 0;background-color: rgba(0, 0, 0, 0.25); text-align: center;"><b>Scene settings:</b></p>
+        <div id="scene_settings_container" class="settings_container">
+            <p class="settings_title"><b>Scene settings:</b></p>
             <div id="scene_selector_container">
-                <div class="dropdown_container" style="display: inline-block; padding: 2px">
-                    <p style="display: inline-block">Select scene: </p>
-                    <select name="scene" id="scene_dropdown" style="display: block"></select>
+                <div class="dropdown_container">
+                    <p class="value_title">Select scene: </p>
+                    <select name="scene" id="scene_dropdown" class="input"></select>
                 </div>
             </div>
             <div id="reload_button_container">
-                <div class="reload_container" style="display: inline-block; padding: 2px">
+                <div class="reload_container">
                     <button id="reload_button">Reload!</button>
+                </div>
+            </div>
+        </div>
+        <div id="controller_settings_container" class="settings_container">
+            <p class="settings_title"><b>Controller settings:</b></p>
+            <div class="button_container">
+                <p class="value_title">Flying:</p>
+                <input type="checkbox" id="flying_checkbox" class="value">
+            </div>
+            <div id="speed_sensitivity_container">
+                <div class="slider_container">
+                    <p class="value_title">Movement speed: </p>
+                    <p id="movement_speed_value" class="value">10</p>
+                    <input type="range" min="1" max="100" value="10" id="movement_speed_slider" class="input">
+                </div>
+                <div class="slider_container">
+                    <p class="value_title">Mouse sensitivity: </p>
+                    <p id="sensitivity_value" class="value">6</p>
+                    <input type="range" min="1" max="100" value="6" id="sensitivity_slider" class="input">
+                </div>
+            </div>
+            <div id="jump_height_container">
+                <div class="slider_container">
+                    <p class="value_title">Jump height: </p>
+                    <p id="jump_height_value" class="value">30</p>
+                    <input type="range" min="1" max="100" value="30" id="jump_height_slider" class="input">
+                </div>
+            </div>
+            <div id="physics_container">
+                <div class="slider_container">
+                    <p class="value_title">Gravity: </p>
+                    <p id="gravity_value" class="value">0.03</p>
+                    <input type="range" min="0" max="1" step="0.01" value="0.03" id="gravity_slider" class="input">
+                </div>
+                <div class="slider_container">
+                    <p class="value_title">Friction factor: </p>
+                    <p id="friction_value" class="value">0.5</p>
+                    <input type="range" min="0" max="1" step="0.01" value="0.5" id="friction_slider" class="input">
                 </div>
             </div>
         </div>

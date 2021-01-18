@@ -35,17 +35,13 @@ function demo(sceneJson) {
         document.getElementById("overlay_content").innerHTML = "fps: "  + (1 / engine.deltaTime).toFixed(2);
     }, 100);
 
-    window.setInterval( () => {
-        document.getElementById("debug_output").innerHTML = engine.controller.velocity;
-    }, 1000);
-
     setupSettings();
 
     console.log("Main done!")
 }
 
 function setupSettings() {
-    // setup sliders
+    // shadow sliders
     document.getElementById("X_slider").oninput = function() {
         debugGlobal.renderEngine.scene.light[0] = this.value;
         debugGlobal.scene.models["light"].position[0] = this.value;
@@ -77,6 +73,8 @@ function setupSettings() {
         debugGlobal.renderEngine.shadowmapSettings.zFar = parseInt(this.value);
         document.getElementById("light_zFar_value").innerHTML = this.value;
     }
+
+    // player sliders
     document.getElementById("player_fov_slider").oninput = function() {
         debugGlobal.renderEngine.fov = this.value;
         document.getElementById("player_fov_value").innerHTML = this.value;
@@ -91,7 +89,7 @@ function setupSettings() {
     }
 
 
-    // setup dropdowns
+    // scene dropdown
     for (var i = 0; i < sceneDescriptions.length; i++){
         const sceneDescription = sceneDescriptions[i];
         const option = document.createElement("option");
@@ -106,10 +104,42 @@ function setupSettings() {
         })
     }
 
+    // scene reload button
     document.getElementById("reload_button").onclick = function() {
         loadJSON(document.getElementById("scene_dropdown").value, function(sceneJson) {
             debugGlobal.loadScene(sceneJson);
         })
+    }
+
+    // flying checkbox
+    document.getElementById("flying_checkbox").onclick = function() {
+        if (this.checked) {
+            debugGlobal.controller.startFlying();
+        } else {
+            debugGlobal.controller.stopFlying();
+        }
+    }
+
+    // controller slider
+    document.getElementById("movement_speed_slider").oninput = function() {
+        debugGlobal.controller.movementSpeed = parseInt(this.value);
+        document.getElementById("movement_speed_value").innerHTML = this.value;
+    }
+    document.getElementById("sensitivity_slider").oninput = function() {
+        debugGlobal.controller.turnSpeed = parseInt(this.value);
+        document.getElementById("sensitivity_value").innerHTML = this.value;
+    }
+    document.getElementById("jump_height_slider").oninput = function() {
+        debugGlobal.controller.jumpHeight = parseInt(this.value);
+        document.getElementById("jump_height_value").innerHTML = this.value;
+    }
+    document.getElementById("gravity_slider").oninput = function() {
+        debugGlobal.controller.gravity = parseFloat(this.value);
+        document.getElementById("gravity_value").innerHTML = this.value;
+    }
+    document.getElementById("friction_slider").oninput = function() {
+        debugGlobal.controller.frictionFactor = parseFloat(this.value);
+        document.getElementById("friction_value").innerHTML = this.value;
     }
 }
 
