@@ -142,3 +142,31 @@ const depthMapUniformNames = [
     "uCameraMatrix",
     "uModelViewMatrix"
 ];
+
+const AABBVsSource = `
+    attribute vec4 aVertexPosition;
+
+    uniform mat4 uProjectionMatrix;
+    uniform mat4 uCameraMatrix;
+    uniform mat4 uModelViewMatrix;
+
+    void main() {
+        gl_Position = uProjectionMatrix * uCameraMatrix * uModelViewMatrix * aVertexPosition;
+    }
+`;
+
+const AABBFsSource = `
+    void main() {
+        gl_FragColor = vec4(1, 0, 0, 1);
+    }
+`;
+
+const AABBAttributeNames = [
+    "aVertexPosition"
+];
+
+const AABBUniformNames = [
+    "uProjectionMatrix",
+    "uCameraMatrix",
+    "uModelViewMatrix"
+];

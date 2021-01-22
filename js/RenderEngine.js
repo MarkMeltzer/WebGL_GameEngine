@@ -32,6 +32,15 @@ var RenderEngine = function(canvas, gl, opts) {
     );
     this.initDepthmap();
 
+    // initialize AABB drawing shader
+    this.AABBShader = new Shader(
+        this.gl,
+        AABBVsSource,
+        AABBFsSource,
+        AABBAttributeNames,
+        AABBUniformNames
+    );
+
     // intialize empty scene
     this.scene = null;
 
@@ -156,71 +165,7 @@ RenderEngine.prototype.drawShadowmap = function(time, frameBuffer) {
     for (let modelId in this.scene.models) {
         const model = this.scene.models[modelId];
         
-        // create model matrix
-        const modelMatrix = mat4.create()
-
-        // translate model to it's world position
-        mat4.translate(
-            modelMatrix,
-            modelMatrix,
-            model.position
-        );
-
-        // animate model translation, if applicable
-        if (model.animateTrans) {
-            mat4.translate(
-                modelMatrix,
-                modelMatrix,
-                [6 * sinAnim - 3, 0, 6 * cosAnim - 3]
-            );
-        }
-
-        // animate model rotation, if applicable
-        if (model.animateRot) {
-            mat4.rotate(
-                modelMatrix,
-                modelMatrix,
-                time * model.rotSpeedFactor,
-                model.rotAxis
-                );
-        }
-
-        // set the model matrix uniform in the shader
-        gl.uniformMatrix4fv(
-            this.depthMapShader.uniformLocations.uModelViewMatrix, 
-            false,
-            modelMatrix
-        );
-            
-        // tell webgl how it should pull information out of vertex position buffer
-        {
-            const numComponents = 3;
-            const type = gl.FLOAT;
-            const normalize = false;
-            const stride = 0;
-            const offset = 0;
-            gl.bindBuffer(gl.ARRAY_BUFFER, model.buffers.position);
-            gl.vertexAttribPointer(
-                this.depthMapShader.attribLocations.aVertexPosition,
-                numComponents,
-                type,
-                normalize,
-                stride,
-                offset
-            );
-            gl.enableVertexAttribArray(this.depthMapShader.attribLocations.aVertexPosition);
-        }
-
-        // bind indices for rendering (move this down)
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.buffers.index);
-
-        // issue the draw call for the current object
-        {
-            const offset = 0;
-            const type = gl.UNSIGNED_SHORT;
-            const vertexCount = model.vertexData.vertexIndices.length;
-            gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
-        }
+        this.drawModel(model, time, this.depthMapShader, false, false);
     }
 }
 
@@ -317,10 +262,6 @@ RenderEngine.prototype.drawScene = function(camera, time) {
         this.shadowmapSettings.bias
     );
 
-    // use sinus and cosinus for some simple animation
-    const sinAnim = Math.sin(time) / 2 + 0.5;
-    const cosAnim = Math.cos(time) / 2 + 0.5;
-
     /**************************************************************************
     * For all meshes:
     * Set uniforms which are specific to a mesh and issue it's draw call.
@@ -328,74 +269,101 @@ RenderEngine.prototype.drawScene = function(camera, time) {
 
     // iterate over all models in the scene
     for (let modelId in this.scene.models) {
+        gl.useProgram(this.mainShader.program);
         const model = this.scene.models[modelId];
         
-        // create model matrix
-        const modelMatrix = mat4.create()
+        this.drawModel(model, time, this.mainShader, true, true);
 
-        // translate model to it's world position
+        // draw the AABBs
+        this.drawAABBs(model, cameraMatrix, projectionMatrix);
+    }
+}
+
+/**
+ * Draws a model. This should only be called in a scene rendering function so
+ * assumes other shader variables such as camera and projection matrix to be
+ * set.
+ * 
+ * @param {model} model The model to draw.
+ * @param {number} time Time sinds starting the demo in seconds. Used for animations.
+ * @param {shader} shader The shader to draw the model with.
+ * @param {bool} normals Wether to provide normals to the shader.
+ * @param {bool} textures Wether to provide textures to the shader.
+ */
+RenderEngine.prototype.drawModel = function(model, time, shader, normals, textures) {
+    const gl = this.gl;
+
+    // use sinus and cosinus for some simple animation
+    const sinAnim = Math.sin(time) / 2 + 0.5;
+    const cosAnim = Math.cos(time) / 2 + 0.5;
+
+    // create model matrix
+    const modelMatrix = mat4.create()
+
+    // translate model to it's world position
+    mat4.translate(
+        modelMatrix,
+        modelMatrix,
+        model.position
+    );
+
+    // animate model translation, if applicable
+    if (model.animateTrans) {
         mat4.translate(
             modelMatrix,
             modelMatrix,
-            model.position
+            [6 * sinAnim - 3, 0, 6 * cosAnim - 3]
         );
+    }
 
-        // animate model translation, if applicable
-        if (model.animateTrans) {
-            mat4.translate(
-                modelMatrix,
-                modelMatrix,
-                [6 * sinAnim - 3, 0, 6 * cosAnim - 3]
+    // animate model rotation, if applicable
+    if (model.animateRot) {
+        mat4.rotate(
+            modelMatrix,
+            modelMatrix,
+            time * model.rotSpeedFactor,
+            model.rotAxis
             );
-        }
+    }
 
-        // animate model rotation, if applicable
-        if (model.animateRot) {
-            mat4.rotate(
-                modelMatrix,
-                modelMatrix,
-                time * model.rotSpeedFactor,
-                model.rotAxis
-                );
-        }
+    // set the model matrix uniform in the shader
+    gl.uniformMatrix4fv(
+        shader.uniformLocations.uModelViewMatrix, 
+        false,
+        modelMatrix
+    );
 
-        // set the model matrix uniform in the shader
-        gl.uniformMatrix4fv(
-            this.mainShader.uniformLocations.uModelViewMatrix, 
-            false,
-            modelMatrix
-        );
-
-        // create the normal matrix and set it as uniform in the shader
+    // tell webgl how it should pull information out of vertex position buffer
+    {
+        const numComponents = 3;
+        const type = gl.FLOAT;
+        const normalize = false;
+        const stride = 0;
+        const offset = 0;
+        gl.bindBuffer(gl.ARRAY_BUFFER, model.buffers.position);
+        gl.vertexAttribPointer(
+            shader.attribLocations.aVertexPosition,
+            numComponents,
+            type,
+            normalize,
+            stride,
+            offset
+            );
+            gl.enableVertexAttribArray(shader.attribLocations.aVertexPosition);
+    }
+        
+    // create the normal matrix and set it as uniform in the shader
+    if (normals) {
         const normalMatrix = mat4.create();
         mat4.invert(normalMatrix, modelMatrix);
         mat4.transpose(normalMatrix, normalMatrix);
         gl.uniformMatrix4fv(
-            this.mainShader.uniformLocations.uNormalMatrix, 
+            shader.uniformLocations.uNormalMatrix, 
             false,
             normalMatrix
         );
-            
-        // tell webgl how it should pull information out of vertex position buffer
-        {
-            const numComponents = 3;
-            const type = gl.FLOAT;
-            const normalize = false;
-            const stride = 0;
-            const offset = 0;
-            gl.bindBuffer(gl.ARRAY_BUFFER, model.buffers.position);
-            gl.vertexAttribPointer(
-                this.mainShader.attribLocations.aVertexPosition,
-                numComponents,
-                type,
-                normalize,
-                stride,
-                offset
-            );
-            gl.enableVertexAttribArray(this.mainShader.attribLocations.aVertexPosition);
-        }
-
-        // tell webgl how it should pull information out of vertexv normals buffer
+        
+        // tell webgl how it should pull information out of vertex normals buffer
         {
             const numComponents = 3;
             const type = gl.FLOAT;
@@ -404,16 +372,18 @@ RenderEngine.prototype.drawScene = function(camera, time) {
             const offset = 0;
             gl.bindBuffer(gl.ARRAY_BUFFER, model.buffers.normal);
             gl.vertexAttribPointer(
-                this.mainShader.attribLocations.aVertexNormal,
+                shader.attribLocations.aVertexNormal,
                 numComponents,
                 type,
                 normalize,
                 stride,
                 offset
             );
-            gl.enableVertexAttribArray(this.mainShader.attribLocations.aVertexNormal);
+            gl.enableVertexAttribArray(shader.attribLocations.aVertexNormal);
         }
-
+    }
+        
+    if (textures) {
         // tell webgl how it should pull information out of the texture coordinate buffer
         {
             const numComponents = 2;
@@ -423,34 +393,97 @@ RenderEngine.prototype.drawScene = function(camera, time) {
             const offset = 0;
             gl.bindBuffer(gl.ARRAY_BUFFER, model.buffers.textureCoord);
             gl.vertexAttribPointer(
-                this.mainShader.attribLocations.aTextureCoord,
+                shader.attribLocations.aTextureCoord,
                 numComponents,
                 type,
                 normalize,
                 stride,
                 offset
             );
-            gl.enableVertexAttribArray(this.mainShader.attribLocations.aTextureCoord);
+            gl.enableVertexAttribArray(shader.attribLocations.aTextureCoord);
         }
-
+    
         // set the texture uniform in the shader
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, model.buffers.texture);
         gl.uniform1i(
-            this.mainShader.uniformLocations.uTexture,
+            shader.uniformLocations.uTexture,
             0
         );
+    }
 
-        // bind indices for rendering (move this down)
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.buffers.index);
+    // bind indices for rendering (move this down)
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.buffers.index);
 
-        // issue the draw call for the current object
-        {
-            const offset = 0;
-            const type = gl.UNSIGNED_SHORT;
-            const vertexCount = model.vertexData.vertexIndices.length;
-            gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
+    // issue the draw call for the current object
+    {
+        const offset = 0;
+        const type = gl.UNSIGNED_SHORT;
+        const vertexCount = model.vertexData.vertexIndices.length;
+        gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
+    }
+}
+
+RenderEngine.prototype.drawAABBs = function(model, cameraMatrix, projectionMatrix) {
+    const gl = this.gl;
+
+    if (model.AABB) {
+        // if the model doesn't have buffers for its AABB yet, create some
+        if (!model.buffers.AABB) {
+            const AABBVertexBuffer = this.createAABBBuffer(model.AABB);
+            model.buffers.AABB = AABBVertexBuffer;
         }
+
+        // use the AABB rendering shader for rendering
+        gl.useProgram(this.AABBShader.program);
+
+        // set the AABB vertex positions in the shader
+        {
+            const numComponents = 3;
+            const type = gl.FLOAT;
+            const normalize = false;
+            const stride = 0;
+            const offset = 0;
+            gl.bindBuffer(gl.ARRAY_BUFFER, model.buffers.AABB);
+            gl.vertexAttribPointer(
+                this.AABBShader.attribLocations.aVertexPosition,
+                numComponents,
+                type,
+                normalize,
+                stride,
+                offset
+            );
+            gl.enableVertexAttribArray(this.AABBShader.attribLocations.aVertexPosition);
+        }
+
+        // set the projection and cameramatrix to render the AABBs with
+        gl.uniformMatrix4fv(
+            this.AABBShader.uniformLocations.uProjectionMatrix,
+            false,
+            projectionMatrix
+        );
+        gl.uniformMatrix4fv(
+            this.AABBShader.uniformLocations.uCameraMatrix,
+            false,
+            cameraMatrix
+        );
+        
+
+        const AABBModelMatrix = mat4.create()
+        mat4.translate(
+            AABBModelMatrix,
+            AABBModelMatrix,
+            model.position
+        );
+        gl.uniformMatrix4fv(
+            this.AABBShader.uniformLocations.uModelViewMatrix,
+            false,
+            AABBModelMatrix
+        );
+
+        // draw the AABBs
+        gl.lineWidth(5);
+        gl.drawArrays(gl.LINES, 0, 24);            
     }
 }
 
@@ -635,4 +668,56 @@ RenderEngine.prototype.setMesh = function(modelId, meshData) {
     const tempTextureBuffer = model.buffers.texture;
     model.buffers = this.createBuffersFromModelData(meshData);
     model.buffers.texture = tempTextureBuffer;
+}
+
+RenderEngine.prototype.createAABBBuffer = function(AABB) {
+    const gl = this.gl;
+
+    var positions = [
+        AABB.minX, AABB.minY, AABB.minZ,
+        AABB.minX, AABB.minY, AABB.maxZ,
+
+        AABB.minX, AABB.minY, AABB.minZ,
+        AABB.minX, AABB.maxY, AABB.minZ,
+
+        AABB.minX, AABB.minY, AABB.minZ,
+        AABB.maxX, AABB.minY, AABB.minZ,
+
+        AABB.minX, AABB.maxY, AABB.minZ,
+        AABB.minX, AABB.maxY, AABB.maxZ,
+
+        AABB.minX, AABB.maxY, AABB.minZ,
+        AABB.maxX, AABB.maxY, AABB.minZ,
+
+        AABB.minX, AABB.maxY, AABB.maxZ,
+        AABB.maxX, AABB.maxY, AABB.maxZ,
+
+        AABB.minX, AABB.maxY, AABB.maxZ,
+        AABB.minX, AABB.minY, AABB.maxZ,
+
+        AABB.maxX, AABB.minY, AABB.maxZ,
+        AABB.minX, AABB.minY, AABB.maxZ,
+
+        AABB.maxX, AABB.minY, AABB.maxZ,
+        AABB.maxX, AABB.maxY, AABB.maxZ,
+
+        AABB.maxX, AABB.minY, AABB.maxZ,
+        AABB.maxX, AABB.minY, AABB.minZ,
+
+        AABB.maxX, AABB.maxY, AABB.minZ,
+        AABB.maxX, AABB.maxY, AABB.maxZ,
+
+        AABB.maxX, AABB.maxY, AABB.minZ,
+        AABB.maxX, AABB.minY, AABB.minZ
+    ];
+
+    const positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(positions),
+        gl.STATIC_DRAW
+    );
+
+    return positionBuffer;
 }

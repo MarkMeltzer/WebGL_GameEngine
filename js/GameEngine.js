@@ -87,8 +87,15 @@ GameEngine.prototype.parseSceneJSON = function(jsonObj) {
             animateTrans: model.animateTrans,
             animateRot: model.animateRot,
             rotSpeedFactor: model.rotSpeedFactor,
-            rotAxis: model.rotAxis
+            rotAxis: model.rotAxis,
+            AABB: null
         };
+
+        // create AABB
+        if (object.vertexData) {
+            object.AABB = this.createAABB(object);
+        }
+
         modelDict[model.id] = object;
     }
 
@@ -178,14 +185,16 @@ GameEngine.prototype.initInputHandeling = function() {
     });
     
     // set up keytracking
-    this.canvas.addEventListener('keydown', function() {
-        if (self.keyTracker[event.key.toLowerCase()]) {
-            self.keyTracker[event.key.toLowerCase()].pressed = true;
+    this.canvas.addEventListener('keydown', function(e) {
+        if (self.keyTracker[e.key.toLowerCase()]) {
+            self.keyTracker[e.key.toLowerCase()].pressed = true;
+            e.preventDefault();
         }
     });
-    this.canvas.addEventListener('keyup', function() {
-        if (self.keyTracker[event.key.toLowerCase()]) {
-            self.keyTracker[event.key.toLowerCase()].pressed = false;
+    this.canvas.addEventListener('keyup', function(e) {
+        if (self.keyTracker[e.key.toLowerCase()]) {
+            self.keyTracker[e.key.toLowerCase()].pressed = false;
+            e.preventDefault();
         }
     });
 }
@@ -207,9 +216,9 @@ GameEngine.prototype.onPointerLockChange = function() {
  * Updates the change in mouse position when mouse is moved. 
  * This can be called multiple times between frames.
  */
-GameEngine.prototype.updateMousePosition = function() {
-    this.mouseChange[0] += event.movementX;
-    this.mouseChange[1] += event.movementY;
+GameEngine.prototype.updateMousePosition = function(e) {
+    this.mouseChange[0] += e.movementX;
+    this.mouseChange[1] += e.movementY;
 }
 
 /**
@@ -255,6 +264,56 @@ GameEngine.prototype.loadTextureImage = function(modelId, url) {
  */
 GameEngine.prototype.loadOBJFile = function(modelId, url) {
     loadOBJ(url, (OBJFile) => {
-        this.renderEngine.setMesh(modelId, parseOBJFile(OBJFile));
+        const mesh = parseOBJFile(OBJFile);
+        this.renderEngine.setMesh(modelId, mesh);
+        this.scene.models[modelId].AABB = this.createAABB(this.scene.models[modelId]);
     });
+}
+
+/**
+ * Creates Axis-aligned bounding box for a given worldObject.
+ * 
+ * @param {object} worldObject the object for which to create an AABB
+ * @return {dictionary} an dictionary containing the bounds of a AABB
+ */
+GameEngine.prototype.createAABB = function(worldObject) {
+    var minX = Infinity;
+    var maxX = -Infinity;
+    var minY = Infinity;
+    var maxY = -Infinity;
+    var minZ = Infinity;
+    var maxZ = -Infinity;
+    
+    for (var i = 0; i < worldObject.vertexData.vertexPositions.length; i += 3) {
+        const x = worldObject.vertexData.vertexPositions[i];
+        const y = worldObject.vertexData.vertexPositions[i+1];
+        const z = worldObject.vertexData.vertexPositions[i+2];
+
+        if (x < minX) {
+            minX = x;
+        } else if (x > maxX) {
+            maxX = x;
+        }
+
+        if (y < minY) {
+            minY = y;
+        } else if (y > maxY) {
+            maxY = y;
+        }
+
+        if (z < minZ) {
+            minZ = z;
+        } else if (z > maxZ) {
+            maxZ = z;
+        }
+    }
+
+    return {
+        "minX" : minX,
+        "maxX" : maxX,
+        "minY" : minY,
+        "maxY" : maxY,
+        "minZ" : minZ,
+        "maxZ" : maxZ,
+    }
 }

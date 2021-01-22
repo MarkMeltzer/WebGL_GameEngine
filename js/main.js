@@ -35,6 +35,10 @@ function demo(sceneJson) {
         document.getElementById("overlay_content").innerHTML = "fps: "  + (1 / engine.deltaTime).toFixed(2);
     }, 100);
 
+    window.setInterval( () => {
+        document.getElementById("debug_output").innerHTML = debugGlobal.controller.position;
+    }, 1000);
+
     setupSettings();
 
     console.log("Main done!")
