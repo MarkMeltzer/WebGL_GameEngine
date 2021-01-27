@@ -1,5 +1,4 @@
 debugGlobal = null;
-temp = 0;
 
 sceneDescriptions = [
     "scenes/scene1.json",
@@ -148,7 +147,7 @@ function setupSettings() {
     }
 
     // controller child dropdown
-    populateObjectDropdown()
+    populateObjectDropdown("controller_child_dropdown", true);
     document.getElementById("controller_child_dropdown").onchange = function() {
         if (this.value == "camera") {
             debugGlobal.controller.parent(debugGlobal.scene.camera)
@@ -156,28 +155,72 @@ function setupSettings() {
             debugGlobal.controller.parent(debugGlobal.scene.worldObjects[this.value]);
         }   
     }
+
+    // object render settings dropdown
+    populateObjectDropdown("object_dropdown")
+    document.getElementById("object_dropdown").onchange = function() {
+        currentObject = this.value; 
+    }
+
+    // render checkbox
+    document.getElementById("render_checkbox").onclick = function() {
+        const worldObject = debugGlobal.scene.worldObjects[
+            document.getElementById("object_dropdown").value
+        ];
+        if (this.checked) {
+            worldObject.model.renderSettings.render = true;
+        } else {
+            worldObject.model.renderSettings.render = false;
+        }
+    }
+
+    // shadow checkbox
+    document.getElementById("shadow_checkbox").onclick = function() {
+        const worldObject = debugGlobal.scene.worldObjects[
+            document.getElementById("object_dropdown").value
+        ];
+        if (this.checked) {
+            worldObject.model.renderSettings.castShadow = true;
+        } else {
+            worldObject.model.renderSettings.castShadow = false;
+        }
+    }
+
+    // render AABB
+    document.getElementById("AABB_checkbox").onclick = function() {
+        const worldObject = debugGlobal.scene.worldObjects[
+            document.getElementById("object_dropdown").value
+        ];
+        if (this.checked) {
+            worldObject.model.renderSettings.renderAABB = true;
+        } else {
+            worldObject.model.renderSettings.renderAABB = false;
+        }
+    }
 }
 
-function populateObjectDropdown() {
+function populateObjectDropdown(dropdownId, addCamera=false) {
     // clear the dropdown list
-    const len = document.getElementById("controller_child_dropdown").options.length;
+    const len = document.getElementById(dropdownId).options.length;
     for (var i = len - 1; i >= 0; i--) {
-        document.getElementById("controller_child_dropdown").remove(i);
+        document.getElementById(dropdownId).remove(i);
     }
 
     // add camera
-    const option = document.createElement("option");
-    option.value = "camera";
-    option.text = "Player Camera";
-    document.getElementById("controller_child_dropdown").add(option);
+    if (addCamera) {
+        const option = document.createElement("option");
+        option.value = "camera";
+        option.text = "Player Camera";
+        document.getElementById(dropdownId).add(option);
+    }
 
-    // add all model
+    // add all worldObjects
     const keys = Object.keys(debugGlobal.scene.worldObjects);
     for (var i = 0; i < keys.length; i++) {
         const option = document.createElement("option");
         option.value = keys[i];
         option.text = keys[i];
-        document.getElementById("controller_child_dropdown").add(option);
+        document.getElementById(dropdownId).add(option);
     }
 }
 

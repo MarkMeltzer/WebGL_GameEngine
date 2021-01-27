@@ -32,6 +32,10 @@
     background-color: rgb(102, 143, 255);
 }
 
+#object_render_settings_container {
+    background-color: rgb(255, 131, 131);
+}
+
 .settings_title {
     font-size: 1.3em; 
     margin: 0; 
