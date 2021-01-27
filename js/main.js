@@ -1,4 +1,5 @@
 debugGlobal = null;
+temp = 0;
 
 sceneDescriptions = [
     "scenes/scene1.json",
@@ -48,17 +49,17 @@ function setupSettings() {
     // shadow sliders
     document.getElementById("X_slider").oninput = function() {
         debugGlobal.renderEngine.scene.light[0] = this.value;
-        debugGlobal.scene.models["light"].position[0] = this.value;
+        debugGlobal.scene.worldObjects["light model"].position[0] = this.value;
         document.getElementById("X_value").innerHTML = this.value;
     }
     document.getElementById("Y_slider").oninput = function() {
         debugGlobal.renderEngine.scene.light[1] = this.value;
-        debugGlobal.scene.models["light"].position[1] = this.value;
+        debugGlobal.scene.worldObjects["light model"].position[1] = this.value;
         document.getElementById("Y_value").innerHTML = this.value;
     }
     document.getElementById("Z_slider").oninput = function() {
         debugGlobal.renderEngine.scene.light[2] = this.value;
-        debugGlobal.scene.models["light"].position[2] = this.value;
+        debugGlobal.scene.worldObjects["light model"].position[2] = this.value;
         document.getElementById("Z_value").innerHTML = this.value;
     }
     document.getElementById("light_fov_slider").oninput = function() {
@@ -152,7 +153,7 @@ function setupSettings() {
         if (this.value == "camera") {
             debugGlobal.controller.parent(debugGlobal.scene.camera)
         } else {
-            debugGlobal.controller.parent(debugGlobal.scene.models[this.value]);
+            debugGlobal.controller.parent(debugGlobal.scene.worldObjects[this.value]);
         }   
     }
 }
@@ -171,7 +172,7 @@ function populateObjectDropdown() {
     document.getElementById("controller_child_dropdown").add(option);
 
     // add all model
-    const keys = Object.keys(debugGlobal.scene.models);
+    const keys = Object.keys(debugGlobal.scene.worldObjects);
     for (var i = 0; i < keys.length; i++) {
         const option = document.createElement("option");
         option.value = keys[i];

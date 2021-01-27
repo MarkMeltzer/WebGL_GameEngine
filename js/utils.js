@@ -266,3 +266,45 @@ function isPowerOf2(value) {
     // source: https://webglfundamentals.org/webgl/lessons/webgl-3d-textures.html
     return (value & (value - 1)) == 0;
 }
+
+function getAABBVertsFromBounds(AABB) {
+    const vertices = [
+        AABB.minX, AABB.minY, AABB.minZ,
+        AABB.minX, AABB.minY, AABB.maxZ,
+
+        AABB.minX, AABB.minY, AABB.minZ,
+        AABB.minX, AABB.maxY, AABB.minZ,
+
+        AABB.minX, AABB.minY, AABB.minZ,
+        AABB.maxX, AABB.minY, AABB.minZ,
+
+        AABB.minX, AABB.maxY, AABB.minZ,
+        AABB.minX, AABB.maxY, AABB.maxZ,
+
+        AABB.minX, AABB.maxY, AABB.minZ,
+        AABB.maxX, AABB.maxY, AABB.minZ,
+
+        AABB.minX, AABB.maxY, AABB.maxZ,
+        AABB.maxX, AABB.maxY, AABB.maxZ,
+
+        AABB.minX, AABB.maxY, AABB.maxZ,
+        AABB.minX, AABB.minY, AABB.maxZ,
+
+        AABB.maxX, AABB.minY, AABB.maxZ,
+        AABB.minX, AABB.minY, AABB.maxZ,
+
+        AABB.maxX, AABB.minY, AABB.maxZ,
+        AABB.maxX, AABB.maxY, AABB.maxZ,
+
+        AABB.maxX, AABB.minY, AABB.maxZ,
+        AABB.maxX, AABB.minY, AABB.minZ,
+
+        AABB.maxX, AABB.maxY, AABB.minZ,
+        AABB.maxX, AABB.maxY, AABB.maxZ,
+
+        AABB.maxX, AABB.maxY, AABB.minZ,
+        AABB.maxX, AABB.minY, AABB.minZ
+    ];
+
+    return vertices;
+}

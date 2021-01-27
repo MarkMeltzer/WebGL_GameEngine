@@ -45,24 +45,26 @@ var RenderEngine = function(canvas, gl, opts) {
     this.scene = null;
 
     // create the default texture
-    this.defaultTextureBuffer = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, this.defaultTextureBuffer);
-    gl.texImage2D(
-        gl.TEXTURE_2D, 
-        0, 
-        gl.RGBA, 
-        1, 
-        1, 
-        0, 
-        gl.RGBA, 
-        gl.UNSIGNED_BYTE, 
-        new Uint8Array([0, 0, 255, 255,])
+    // TODO also create default buffers so new buffers won't be created
+    // for each object with default textures
+    this.defaultTextureData = new ImageData(
+        new Uint8ClampedArray([0, 0, 255, 255,]),
+        1,
+        1
     );
+    this.defaultMaterial = new Material(this.defaultTextureData);
+
 
     // create the default mesh
+    // TODO also create default buffers so new buffers won't be created
+    // for each object with default meshes
     this.defaultMeshData = createBox(2, 2, 2);
-    this.defaultMeshBuffers = this.createBuffersFromModelData(this.defaultMeshData);
-
+    this.defaultMesh = new Mesh(
+        this.defaultMeshData.vertexPositions,
+        this.defaultMeshData.vertexNormals,
+        this.defaultMeshData.vertexIndices,
+        this.defaultMeshData.textureCoords
+    );
 }
 
 RenderEngine.prototype.render = function(time) {
@@ -162,10 +164,16 @@ RenderEngine.prototype.drawShadowmap = function(time, frameBuffer) {
     **************************************************************************/
 
     // iterate over all models in the scene
-    for (let modelId in this.scene.models) {
-        const model = this.scene.models[modelId];
+    for (let id in this.scene.worldObjects) {
+        const worldObject = this.scene.worldObjects[id];
         
-        this.drawModel(model, time, this.depthMapShader, false, false);
+        if (!worldObject.model || 
+            !worldObject.model.mesh ||
+            !worldObject.model.renderSettings.castShadow) {
+            continue;
+        }
+
+        this.drawModel(worldObject, time, this.depthMapShader, false, false);
     }
 }
 
@@ -268,14 +276,22 @@ RenderEngine.prototype.drawScene = function(camera, time) {
     **************************************************************************/
 
     // iterate over all models in the scene
-    for (let modelId in this.scene.models) {
+    for (let id in this.scene.worldObjects) {
         gl.useProgram(this.mainShader.program);
-        const model = this.scene.models[modelId];
+        const worldObject = this.scene.worldObjects[id];
         
-        this.drawModel(model, time, this.mainShader, true, true);
+        if (!worldObject.model || 
+            !worldObject.model.mesh ||
+            !worldObject.model.renderSettings.render) {
+            continue;
+        }
+
+        this.drawModel(worldObject, time, this.mainShader, true, true);
 
         // draw the AABBs
-        this.drawAABBs(model, cameraMatrix, projectionMatrix);
+        if (worldObject.model.renderSettings.renderAABB) {
+            this.drawAABBs(worldObject, cameraMatrix, projectionMatrix);
+        }
     }
 }
 
@@ -284,14 +300,17 @@ RenderEngine.prototype.drawScene = function(camera, time) {
  * assumes other shader variables such as camera and projection matrix to be
  * set.
  * 
- * @param {model} model The model to draw.
+ * @param {model} worldObject The worldObject containing the model.
  * @param {number} time Time sinds starting the demo in seconds. Used for animations.
  * @param {shader} shader The shader to draw the model with.
  * @param {bool} normals Wether to provide normals to the shader.
  * @param {bool} textures Wether to provide textures to the shader.
  */
-RenderEngine.prototype.drawModel = function(model, time, shader, normals, textures) {
+RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, textures) {
     const gl = this.gl;
+  
+    // for readability of the code
+    const model = worldObject.model;
 
     // use sinus and cosinus for some simple animation
     const sinAnim = Math.sin(time) / 2 + 0.5;
@@ -304,11 +323,11 @@ RenderEngine.prototype.drawModel = function(model, time, shader, normals, textur
     mat4.translate(
         modelMatrix,
         modelMatrix,
-        model.position
+        worldObject.position
     );
 
     // animate model translation, if applicable
-    if (model.animateTrans) {
+    if (model.animation.animateTrans) {
         mat4.translate(
             modelMatrix,
             modelMatrix,
@@ -317,12 +336,12 @@ RenderEngine.prototype.drawModel = function(model, time, shader, normals, textur
     }
 
     // animate model rotation, if applicable
-    if (model.animateRot) {
+    if (model.animation.animateRot) {
         mat4.rotate(
             modelMatrix,
             modelMatrix,
-            time * model.rotSpeedFactor,
-            model.rotAxis
+            time * model.animation.rotSpeedFactor,
+            model.animation.rotAxis
             );
     }
 
@@ -391,7 +410,7 @@ RenderEngine.prototype.drawModel = function(model, time, shader, normals, textur
             const normalize = false;
             const stride = 0;
             const offset = 0;
-            gl.bindBuffer(gl.ARRAY_BUFFER, model.buffers.textureCoord);
+            gl.bindBuffer(gl.ARRAY_BUFFER, model.buffers.texCoord);
             gl.vertexAttribPointer(
                 shader.attribLocations.aTextureCoord,
                 numComponents,
@@ -412,28 +431,22 @@ RenderEngine.prototype.drawModel = function(model, time, shader, normals, textur
         );
     }
 
-    // bind indices for rendering (move this down)
+    // bind indices for rendering
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.buffers.index);
 
     // issue the draw call for the current object
     {
         const offset = 0;
         const type = gl.UNSIGNED_SHORT;
-        const vertexCount = model.vertexData.vertexIndices.length;
+        const vertexCount = model.mesh.getNumVerts();
         gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
     }
 }
 
-RenderEngine.prototype.drawAABBs = function(model, cameraMatrix, projectionMatrix) {
+RenderEngine.prototype.drawAABBs = function(worldObject, cameraMatrix, projectionMatrix) {
     const gl = this.gl;
 
-    if (model.AABB) {
-        // if the model doesn't have buffers for its AABB yet, create some
-        if (!model.buffers.AABB) {
-            const AABBVertexBuffer = this.createAABBBuffer(model.AABB);
-            model.buffers.AABB = AABBVertexBuffer;
-        }
-
+    if (worldObject.model.modelSpaceAABB && worldObject.model.buffers.AABBVerts) {
         // use the AABB rendering shader for rendering
         gl.useProgram(this.AABBShader.program);
 
@@ -444,7 +457,7 @@ RenderEngine.prototype.drawAABBs = function(model, cameraMatrix, projectionMatri
             const normalize = false;
             const stride = 0;
             const offset = 0;
-            gl.bindBuffer(gl.ARRAY_BUFFER, model.buffers.AABB);
+            gl.bindBuffer(gl.ARRAY_BUFFER, worldObject.model.buffers.AABBVerts);
             gl.vertexAttribPointer(
                 this.AABBShader.attribLocations.aVertexPosition,
                 numComponents,
@@ -473,7 +486,7 @@ RenderEngine.prototype.drawAABBs = function(model, cameraMatrix, projectionMatri
         mat4.translate(
             AABBModelMatrix,
             AABBModelMatrix,
-            model.position
+            worldObject.position
         );
         gl.uniformMatrix4fv(
             this.AABBShader.uniformLocations.uModelViewMatrix,
@@ -554,170 +567,28 @@ RenderEngine.prototype.initDepthmap = function() {
 
 
 RenderEngine.prototype.setScene = function(scene) {
-    const gl = this.gl;
+    for (let id in scene.worldObjects) {
+        const object = scene.worldObjects[id];
 
-    for (let modelId in scene.models) {
-        const model = scene.models[modelId];
-
-        // create and save the vertex buffers
-        if (model.vertexData) {
-            model.buffers = this.createBuffersFromModelData(model.vertexData);
+        // create mesh buffers
+        if (object.model.mesh) {
+            object.model.setMeshBuffers();
+            object.model.setAABBBuffer();
         } else {
-            model.vertexData = this.defaultMeshData;
-            model.buffers = this.defaultMeshBuffers;
+            // set the default mesh and create buffers for it
+            object.model.mesh = this.defaultMesh;
+            object.model.setMeshBuffers();
+            object.model.setAABBBuffer();
         }
 
-        // fill texture buffer with default texture (single pixel color)
-        model.buffers.texture = this.defaultTextureBuffer;
+        // create texture buffer
+        if (object.model.material) {
+            object.model.setTextureBuffer();
+        } else {
+            object.model.material = this.defaultMaterial;
+            object.model.setTextureBuffer();
+        }
     }
 
     this.scene = scene;
-}
-
-RenderEngine.prototype.createBuffersFromModelData = function(modelData) {
-    const gl = this.gl;
-    
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(
-        gl.ARRAY_BUFFER,
-        new Float32Array(modelData.vertexPositions),
-        gl.STATIC_DRAW
-    );
-    
-    const normalBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-    gl.bufferData(
-        gl.ARRAY_BUFFER,
-        new Float32Array(modelData.vertexNormals),
-        gl.STATIC_DRAW
-    );
-
-    const textureCoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
-    gl.bufferData(
-        gl.ARRAY_BUFFER,
-        new Float32Array(modelData.textureCoords),
-        gl.STATIC_DRAW
-    );
-
-    const indexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gl.bufferData(
-        gl.ELEMENT_ARRAY_BUFFER,
-        new Uint16Array(modelData.vertexIndices),
-        gl.STATIC_DRAW
-    );
-
-    return {
-        position: positionBuffer,
-        normal: normalBuffer,
-        textureCoord: textureCoordBuffer,
-        index: indexBuffer
-    };
-}
-
-RenderEngine.prototype.setTexture = function(modelId, image) {
-    const gl = this.gl;
-    
-    // Find the model corresponding to the modelId
-    const model = this.scene.models[modelId];
-    if (!model) {
-        console.log("Model not found during call to setTexture. ModelId: " + modelId);
-        return null;
-    }
-
-    // create a new buffer and set the new texture
-    const textureBuffer = gl.createTexture();
-    model.buffers.texture = textureBuffer;
-    gl.bindTexture(gl.TEXTURE_2D, model.buffers.texture);
-    gl.texImage2D(
-        gl.TEXTURE_2D,
-        0,
-        gl.RGBA,
-        gl.RGBA,
-        gl.UNSIGNED_BYTE,
-        image
-    );
-    
-    // No power of 2? No mipmap for you!
-    if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
-        gl.generateMipmap(gl.TEXTURE_2D);
-    } else {
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    }
-}
-
-RenderEngine.prototype.setMesh = function(modelId, meshData) {
-    const gl = this.gl;
-    
-    // Find the model corresponding to the modelId
-    const model = this.scene.models[modelId];
-    if (!model) {
-        console.log("Model not found during call to setMesh. ModelId: " + modelId);
-        return null;
-    }
-    
-    // set the new mesh
-    model.vertexData = meshData;
-    model.numVertices = meshData.vertexIndices.length;
-    
-    // fill the buffers with the new data
-    const tempTextureBuffer = model.buffers.texture;
-    model.buffers = this.createBuffersFromModelData(meshData);
-    model.buffers.texture = tempTextureBuffer;
-}
-
-RenderEngine.prototype.createAABBBuffer = function(AABB) {
-    const gl = this.gl;
-
-    var positions = [
-        AABB.minX, AABB.minY, AABB.minZ,
-        AABB.minX, AABB.minY, AABB.maxZ,
-
-        AABB.minX, AABB.minY, AABB.minZ,
-        AABB.minX, AABB.maxY, AABB.minZ,
-
-        AABB.minX, AABB.minY, AABB.minZ,
-        AABB.maxX, AABB.minY, AABB.minZ,
-
-        AABB.minX, AABB.maxY, AABB.minZ,
-        AABB.minX, AABB.maxY, AABB.maxZ,
-
-        AABB.minX, AABB.maxY, AABB.minZ,
-        AABB.maxX, AABB.maxY, AABB.minZ,
-
-        AABB.minX, AABB.maxY, AABB.maxZ,
-        AABB.maxX, AABB.maxY, AABB.maxZ,
-
-        AABB.minX, AABB.maxY, AABB.maxZ,
-        AABB.minX, AABB.minY, AABB.maxZ,
-
-        AABB.maxX, AABB.minY, AABB.maxZ,
-        AABB.minX, AABB.minY, AABB.maxZ,
-
-        AABB.maxX, AABB.minY, AABB.maxZ,
-        AABB.maxX, AABB.maxY, AABB.maxZ,
-
-        AABB.maxX, AABB.minY, AABB.maxZ,
-        AABB.maxX, AABB.minY, AABB.minZ,
-
-        AABB.maxX, AABB.maxY, AABB.minZ,
-        AABB.maxX, AABB.maxY, AABB.maxZ,
-
-        AABB.maxX, AABB.maxY, AABB.minZ,
-        AABB.maxX, AABB.minY, AABB.minZ
-    ];
-
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(
-        gl.ARRAY_BUFFER,
-        new Float32Array(positions),
-        gl.STATIC_DRAW
-    );
-
-    return positionBuffer;
 }

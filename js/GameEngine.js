@@ -37,15 +37,15 @@ GameEngine.prototype.loadScene = function(sceneJson) {
     this.renderEngine.setScene(this.scene);
 
     // start loading the textures and meshes
-    for (let modelId in this.scene.models) {
-        const model = this.scene.models[modelId];
+    for (let id in this.scene.worldObjects) {
+        const object = this.scene.worldObjects[id];
 
-        if (model.texture) {
-            this.loadTextureImage(modelId, model.texture);
+        if (object.model.texturePath) {
+            this.loadTextureImage(object.model, object.model.texturePath);
         }
 
-        if (model.type == "obj" && model.filePath) {
-            this.loadOBJFile(modelId, model.filePath);
+        if (object.type == "obj" && object.model.filePath) {
+            this.loadOBJFile(object.model, object.model.filePath);
         }
     }
     
@@ -62,45 +62,64 @@ GameEngine.prototype.loadScene = function(sceneJson) {
  * @return {Scene} the Scene object.
  */
 GameEngine.prototype.parseSceneJSON = function(jsonObj) {
-    var modelDict = {};
+    var objectDict = {};
 
-    for (var i = 0; i < jsonObj.objects.length; i++) {
-        const model = jsonObj.objects[i];
+    for (var i = 0; i < jsonObj.worldObjects.length; i++) {
+        const objectDescription = jsonObj.worldObjects[i];
 
-        var meshData;
-        if (model.type == "box") {
-            meshData = createBox(
-                model.sizes[0],
-                model.sizes[1],
-                model.sizes[2]
+        const worldObject = new WorldObject(
+            objectDescription.id,
+            objectDescription.type,
+            objectDescription.position,
+            [0, 0, 0], // TODO actually add support for rotation
+        )
+
+        if (objectDescription.type == "box") {
+            const meshData = createBox(
+                objectDescription.sizes[0],
+                objectDescription.sizes[1],
+                objectDescription.sizes[2]
             );
+
+            var model = new Model(
+                this.gl,
+                null,
+                objectDescription.texture,
+                true,
+                objectDescription.rotAxis,
+                objectDescription.animateTrans,
+                objectDescription.animateRot,
+                objectDescription.rotSpeedFactor
+            );
+
+            const mesh = new Mesh(
+                meshData.vertexPositions,
+                meshData.vertexNormals,
+                meshData.vertexIndices,
+                meshData.textureCoords
+            );
+
+            model.mesh = mesh;
         } else {
-            meshData = null;
+            var model = new Model(
+                this.gl,
+                objectDescription.file_path,
+                objectDescription.texture,
+                true,
+                objectDescription.rotAxis,
+                objectDescription.animateTrans,
+                objectDescription.animateRot,
+                objectDescription.rotSpeedFactor
+            )
         }
 
-        const object = {
-            type: model.type,
-            filePath: model.file_path,
-            position: model.position,
-            texture: model.texture,
-            vertexData: meshData,
-            animateTrans: model.animateTrans,
-            animateRot: model.animateRot,
-            rotSpeedFactor: model.rotSpeedFactor,
-            rotAxis: model.rotAxis,
-            AABB: null
-        };
+        worldObject.model = model;
 
-        // create AABB
-        if (object.vertexData) {
-            object.AABB = this.createAABB(object);
-        }
-
-        modelDict[model.id] = object;
+        objectDict[worldObject.id] = worldObject;
     }
 
     const scene = new Scene();
-    scene.models = modelDict;
+    scene.worldObjects = objectDict;
 
     this.controller = new Controller()
 
@@ -247,10 +266,11 @@ GameEngine.prototype.handleKeyboardInput = function() {
  * @param {string} modelId the Id of the model the texture belongs to.
  * @param {string} url the url to load the image from.
  */
-GameEngine.prototype.loadTextureImage = function(modelId, url) {
+GameEngine.prototype.loadTextureImage = function(model, url) {
     const image = new Image();
     image.onload = () => {
-        this.renderEngine.setTexture(modelId, image);
+        model.material = new Material(image);
+        model.setTextureBuffer();
     }
     image.crossOrigin = "";
     image.src = url;
@@ -262,58 +282,17 @@ GameEngine.prototype.loadTextureImage = function(modelId, url) {
  * @param {string} modelId the Id of the model the mesh belongs to.
  * @param {string} url the url to load the .obj file from.
  */
-GameEngine.prototype.loadOBJFile = function(modelId, url) {
+GameEngine.prototype.loadOBJFile = function(model, url) {
     loadOBJ(url, (OBJFile) => {
-        const mesh = parseOBJFile(OBJFile);
-        this.renderEngine.setMesh(modelId, mesh);
-        this.scene.models[modelId].AABB = this.createAABB(this.scene.models[modelId]);
+        const meshData = parseOBJFile(OBJFile);
+        const mesh = new Mesh(
+            meshData.vertexPositions,
+            meshData.vertexNormals,
+            meshData.vertexIndices,
+            meshData.textureCoords
+        );
+        model.mesh = mesh;
+        model.setMeshBuffers();
+        model.setAABBBuffer();
     });
-}
-
-/**
- * Creates Axis-aligned bounding box for a given worldObject.
- * 
- * @param {object} worldObject the object for which to create an AABB
- * @return {dictionary} an dictionary containing the bounds of a AABB
- */
-GameEngine.prototype.createAABB = function(worldObject) {
-    var minX = Infinity;
-    var maxX = -Infinity;
-    var minY = Infinity;
-    var maxY = -Infinity;
-    var minZ = Infinity;
-    var maxZ = -Infinity;
-    
-    for (var i = 0; i < worldObject.vertexData.vertexPositions.length; i += 3) {
-        const x = worldObject.vertexData.vertexPositions[i];
-        const y = worldObject.vertexData.vertexPositions[i+1];
-        const z = worldObject.vertexData.vertexPositions[i+2];
-
-        if (x < minX) {
-            minX = x;
-        } else if (x > maxX) {
-            maxX = x;
-        }
-
-        if (y < minY) {
-            minY = y;
-        } else if (y > maxY) {
-            maxY = y;
-        }
-
-        if (z < minZ) {
-            minZ = z;
-        } else if (z > maxZ) {
-            maxZ = z;
-        }
-    }
-
-    return {
-        "minX" : minX,
-        "maxX" : maxX,
-        "minY" : minY,
-        "maxY" : maxY,
-        "minZ" : minZ,
-        "maxZ" : maxZ,
-    }
 }
