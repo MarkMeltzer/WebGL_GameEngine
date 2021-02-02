@@ -156,8 +156,10 @@ const AABBVsSource = `
 `;
 
 const AABBFsSource = `
+    uniform mediump vec3 AABBRenderColor;
+
     void main() {
-        gl_FragColor = vec4(1, 0, 0, 1);
+        gl_FragColor = vec4(AABBRenderColor, 1);
     }
 `;
 
@@ -168,5 +170,6 @@ const AABBAttributeNames = [
 const AABBUniformNames = [
     "uProjectionMatrix",
     "uCameraMatrix",
-    "uModelViewMatrix"
+    "uModelViewMatrix",
+    "AABBRenderColor"
 ];

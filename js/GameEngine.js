@@ -21,6 +21,8 @@ var GameEngine = function(canvas, gl) {
         clearColor: [0.75, 0.88, 0.92, 1.0]
     };
     this.renderEngine = new RenderEngine(canvas, gl, opts);
+
+    this.physicsEngine = new PhysicsEngine();
 }
 
 /**
@@ -48,6 +50,9 @@ GameEngine.prototype.loadScene = function(sceneJson) {
             this.loadOBJFile(object.model, object.model.filePath);
         }
     }
+
+    // set the scene for the physicsEngine
+    this.physicsEngine.setScene(this.scene);
     
     // set up input handeling
     this.mouseChange = [0, 0];
@@ -153,6 +158,9 @@ GameEngine.prototype.startGameLoop = function() {
         self.handleKeyboardInput();
         self.handleMouseInput();
         self.controller.update();
+
+        // update the locations of all objects
+        self.physicsEngine.updateScene();
 
         // draw the scene
         self.renderEngine.render(self.time);

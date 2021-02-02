@@ -1,4 +1,5 @@
 debugGlobal = null;
+logCounter = 0;
 
 sceneDescriptions = [
     "scenes/scene1.json",
@@ -103,7 +104,8 @@ function setupSettings() {
     document.getElementById("scene_dropdown").onchange = function() {
         loadJSON(this.value, function(sceneJson) {
             debugGlobal.loadScene(sceneJson);
-            populateObjectDropdown();
+            populateObjectDropdown("controller_child_dropdown", true);
+            populateObjectDropdown("object_dropdown");
         })
     }
 
@@ -111,7 +113,8 @@ function setupSettings() {
     document.getElementById("reload_button").onclick = function() {
         loadJSON(document.getElementById("scene_dropdown").value, function(sceneJson) {
             debugGlobal.loadScene(sceneJson);
-            populateObjectDropdown();
+            populateObjectDropdown("controller_child_dropdown", true);
+            populateObjectDropdown("object_dropdown");
         })
     }
 

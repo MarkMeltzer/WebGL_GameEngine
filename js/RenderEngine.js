@@ -480,7 +480,18 @@ RenderEngine.prototype.drawAABBs = function(worldObject, cameraMatrix, projectio
             false,
             cameraMatrix
         );
-        
+
+        // set the color of the wireframe of the AABB
+        var renderColor = [0, 0, 0];
+        if (worldObject.isColliding) {
+            renderColor = [1, 0, 0];
+        } else {
+            renderColor = [0, 0, 1];
+        }
+        gl.uniform3fv(
+            this.AABBShader.uniformLocations.AABBRenderColor, 
+            renderColor
+        );
 
         const AABBModelMatrix = mat4.create()
         mat4.translate(
@@ -564,7 +575,6 @@ RenderEngine.prototype.initDepthmap = function() {
     this.depthFrameBuffer = depthFrameBuffer;
     this.shadowmap = depthTexture;
 }
-
 
 RenderEngine.prototype.setScene = function(scene) {
     for (let id in scene.worldObjects) {

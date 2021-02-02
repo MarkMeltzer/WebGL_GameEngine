@@ -3,19 +3,21 @@ var WorldObject = function(
     type,
     position,
     rotation,
-    hasCollision = false,
+    hasCollision = true,
     hasGravity = false
 ) {
     this.id = id;
     this.type = type;
 
+    // state
     this.position = position;
     this.velocity = [0, 0, 0];
     this.rotation = rotation;
-    
+    this.isColliding = false;
+   
+    // properties
     this.hasCollision = hasCollision;
     this.hasGravity = hasGravity;
-    this.modelSpaceAABB = null;
 
     this.model = null;
 }
@@ -26,7 +28,7 @@ var WorldObject = function(
  * @return {object} the AABB object with world space bounds.
  */
 WorldObject.prototype.getWorldSpaceAABB = function() {
-    if (!this.modelSpaceAABB) {
+    if (!this.model.modelSpaceAABB) {
         console.log("Error while getting worldspace AABB for model " + this.id +
                     ": No modelspace AABB set.");
         return;
