@@ -42,12 +42,16 @@ GameEngine.prototype.loadScene = function(sceneJson) {
     for (let id in this.scene.worldObjects) {
         const object = this.scene.worldObjects[id];
 
+        if (!object.model) {
+            continue;
+        }
+
         if (object.model.texturePath) {
             this.loadTextureImage(object.model, object.model.texturePath);
         }
 
         if (object.type == "obj" && object.model.filePath) {
-            this.loadOBJFile(object.model, object.model.filePath);
+            this.loadOBJFile(object, object.model.filePath);
         }
     }
 
@@ -105,6 +109,17 @@ GameEngine.prototype.parseSceneJSON = function(jsonObj) {
             );
 
             model.mesh = mesh;
+
+            worldObject.model = model;
+            worldObject.AABB = new AABB(
+                this.gl,
+                objectDescription.sizes[0] / -2,
+                objectDescription.sizes[0] / 2,
+                objectDescription.sizes[1] / -2,
+                objectDescription.sizes[1] / 2,
+                objectDescription.sizes[2] / -2,
+                objectDescription.sizes[2] / 2,
+            )
         } else {
             var model = new Model(
                 this.gl,
@@ -116,9 +131,10 @@ GameEngine.prototype.parseSceneJSON = function(jsonObj) {
                 objectDescription.animateRot,
                 objectDescription.rotSpeedFactor
             )
-        }
 
-        worldObject.model = model;
+            worldObject.model = model;
+            worldObject.AABB = new AABB(this.gl);
+        }
 
         objectDict[worldObject.id] = worldObject;
     }
@@ -135,7 +151,9 @@ GameEngine.prototype.parseSceneJSON = function(jsonObj) {
         0.1,
         100
     );
+    cam.AABB = new AABB(this.gl, -1, 1, -2.5, 2.5, -1, 1);
     scene.camera = cam;
+    scene.worldObjects["camera"] = cam;
     this.controller.parent(cam);
     
     return scene;
@@ -157,10 +175,12 @@ GameEngine.prototype.startGameLoop = function() {
         // handle input
         self.handleKeyboardInput();
         self.handleMouseInput();
-        self.controller.update();
+        // self.controller.update();
+        // self.controller.updateChild();
 
         // update the locations of all objects
-        self.physicsEngine.updateScene();
+        // self.physicsEngine.updateScene();
+        self.physicsEngine.update();
 
         // draw the scene
         self.renderEngine.render(self.time);
@@ -290,7 +310,7 @@ GameEngine.prototype.loadTextureImage = function(model, url) {
  * @param {string} modelId the Id of the model the mesh belongs to.
  * @param {string} url the url to load the .obj file from.
  */
-GameEngine.prototype.loadOBJFile = function(model, url) {
+GameEngine.prototype.loadOBJFile = function(worldObject, url) {
     loadOBJ(url, (OBJFile) => {
         const meshData = parseOBJFile(OBJFile);
         const mesh = new Mesh(
@@ -299,8 +319,8 @@ GameEngine.prototype.loadOBJFile = function(model, url) {
             meshData.vertexIndices,
             meshData.textureCoords
         );
-        model.mesh = mesh;
-        model.setMeshBuffers();
-        model.setAABBBuffer();
+        worldObject.model.mesh = mesh;
+        worldObject.model.setMeshBuffers();
+        worldObject.AABB.setBounds(worldObject.model.getModelAABB());
     });
 }

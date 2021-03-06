@@ -16,7 +16,7 @@ var Model = function(
     this.texturePath = texturePath;
     this.material = null;
 
-    this.modelSpaceAABB = null;
+    // this.modelSpaceAABB = null;
 
     this.buffers = {
         index: null,
@@ -24,13 +24,12 @@ var Model = function(
         position: null,
         texCoord: null,
         texture: null,
-        AABBVerts: null
+        // AABBVerts: null
     };
 
     this.renderSettings = {
         render: true,
-        castShadow: castShadow,
-        renderAABB: false
+        castShadow: castShadow
     };
 
     this.animation = {
@@ -123,42 +122,42 @@ Model.prototype.setTextureBuffer = function() {
     }
 }
 
-Model.prototype.setAABBBuffer = function() {
-    const gl = this.gl;
+// Model.prototype.setAABBBuffer = function() {
+//     const gl = this.gl;
 
-    // create the modelspace AABB bounds
-    this.createModelSpaceAABB();
+//     // create the modelspace AABB bounds
+//     this.createModelSpaceAABB();
 
-    // convert the bounds into vertices for drawing
-    const AABBVerts = getAABBVertsFromBounds(this.modelSpaceAABB);
+//     // convert the bounds into vertices for drawing
+//     const AABBVerts = getAABBVertsFromBounds(this.modelSpaceAABB);
 
-    // fill the buffer with the vertices
-    if (!this.buffers.AABBVerts) {
-        // if theres no buffer yet, create one.
-        const AABBBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, AABBBuffer);
-        gl.bufferData(
-            gl.ARRAY_BUFFER,
-            new Float32Array(AABBVerts),
-            gl.STATIC_DRAW
-        );
+//     // fill the buffer with the vertices
+//     if (!this.buffers.AABBVerts) {
+//         // if theres no buffer yet, create one.
+//         const AABBBuffer = gl.createBuffer();
+//         gl.bindBuffer(gl.ARRAY_BUFFER, AABBBuffer);
+//         gl.bufferData(
+//             gl.ARRAY_BUFFER,
+//             new Float32Array(AABBVerts),
+//             gl.STATIC_DRAW
+//         );
     
-        this.buffers.AABBVerts = AABBBuffer;
-    } else {
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.AABBVerts);
-        gl.bufferSubData(
-            gl.ARRAY_BUFFER,
-            0,
-            new Float32Array(AABBVerts)
-        );
-    }
-}
+//         this.buffers.AABBVerts = AABBBuffer;
+//     } else {
+//         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.AABBVerts);
+//         gl.bufferSubData(
+//             gl.ARRAY_BUFFER,
+//             0,
+//             new Float32Array(AABBVerts)
+//         );
+//     }
+// }
 
 /**
  * Creates Axis-aligned bounding box from the mesh of the current mesh in
  * model space.
  */
-Model.prototype.createModelSpaceAABB = function() {
+Model.prototype.getModelAABB = function() {
     if (!this.mesh) {
         console.log("Error while creating AABB for model: No" + 
                     " mesh set.")
@@ -196,7 +195,7 @@ Model.prototype.createModelSpaceAABB = function() {
         }
     }
 
-    this.modelSpaceAABB = {
+    return {
         "minX" : minX,
         "maxX" : maxX,
         "minY" : minY,

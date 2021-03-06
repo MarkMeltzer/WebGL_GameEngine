@@ -37,8 +37,8 @@ function demo(sceneJson) {
     }, 100);
 
     window.setInterval( () => {
-        document.getElementById("debug_output").innerHTML = debugGlobal.controller.position;
-    }, 1000);
+        document.getElementById("debug_output").innerHTML = debugGlobal.scene.camera.airborne;
+    }, 100);
 
     setupSettings();
 

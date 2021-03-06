@@ -289,7 +289,7 @@ RenderEngine.prototype.drawScene = function(camera, time) {
         this.drawModel(worldObject, time, this.mainShader, true, true);
 
         // draw the AABBs
-        if (worldObject.model.renderSettings.renderAABB) {
+        if (worldObject.AABB.render) {
             this.drawAABBs(worldObject, cameraMatrix, projectionMatrix);
         }
     }
@@ -446,7 +446,7 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
 RenderEngine.prototype.drawAABBs = function(worldObject, cameraMatrix, projectionMatrix) {
     const gl = this.gl;
 
-    if (worldObject.model.modelSpaceAABB && worldObject.model.buffers.AABBVerts) {
+    if (worldObject.AABB && worldObject.AABB.renderBuffer) {
         // use the AABB rendering shader for rendering
         gl.useProgram(this.AABBShader.program);
 
@@ -457,7 +457,7 @@ RenderEngine.prototype.drawAABBs = function(worldObject, cameraMatrix, projectio
             const normalize = false;
             const stride = 0;
             const offset = 0;
-            gl.bindBuffer(gl.ARRAY_BUFFER, worldObject.model.buffers.AABBVerts);
+            gl.bindBuffer(gl.ARRAY_BUFFER, worldObject.AABB.renderBuffer);
             gl.vertexAttribPointer(
                 this.AABBShader.attribLocations.aVertexPosition,
                 numComponents,
@@ -580,15 +580,21 @@ RenderEngine.prototype.setScene = function(scene) {
     for (let id in scene.worldObjects) {
         const object = scene.worldObjects[id];
 
+        if (object.AABB) {
+            object.AABB.createRenderBuffer();
+        }
+
+        if (!object.model) {
+            continue;
+        }
+
         // create mesh buffers
-        if (object.model.mesh) {
+        if (object.model.mesh) {    
             object.model.setMeshBuffers();
-            object.model.setAABBBuffer();
         } else {
             // set the default mesh and create buffers for it
             object.model.mesh = this.defaultMesh;
             object.model.setMeshBuffers();
-            object.model.setAABBBuffer();
         }
 
         // create texture buffer
