@@ -126,9 +126,9 @@ function setupSettings() {
     // flying checkbox
     document.getElementById("flying_checkbox").onclick = function() {
         if (this.checked) {
-            debugGlobal.controller.startFlying();
+            debugGlobal.controller.child.flying = true;
         } else {
-            debugGlobal.controller.stopFlying();
+            debugGlobal.controller.child.flying = false;
         }
     }
 
@@ -144,14 +144,6 @@ function setupSettings() {
     document.getElementById("jump_height_slider").oninput = function() {
         debugGlobal.controller.jumpHeight = parseInt(this.value);
         document.getElementById("jump_height_value").innerHTML = this.value;
-    }
-    document.getElementById("gravity_slider").oninput = function() {
-        debugGlobal.controller.gravity = parseFloat(this.value);
-        document.getElementById("gravity_value").innerHTML = this.value;
-    }
-    document.getElementById("friction_slider").oninput = function() {
-        debugGlobal.controller.frictionFactor = parseFloat(this.value);
-        document.getElementById("friction_value").innerHTML = this.value;
     }
 
     // controller child dropdown
@@ -200,9 +192,9 @@ function setupSettings() {
             document.getElementById("object_dropdown").value
         ];
         if (this.checked) {
-            worldObject.model.renderSettings.renderAABB = true;
+            worldObject.AABB.render = true;
         } else {
-            worldObject.model.renderSettings.renderAABB = false;
+            worldObject.AABB.render = false;
         }
     }
 }
