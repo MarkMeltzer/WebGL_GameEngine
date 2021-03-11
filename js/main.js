@@ -46,6 +46,11 @@ function demo(sceneJson) {
 }
 
 function setupSettings() {
+    // set up tabs
+    currentPanel = null;
+    currentButton = null;
+    document.getElementById("shadow_settings_button").click();
+
     // shadow sliders
     document.getElementById("X_slider").oninput = function() {
         debugGlobal.renderEngine.scene.light[0] = this.value;
@@ -225,6 +230,32 @@ function populateObjectDropdown(dropdownId, addCamera=false) {
         option.text = keys[i];
         document.getElementById(dropdownId).add(option);
     }
+}
+
+function openPanel(setting) {
+    const panel = document.getElementById(setting + "_container");
+
+    // hide current panel
+    if (currentPanel) {
+        currentPanel.style.display = "none";
+    }
+    currentPanel = panel;
+
+    // show the new panel
+    panel.style.display = "block";
+
+    // change old button
+    if (currentButton) {
+        currentButton.style.backgroundColor = "rgba(0, 0, 0, 0)";
+        currentButton.style.border = "0px";
+        currentButton.style.borderBottom = "2px solid rgb(192, 192, 192)";
+    }
+    currentButton = document.getElementById(setting + "_button");
+
+    // change the background color of new active button
+    currentButton.style.backgroundColor = getComputedStyle(currentPanel).getPropertyValue("background-color");
+    currentButton.style.border = "2px solid rgb(192, 192, 192)";
+    currentButton.style.borderBottom = "2px solid " + currentButton.style.backgroundColor;
 }
 
 onload = main;

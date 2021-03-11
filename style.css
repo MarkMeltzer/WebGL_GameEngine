@@ -1,3 +1,8 @@
+body {
+    background-color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 #canvas_container {
     position: relative;
     display: inline-block;
@@ -9,39 +14,58 @@
     top: 10px;
 }
 
-.settings_container {
-    vertical-align: top; 
+#all_settings {
     display: inline-block;
+    vertical-align: top;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.tab_button {
+    padding: 12px;
+    font-size: 1em;
+    background-color: rgba(0, 0, 0, 0);
+    border: none;
+    outline: none;
+    cursor: pointer;
+    border-bottom: 2px solid rgb(192, 192, 192);
+}
+
+.settings_container {
+    border: 2px solid rgb(192, 192, 192);
+    border-top: 0px;
+    vertical-align: top; 
+    display: none;
     background-color: rgb(190, 253, 255);
     padding: 5px;
+    height: 100%;
 }
 
 #shadow_settings_container {
-    background-color: rgb(190, 253, 255);
+    background-color: #C7CEEA;
 }
 
 #player_settings_container {
-    background-color: rgb(192, 255, 190);
+    background-color: #E2F0CB;
 }
 
 #scene_settings_container {
-    background-color: rgb(237, 190, 255);
+    background-color: #FFDAC1;
 }
 
 #controller_settings_container {
-    background-color: rgb(102, 143, 255);
+    background-color: #B5EAD7;
 }
 
 #object_render_settings_container {
-    background-color: rgb(255, 131, 131);
+    background-color: #FFB7B2;
 }
 
-.settings_title {
+/* .settings_title {
     font-size: 1.3em; 
     margin: 0; 
     background-color: rgba(0, 0, 0, 0.25);
     text-align: center;
-}
+} */
 
 .slider_container {
     display: inline-block;

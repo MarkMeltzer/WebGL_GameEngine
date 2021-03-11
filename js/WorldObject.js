@@ -34,15 +34,6 @@ class WorldObject {
         this.model = null;
         this.AABB = null;
     }
-
-    // setModel(model) {
-    //     this.model = model;
-        
-    //     if (model.mesh) {
-    //         this.AABB.setBounds(model.getModelAABB());
-    //     }
-    // }
-
     /**
      * Returns the Axis-aligned bounding box in world space.
      * 

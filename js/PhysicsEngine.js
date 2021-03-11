@@ -139,13 +139,6 @@ PhysicsEngine.prototype.updateDynamics = function() {
         if (!obj.flying){
             obj.velocity[1] -= this.gravity;
         }
-
-        // // add fake collision with the ground
-        // if (obj.position[1] <= this.floorHeight && !obj.flying) {
-        //     obj.position[1] = this.floorHeight;
-        //     obj.airborne = false;
-        //     obj.velocity[1] = 0;
-        // }
     }
 }
 
