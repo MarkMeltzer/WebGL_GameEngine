@@ -20,7 +20,8 @@
                 ><button id="player_settings_button" class="tab_button" onclick="openPanel('player_settings')">Player settings</button
                 ><button id="scene_settings_button" class="tab_button" onclick="openPanel('scene_settings')">Scene settings</button
                 ><button id="controller_settings_button" class="tab_button" onclick="openPanel('controller_settings')">Controller settings</button
-                ><button id="object_render_settings_button" class="tab_button" onclick="openPanel('object_render_settings')">Object settings</button>
+                ><button id="object_render_settings_button" class="tab_button" onclick="openPanel('object_render_settings')">Object settings</button
+                ><button id="physics_settings_button" class="tab_button" onclick="openPanel('physics_settings')">Physics settings</button>
             </div>
             <div id="shadow_settings_container" class="settings_container">
                 <div id="light_coordinates_container">
@@ -152,6 +153,22 @@
                 <div class="checkbox_container">
                     <p class="value_title">Render AABB:</p>
                     <input type="checkbox" id="AABB_checkbox" class="value">
+                </div>
+            </div>
+            <div id="physics_settings_container" class="settings_container">
+                <div id="gravity_container">
+                    <div class="slider_container">
+                        <p class="value_title">Gravity: </p>
+                        <p id="gravity_value" class="value">0.03</p>
+                        <input type="range" min="0" max="0.25" value="0.03" step="0.001" id="gravity_slider" class="input">
+                    </div>
+                </div>
+                <div id="friction_container">
+                    <div class="slider_container">
+                        <p class="value_title">Friction factor: </p>
+                        <p id="friction_value" class="value">0.5</p>
+                        <input type="range" min="0" max="1" value="0.5" step="0.01" id="friction_slider" class="input">
+                    </div>
                 </div>
             </div>
         </div>

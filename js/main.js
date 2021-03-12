@@ -197,6 +197,18 @@ function setupSettings() {
             worldObject.AABB.render = false;
         }
     }
+
+    // gravity slider
+    document.getElementById("gravity_slider").oninput = function() {
+        debugGlobal.physicsEngine.gravity = parseFloat(this.value);
+        document.getElementById("gravity_value").innerHTML = this.value;
+    }
+
+    // friction slider
+    document.getElementById("friction_slider").oninput = function() {
+        debugGlobal.physicsEngine.frictionFactor = parseFloat(this.value);
+        document.getElementById("friction_value").innerHTML = this.value;
+    }
 }
 
 function populateObjectDropdown(dropdownId, addCamera=false) {

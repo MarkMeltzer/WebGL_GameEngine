@@ -60,6 +60,10 @@ body {
     background-color: #FFB7B2;
 }
 
+#physics_settings_container {
+    background-color: #C5CB68;
+}
+
 .slider_container {
     display: inline-block;
     padding: 2px;
