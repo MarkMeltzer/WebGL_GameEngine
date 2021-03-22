@@ -1,4 +1,5 @@
 debugGlobal = null;
+debugGlobal2 = null;
 logCounter = 0;
 
 sceneDescriptions = [
@@ -33,11 +34,12 @@ function demo(sceneJson) {
     engine.startGameLoop();
 
     window.setInterval( () => {
-        document.getElementById("overlay_content").innerHTML = "fps: "  + (1 / engine.deltaTime).toFixed(2);
+        document.getElementById("fps").innerHTML = "fps: "  + (1 / engine.deltaTime).toFixed(2);
     }, 100);
 
     window.setInterval( () => {
-        document.getElementById("debug_output").innerHTML = debugGlobal.scene.camera.airborne;
+        document.getElementById("debug_output").innerHTML = (debugGlobal.lookingAtObj) ? debugGlobal.lookingAtObj.id : "None";
+        // document.getElementById("debug_output").innerHTML = debugGlobal2;
     }, 100);
 
     setupSettings();

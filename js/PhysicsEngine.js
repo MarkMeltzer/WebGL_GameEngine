@@ -12,7 +12,7 @@ PhysicsEngine.prototype.setScene = function(scene) {
     this.scene = scene;
 }
 
-PhysicsEngine.prototype.updateCollisions = function() {
+PhysicsEngine.prototype.updateCollisions = function(deltaTime) {
     // reset collision for all objects
     for (let id in this.scene.worldObjects) {
         this.scene.worldObjects[id].isColliding = false;
@@ -107,7 +107,7 @@ PhysicsEngine.prototype.checkCollision = function(object1, object2) {
     }
 }
 
-PhysicsEngine.prototype.updateDynamics = function() {
+PhysicsEngine.prototype.updateDynamics = function(deltaTime) {
     for (let id in this.scene.worldObjects) {
         const obj = this.scene.worldObjects[id];
 
@@ -142,7 +142,7 @@ PhysicsEngine.prototype.updateDynamics = function() {
     }
 }
 
-PhysicsEngine.prototype.update = function() {
-    this.updateDynamics();
-    this.updateCollisions();
+PhysicsEngine.prototype.update = function(deltaTime) {
+    this.updateDynamics(deltaTime);
+    this.updateCollisions(deltaTime);
 }

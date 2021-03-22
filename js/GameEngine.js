@@ -23,6 +23,9 @@ var GameEngine = function(canvas, gl) {
     this.renderEngine = new RenderEngine(canvas, gl, opts);
 
     this.physicsEngine = new PhysicsEngine();
+
+    this.lookingAtObj = null;
+    this.rayCastT = null;
 }
 
 /**
@@ -84,7 +87,7 @@ GameEngine.prototype.parseSceneJSON = function(jsonObj) {
         )
 
         if (objectDescription.type == "box") {
-            const meshData = createBox(
+            const meshData = createBoxMeshData(
                 objectDescription.sizes[0],
                 objectDescription.sizes[1],
                 objectDescription.sizes[2]
@@ -139,6 +142,12 @@ GameEngine.prototype.parseSceneJSON = function(jsonObj) {
         objectDict[worldObject.id] = worldObject;
     }
 
+    // add object to render at raycast intersection
+    const rayCastmodel = new Model(this.gl, null, null);
+    wO = new WorldObject("rayCastObj", "rayCastObj");
+    wO.model = rayCastmodel;
+    objectDict["rayCastObj"] = wO;
+
     const scene = new Scene();
     scene.worldObjects = objectDict;
 
@@ -175,12 +184,23 @@ GameEngine.prototype.startGameLoop = function() {
         // handle input
         self.handleKeyboardInput();
         self.handleMouseInput();
-        // self.controller.update();
-        // self.controller.updateChild();
 
         // update the locations of all objects
-        // self.physicsEngine.updateScene();
-        self.physicsEngine.update();
+        self.physicsEngine.update(this.deltaTime);
+
+        // raycast
+        self.castRay();
+        // update rayCast indicator position
+        vec3.scale(
+            self.scene.worldObjects["rayCastObj"].position,
+            self.controller.child.front,
+            self.rayCastT
+        );
+        vec3.add(
+            self.scene.worldObjects["rayCastObj"].position,
+            self.controller.child.position,
+            self.scene.worldObjects["rayCastObj"].position
+        );
 
         // draw the scene
         self.renderEngine.render(self.time);
@@ -323,4 +343,109 @@ GameEngine.prototype.loadOBJFile = function(worldObject, url) {
         worldObject.model.setMeshBuffers();
         worldObject.AABB.setBounds(worldObject.model.getModelAABB());
     });
+}
+
+GameEngine.prototype.castRay = function() {
+    // reset lookingAtObj
+    this.lookingAtObj = null;
+
+
+    // for each world object with an AABB, check for ray intersection and
+    // find the smallest distance
+    var minT = Number.MAX_VALUE;
+    var minObj = null;
+    for (let id in this.scene.worldObjects) {
+        const obj = this.scene.worldObjects[id];
+
+        if (!obj.AABB || obj.id == "camera") {
+            continue;
+        }
+    
+        debugGlobal2 = obj;
+        const t = this.rayAABBIntersect(this.controller.child.position, 
+                                        this.controller.child.front,
+                                        obj.getWorldSpaceAABBBounds());
+        if (t && t < minT) {
+            minT = t;
+            minObj = obj;
+        }
+    }
+
+    this.lookingAtObj = minObj;
+    this.rayCastT = minT;
+}
+
+GameEngine.prototype.rayAABBIntersect = function(rayO, rayD, AABB) {
+    // src: https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
+    var tMin = (AABB.minX - rayO[0]) / rayD[0];
+    var tMax = (AABB.maxX - rayO[0]) / rayD[0];
+
+    // ray has negative x-direction
+    var temp;
+    if (tMin > tMax) {
+        temp = tMin;
+        tMin = tMax;
+        tMax = temp;
+    }
+
+    var tMinY = (AABB.minY - rayO[1]) / rayD[1];
+    var tMaxY = (AABB.maxY - rayO[1]) / rayD[1];
+
+    // ray has negative y-direction
+    if (tMinY > tMaxY) {
+        temp = tMinY;
+        tMinY = tMaxY;
+        tMaxY = temp;
+    }
+
+    // ray misses on the X-Y axes
+    if (tMin > tMaxY || tMinY > tMax) {
+        return false;
+    }
+
+    // get the tMin that actually lies on the AABB, rather than the one that
+    // lies on the parallel plane
+    if (tMinY > tMin) {
+        tMin = tMinY;
+    }
+
+    // get the tMax that actually lies on the AABB, rather than the one that
+    // lies on the parallel plane
+    if (tMaxY < tMax) {
+        tMax = tMaxY;
+    }
+
+    var tMinZ = (AABB.minZ - rayO[2]) / rayD[2];
+    var tMaxZ = (AABB.maxZ - rayO[2]) / rayD[2];
+
+    // ray has negative z-direction
+    if (tMinZ > tMaxZ) {
+        temp = tMinZ;
+        tMinZ = tMaxZ;
+        tMaxZ = temp;
+    }
+
+    // ray misses on the Z axis
+    if (tMin > tMaxZ || tMinZ > tMax) {
+        return false;
+    }
+
+    // get the tMin that actually lies on the AABB, rather than the one that
+    // lies on the parallel plane
+    if (tMinZ > tMin) {
+        tMin = tMinZ;
+    }
+
+    // get the tMax that actually lies on the AABB, rather than the one that
+    // lies on the parallel plane
+    if (tMaxZ < tMax) {
+        tMax = tMaxZ;
+    }
+
+    // only look in the positive ray direction
+    if (tMin < 0) {
+        return false;
+    } else {
+        return tMin;
+    }
 }

@@ -29,7 +29,7 @@ function loadOBJ(path, callback) {
 }
 
 
-function createBox(width, height, depth) {
+function createBoxMeshData(width, height, depth) {
     const positions = [
         // Front face
         -width / 2, -height / 2,  depth / 2,

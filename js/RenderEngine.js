@@ -58,7 +58,7 @@ var RenderEngine = function(canvas, gl, opts) {
     // create the default mesh
     // TODO also create default buffers so new buffers won't be created
     // for each object with default meshes
-    this.defaultMeshData = createBox(2, 2, 2);
+    this.defaultMeshData = createBoxMeshData(1, 1, 1);
     this.defaultMesh = new Mesh(
         this.defaultMeshData.vertexPositions,
         this.defaultMeshData.vertexNormals,
@@ -289,7 +289,7 @@ RenderEngine.prototype.drawScene = function(camera, time) {
         this.drawModel(worldObject, time, this.mainShader, true, true);
 
         // draw the AABBs
-        if (worldObject.AABB.render) {
+        if (worldObject.AABB && worldObject.AABB.render) {
             this.drawAABBs(worldObject, cameraMatrix, projectionMatrix);
         }
     }

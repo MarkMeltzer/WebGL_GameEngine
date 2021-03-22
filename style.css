@@ -8,8 +8,21 @@ body {
     display: inline-block;
 }
 
-#overlay {
+.overlay {
     position: absolute;
+}
+
+#crosshair_overlay {
+    left: 50%;
+    top: 50%;
+    pointer-events: none;
+    color: rgba(255, 255, 255, 1);
+}
+
+#fps_overlay {
+    padding: 2px;
+    border: 1px solid rgba(0, 0, 0, 0.664);
+    background-color: rgba(255, 255, 255, 0.664);
     left: 10px;
     top: 10px;
 }
