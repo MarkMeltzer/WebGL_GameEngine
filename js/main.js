@@ -8,7 +8,7 @@ sceneDescriptions = [
 ];
 
 function main() {
-    loadJSON("scenes/scene1.json", demo);
+    loadJSON("scenes/scene1_v2.json", demo);
 }
 
 function demo(sceneJson) {
@@ -30,7 +30,8 @@ function demo(sceneJson) {
 
     let engine = new GameEngine(canvas, gl);
     debugGlobal = engine;
-    engine.loadScene(sceneJson);
+    engine.loadScene2(sceneJson);
+    engine.loadStateOutput = document.getElementById("debug_output");
     engine.startGameLoop();
 
     window.setInterval( () => {
@@ -38,8 +39,8 @@ function demo(sceneJson) {
     }, 100);
 
     window.setInterval( () => {
-        document.getElementById("debug_output").innerHTML = (debugGlobal.lookingAtObj) ? debugGlobal.lookingAtObj.id : "None";
-        // document.getElementById("debug_output").innerHTML = debugGlobal2;
+        // document.getElementById("debug_output").innerHTML = (debugGlobal.lookingAtObj) ? debugGlobal.lookingAtObj.id : "None";
+        document.getElementById("debug_output").innerHTML = engine.loadingState.current + " / " + engine.loadingState.total;
     }, 100);
 
     setupSettings();

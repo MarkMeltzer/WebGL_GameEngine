@@ -1,0 +1,77 @@
+{
+    "assets" :
+        {
+            "meshes" : [
+                {
+                    "id" : "sphere",
+                    "path" : "objs/sphere.obj"
+                },
+                {
+                    "id" : "clothsim",
+                    "path" : "objs/cloththing.obj"
+                }
+            ],
+            "textures" : [
+                {
+                    "id" : "colorTexture",
+                    "type" : "diffuse",
+                    "path" : "imgs/colors.png"
+                },
+                {
+                    "id" : "ijsbeerTexture",
+                    "type" : "diffuse",
+                    "path" : "imgs/ijsbeer.jpg"
+                }
+            ],
+            "materials" : [
+                {
+                    "id" : "colorMat",
+                    "diffuseTexture" : "colorTexture"
+                },
+                {
+                    "id" : "ijsbeerMat",
+                    "diffuseTexture" : "ijsbeerTexture"
+                }
+            ],
+            "models" : [
+                {
+                    "id" : "sphere",
+                    "mesh" : "sphere",
+                    "material" : "colorMat",
+                    "render" : true,
+                    "castShadow" : true
+                },
+                {
+                    "id" : "clothsim",
+                    "mesh" : "clothsim",
+                    "animateRot" : true,
+                    "rotAxis" : [1,0,0],
+                    "rotSpeedFactor": 1,
+                    "animateTrans" : false
+                }
+            ]
+        },
+    "worldObjects" : [
+        {
+            "id" : "sphereObject",
+            "type" : "model",
+            "position" : [-10,1,5],
+            "model" : "sphere"
+        },
+        {
+            "id" : "clothsimObject",
+            "type" : "model",
+            "position" : [0, 15, 0],
+            "hasGravity" : true,
+            "model" : "clothsim",
+            "AABB" : {
+                "minX" : -1,
+                "maxX" : 1,
+                "minY" : -1,
+                "maxY" : 1,
+                "minZ" : -1,
+                "maxZ" : 1
+            }
+        }
+    ]
+}

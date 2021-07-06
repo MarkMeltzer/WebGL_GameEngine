@@ -5,6 +5,11 @@ var GameEngine = function(canvas, gl) {
 
     // current scene
     this.scene = null;
+    this.loadingState = {
+        "current" : 0,
+        "total" : 0
+    }
+    this.loadStateOutput = null;
 
     // input globals
     this.controller = null;
@@ -26,6 +31,252 @@ var GameEngine = function(canvas, gl) {
 
     this.lookingAtObj = null;
     this.rayCastT = null;
+}
+
+GameEngine.prototype.loadScene2 = function(sceneJson) {
+    const scene = new Scene();
+    this.scene = scene;
+    this.createDefaults();
+    this.renderEngine.scene = scene;
+    this.physicsEngine.scene = scene;
+
+    this.loadAtomicAssets(sceneJson);
+
+    this.controller = new Controller()
+
+    const cam = new Camera(
+        [0,0,10],
+        45,
+        this.gl.canvas.clientWidth / this.gl.canvas.clientHeight,
+        0.1,
+        100
+    );
+    cam.AABB = new AABB(this.gl, -1, 1, -2.5, 2.5, -1, 1);
+    scene.camera = cam;
+    scene.worldObjects["camera"] = cam;
+    this.controller.parent(cam);
+
+    this.mouseChange = [0, 0];
+    this.keyTracker = this.getKeyTracker();
+    this.initInputHandeling();
+}
+
+GameEngine.prototype.loadAtomicAssets = function(sceneJson) {
+    // load meshes
+    for (var i = 0; i < sceneJson.assets.meshes.length; i++) {
+        const meshData = sceneJson.assets.meshes[i];
+
+        loadOBJ(meshData.path, (OBJFile) => {
+            // parse the obj file and create mesh object
+            const vertexhData = parseOBJFile(OBJFile);
+            const mesh = new Mesh(
+                this.gl,
+                meshData.id,
+                vertexhData.vertexPositions,
+                vertexhData.vertexNormals,
+                vertexhData.vertexIndices,
+                vertexhData.textureCoords
+            );
+
+            // add mesh object to scene
+            this.scene.assets.meshes[meshData.id] = mesh;
+
+            // report loaded object
+            this.loadingState.current += 1;
+            console.log("Loaded mesh: " + meshData.id);
+
+            // continue to loading materials
+            if (this.loadingState.current == this.loadingState.total) {
+                console.log("Finished loading atomic assets!");
+                this.loadCompositeAssets(sceneJson);
+            }
+        });
+    }
+
+    // load textures
+    for (var i = 0; i < sceneJson.assets.textures.length; i++) {
+        const textureData = sceneJson.assets.textures[i];
+
+        const image = new Image();
+        image.onload = () => {
+            const texture = new Texture(
+                this.gl,
+                textureData.id,
+                textureData.type,
+                image
+            );
+
+            // add texture to scene
+            this.scene.assets.textures[textureData.id] = texture;
+
+            // report loaded object
+            this.loadingState.current += 1;
+
+            // continue to loading materials
+            console.log("Loaded texture: " + textureData.id);
+            if (this.loadingState.current == this.loadingState.total) {
+                console.log("Finished loading atomic assets!");
+                this.loadCompositeAssets(sceneJson);
+            }
+        }
+        image.crossOrigin = "";
+        image.src = textureData.path;
+    }
+}
+
+GameEngine.prototype.loadCompositeAssets = function(sceneJson) {
+    // load materials
+    for (var i = 0; i < sceneJson.assets.materials.length; i++) {
+        const materialData = sceneJson.assets.materials[i];
+
+        // if texture isn't specified or can't be found, use the default textures
+        var diffuse = this.scene.assets.textures[materialData.diffuseTexture];
+        if (materialData.diffuseTexture &&
+            !diffuse) {
+            console.log("Missing texture when creating material\n\tmaterial: " +
+                        materialData.id + "\n\ttexture: " + materialData.diffuseTexture);
+        }
+        if (!diffuse) diffuse = this.scene.defaultMaterial.diffuseTexture;
+
+        // if texture isn't specified or can't be found, use the default textures
+        var normal = this.scene.assets.textures[materialData.normalTexture];
+        if (materialData.normalTexture &&
+            !normal) {
+            console.log("Missing texture when creating material\n\tmaterial: " +
+                        materialData.id + "\n\ttexture: " + materialData.normalTexture);
+        }
+        if (!normal) normal = this.scene.defaultMaterial.normalTexture;
+
+        const material = new Material(
+            materialData.id,
+            diffuse,
+            normal,
+        )
+
+        this.scene.assets.materials[materialData.id] = material;
+
+        console.log("Loaded material: " + materialData.id);
+    }
+    console.log("Finished loading materials!");
+    
+    // load models
+    for (var i = 0; i < sceneJson.assets.models.length; i++) {
+        const modelData = sceneJson.assets.models[i];
+
+        // if mesh isn't specified or can't be found, use the default textures
+        var mesh = this.scene.assets.meshes[modelData.mesh];
+        if (modelData.mesh &&
+            !mesh) {
+            console.log("Missing mesh when creating model\n\tmodel: " +
+                        modelData.id + "\n\tmesh: " + modelData.mesh);
+        }
+        if (!mesh) mesh = this.scene.defaultMesh;
+
+        // if material isn't specified or can't be found, use the default textures
+        var material = this.scene.assets.materials[modelData.material];
+        if (modelData.material &&
+            !material) {
+            console.log("Missing material when creating model\n\tmodel: " +
+                        modelData.id + "\n\tmaterial: " + modelData.material);
+        }
+        if (!material) material = this.scene.defaultMaterial;
+
+        const model = new Model(
+            this.gl,
+            modelData.id,
+            mesh,
+            material
+        )
+
+        // set other settings if specified
+        if (!modelData.render === undefined) model.renderSettings.render = modelData.render;
+        if (!modelData.castShadow === undefined) model.renderSettings.castShadow = modelData.castShadow;
+        if (!modelData.animateRot === undefined) model.animation.animateRot = modelData.animateRot;
+        if (modelData.rotAxis) model.animation.rotAxis = modelData.rotAxis;
+        if (modelData.rotSpeedFactor) model.animation.rotSpeedFactor = modelData.rotSpeedFactor;
+        if (!modelData.animateTrans === undefined) model.animation.animateTrans = modelData.animateTrans;
+
+        this.scene.assets.models[modelData.id] = model;
+
+        console.log("Loaded model: " + modelData.id);
+    }
+    console.log("Finished loading models!");
+
+    // load worldObjects
+    for (var i = 0; i < sceneJson.worldObjects.length; i++) {
+        const wOData = sceneJson.worldObjects[i];
+
+        const worldObject = new WorldObject(
+            wOData.id,
+            wOData.type
+        )
+        
+        // set the model for the worldObject if a model is specified and loaded
+        if (wOData.model) {
+            if (!this.scene.assets.models[wOData.model]) {
+                console.log("Missing mdoel when creating worldObject\n\tworldObject: " +
+                            wOData.id + "\n\tmodel: " + wOData.model);
+            } else {
+                worldObject.model = this.scene.assets.models[wOData.model];
+            }
+        }
+
+        // set the AABB for the worldObject
+        if (wOData.AABB) {
+            worldObject.AABB = new AABB(this.gl);
+            worldObject.AABB.setBounds(wOData.AABB);
+        } else if (worldObject.model && worldObject.model.mesh) {
+            worldObject.AABB = new AABB(this.gl);
+            worldObject.AABB.setBounds(worldObject.model.getModelAABB())
+        }
+
+        // set other settings if specified
+        if (wOData.position) worldObject.position = wOData.position;
+        if (wOData.rotation) worldObject.rotation = wOData.rotation;
+        if (!wOData.isImmovable === undefined) worldObject.isImmovable = wOData.isImmovable;
+        if (!wOData.hasCollision === undefined) worldObject.hasCollision = wOData.hasCollision;
+        if (!wOData.hasGravity === undefined) worldObject.hasGravity = wOData.hasGravity;
+
+        this.scene.worldObjects[wOData.id] = worldObject;
+
+        console.log("Loaded worldObject: " + wOData.id);
+    }
+    console.log("Finished loading worldObjects!")
+}
+
+GameEngine.prototype.createDefaults = function() {
+    const defaultTextureData = new ImageData(
+        new Uint8ClampedArray([127, 127, 127, 255,]),
+        1,
+        1
+    );
+    const defaultDiffuse = new Texture(
+        this.gl,
+        "defaultTexture",
+        "diffuse",
+        defaultTextureData
+    );
+    const defaultNormal = new Texture(
+        this.gl,
+        "defaultTexture",
+        "normal",
+        defaultTextureData
+    );
+    this.scene.defaultMaterial = new Material(
+        "defaultMaterial",
+        defaultDiffuse,
+        defaultNormal
+    );
+
+    const defaultMeshData = createBoxMeshData(1, 1, 1);
+    this.scene.defaultMesh = new Mesh(
+        this.gl,
+        "defaultMesh",
+        defaultMeshData.vertexPositions,
+        defaultMeshData.vertexNormals,
+        defaultMeshData.vertexIndices,
+        defaultMeshData.textureCoords
+    );
 }
 
 /**
@@ -142,12 +393,6 @@ GameEngine.prototype.parseSceneJSON = function(jsonObj) {
         objectDict[worldObject.id] = worldObject;
     }
 
-    // add object to render at raycast intersection
-    const rayCastmodel = new Model(this.gl, null, null);
-    wO = new WorldObject("rayCastObj", "rayCastObj");
-    wO.model = rayCastmodel;
-    objectDict["rayCastObj"] = wO;
-
     const scene = new Scene();
     scene.worldObjects = objectDict;
 
@@ -190,17 +435,6 @@ GameEngine.prototype.startGameLoop = function() {
 
         // raycast
         self.castRay();
-        // update rayCast indicator position
-        vec3.scale(
-            self.scene.worldObjects["rayCastObj"].position,
-            self.controller.child.front,
-            self.rayCastT
-        );
-        vec3.add(
-            self.scene.worldObjects["rayCastObj"].position,
-            self.controller.child.position,
-            self.scene.worldObjects["rayCastObj"].position
-        );
 
         // draw the scene
         self.renderEngine.render(self.time);
@@ -447,5 +681,11 @@ GameEngine.prototype.rayAABBIntersect = function(rayO, rayD, AABB) {
         return false;
     } else {
         return tMin;
+    }
+}
+
+GameEngine.prototype.logLoadText = function(s) {
+    if (this.loadingStateOutput) {
+        this.loadingStateOutput.innerHTML = s;
     }
 }

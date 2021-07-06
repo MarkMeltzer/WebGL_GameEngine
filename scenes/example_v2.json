@@ -1,0 +1,78 @@
+{
+    "assets" :
+        {
+            "meshes" : [
+                {
+                    "id" : "meshId1",
+                    "path" : "c/file1"
+                },
+                {
+                    "id" : "meshId2",
+                    "path" : "c/file2"
+                }
+            ],
+            "textures" : [
+                {
+                    "id" : "texId1",
+                    "type" : "diffuse",
+                    "path" : "c/file3"
+                },
+                {
+                    "id" : "texId2",
+                    "type" : "normal",
+                    "path" : "c/file4"
+                }
+            ],
+            "materials" : [
+                {
+                    "id" : "matId1",
+                    "diffuseTexture" : "texId1",
+                    "normalTexture" : "texId2"
+                },
+                {
+                    "id" : "matId2",
+                    "diffuseTexture" : "texId1"
+                }
+            ],
+            "models" : [
+                {
+                    "id" : "modelId1",
+                    "mesh" : "meshId1",
+                    "material" : "matId1",
+                    "render" : true,
+                    "castShadow" : true
+                },
+                {
+                    "id" : "modelId2",
+                    "mesh" : "meshId2",
+                    "animateRot" : true,
+                    "rotAxis" : [1,0,0],
+                    "rotSpeedFactor": 1,
+                    "animateTrans" : false
+                }
+            ]
+        },
+    "worldObjects" : [
+        {
+            "id" : "wO1",
+            "type" : "model",
+            "position" : [-10,1,5],
+            "model" : "modelId1"
+        },
+        {
+            "id" : "wO2",
+            "type" : "model",
+            "position" : [0, 15, 0],
+            "hasGravity" : true,
+            "model" : "modelId2",
+            "AABB" : {
+                "minX" : -1,
+                "maxX" : 1,
+                "minY" : -1,
+                "maxY" : 1,
+                "minZ" : -1,
+                "maxZ" : 1
+            }
+        }
+    ]
+}

@@ -20,7 +20,8 @@ function loadOBJ(path, callback) {
             if (this.status == 200) {
                 callback(this.responseText);
             } else {
-                console.log("Error loading OBJ file! :(, status: " + this.statusText);
+                console.log("Error loading OBJ file! :( \n\tstatus: " + this.statusText
+                            + "\n\tfile path: " + path);
             }
         }
     };

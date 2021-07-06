@@ -43,28 +43,6 @@ var RenderEngine = function(canvas, gl, opts) {
 
     // intialize empty scene
     this.scene = null;
-
-    // create the default texture
-    // TODO also create default buffers so new buffers won't be created
-    // for each object with default textures
-    this.defaultTextureData = new ImageData(
-        new Uint8ClampedArray([0, 0, 255, 255,]),
-        1,
-        1
-    );
-    this.defaultMaterial = new Material(this.defaultTextureData);
-
-
-    // create the default mesh
-    // TODO also create default buffers so new buffers won't be created
-    // for each object with default meshes
-    this.defaultMeshData = createBoxMeshData(1, 1, 1);
-    this.defaultMesh = new Mesh(
-        this.defaultMeshData.vertexPositions,
-        this.defaultMeshData.vertexNormals,
-        this.defaultMeshData.vertexIndices,
-        this.defaultMeshData.textureCoords
-    );
 }
 
 RenderEngine.prototype.render = function(time) {
@@ -359,7 +337,7 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
         const normalize = false;
         const stride = 0;
         const offset = 0;
-        gl.bindBuffer(gl.ARRAY_BUFFER, model.buffers.position);
+        gl.bindBuffer(gl.ARRAY_BUFFER, model.mesh.buffers.position);
         gl.vertexAttribPointer(
             shader.attribLocations.aVertexPosition,
             numComponents,
@@ -389,7 +367,7 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
             const normalize = false;
             const stride = 0;
             const offset = 0;
-            gl.bindBuffer(gl.ARRAY_BUFFER, model.buffers.normal);
+            gl.bindBuffer(gl.ARRAY_BUFFER, model.mesh.buffers.normal);
             gl.vertexAttribPointer(
                 shader.attribLocations.aVertexNormal,
                 numComponents,
@@ -410,7 +388,7 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
             const normalize = false;
             const stride = 0;
             const offset = 0;
-            gl.bindBuffer(gl.ARRAY_BUFFER, model.buffers.texCoord);
+            gl.bindBuffer(gl.ARRAY_BUFFER, model.mesh.buffers.texCoord);
             gl.vertexAttribPointer(
                 shader.attribLocations.aTextureCoord,
                 numComponents,
@@ -424,7 +402,7 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
     
         // set the texture uniform in the shader
         gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, model.buffers.texture);
+        gl.bindTexture(gl.TEXTURE_2D, model.material.diffuseTexture.buffer);
         gl.uniform1i(
             shader.uniformLocations.uTexture,
             0
@@ -432,7 +410,7 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
     }
 
     // bind indices for rendering
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.buffers.index);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.mesh.buffers.index);
 
     // issue the draw call for the current object
     {

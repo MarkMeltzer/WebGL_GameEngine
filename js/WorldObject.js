@@ -34,6 +34,7 @@ class WorldObject {
         this.model = null;
         this.AABB = null;
     }
+    
     /**
      * Returns the Axis-aligned bounding box in world space.
      * 

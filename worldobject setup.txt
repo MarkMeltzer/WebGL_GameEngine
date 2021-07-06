@@ -1,0 +1,38 @@
+worldobject:
+	- id
+	- type
+	- position (array[3])
+	- rotation (array[3])
+	- localAxes
+		- front (vector[3])
+		- up (vector[3])
+		- right (vector[3])
+	- hasCollision (bool)
+	- hasGravity (bool)
+	- AABB (AABB object, dict containing mins and maxs)
+	- velocity (vector[3])
+	- model
+		- mesh
+			- filePath (string)
+			- numVerts (int)
+			- vertPositions (array[n])
+			- vertNormals (array[n])
+			- vertIndices (array[n])
+			- texCoords (array[n])
+		- material
+			- texture (image/2d array)
+		- buffers
+			- index (WebGLBuffer)
+			- normal (WebGLBuffer)
+			- position (WebGLBuffer)
+			- textureCoord (WebGLBuffer)
+			- texture (WebGLBuffer)
+			- AABBVerts (WebGLBuffer)
+		- renderSettings
+			- castShadow
+		- animation
+			- rotAxis (array[3])
+			- animateTrans (array[3])
+			- animateRot (bool)
+			- rotSpeedFactor (float)
+		
