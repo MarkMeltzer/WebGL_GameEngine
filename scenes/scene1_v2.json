@@ -7,6 +7,10 @@
                     "path" : "objs/sphere.obj"
                 },
                 {
+                    "id" : "invSphere",
+                    "path" : "objs/inv_sphere.obj"
+                },
+                {
                     "id" : "clothsim",
                     "path" : "objs/cloththing.obj"
                 }
@@ -21,6 +25,10 @@
                     "id" : "ijsbeerTexture",
                     "type" : "diffuse",
                     "path" : "imgs/ijsbeer.jpg"
+                },{
+                    "id" : "skyGradientTexture",
+                    "type" : "diffuse",
+                    "path" : "imgs/skygradient.png"
                 }
             ],
             "materials" : [
@@ -31,6 +39,10 @@
                 {
                     "id" : "ijsbeerMat",
                     "diffuseTexture" : "ijsbeerTexture"
+                },
+                {
+                    "id" : "skyGradient",
+                    "diffuseTexture" : "skyGradientTexture"
                 }
             ],
             "models" : [
@@ -40,6 +52,15 @@
                     "material" : "colorMat",
                     "render" : true,
                     "castShadow" : true
+                },
+                {
+                    "id" : "invSphere",
+                    "mesh" : "invSphere",
+                    "material" : "skyGradient",
+                    "render" : true,
+                    "castShadow" : false,
+                    "recieveShadow" : false,
+                    "recieveLighting" : false
                 },
                 {
                     "id" : "clothsim",
@@ -55,13 +76,26 @@
         {
             "id" : "sphereObject",
             "type" : "model",
-            "position" : [-10,1,5],
+            "position" : [0,-5,0],
             "model" : "sphere"
+        },
+        {
+            "id" : "sphereFloor",
+            "type" : "model",
+            "position" : [0,-10,10],
+            "model" : "sphere"
+        },
+        {
+            "id" : "skySphere",
+            "type" : "model",
+            "position" : [0,0,0],
+            "model" : "invSphere",
+            "AABB" : "none"
         },
         {
             "id" : "clothsimObject",
             "type" : "model",
-            "position" : [0, 15, 0],
+            "position" : [0, 3, 0],
             "hasGravity" : true,
             "model" : "clothsim",
             "AABB" : {

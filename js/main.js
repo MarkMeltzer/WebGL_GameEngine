@@ -34,19 +34,32 @@ function demo(sceneJson) {
     engine.loadStateOutput = document.getElementById("debug_output");
     engine.startGameLoop();
 
-    window.setInterval( () => {
+        window.setInterval( () => {
         document.getElementById("fps").innerHTML = "fps: "  + (1 / engine.deltaTime).toFixed(2);
     }, 100);
 
     window.setInterval( () => {
         // document.getElementById("debug_output").innerHTML = (debugGlobal.lookingAtObj) ? debugGlobal.lookingAtObj.id : "None";
-        document.getElementById("debug_output").innerHTML = engine.loadingState.current + " / " + engine.loadingState.total;
+        document.getElementById("debug_output").innerHTML = (engine.loadingState.currentAtomic +
+                                                            engine.loadingState.currentComposite) + 
+                                                            " / " + 
+                                                            (engine.loadingState.totalAtomic + 
+                                                            engine.loadingState.totalComposite) + 
+                                                            " items loaded!";
     }, 100);
 
     setupSettings();
 
+    // temporarily set flying to be on by default for the player camera
+    document.getElementById("flying_checkbox").click();
+
     console.log("Main done!")
 }
+
+const assert = function(condition, message) {
+    if (!condition)
+        throw Error('Assert failed: ' + (message || ''));
+};
 
 function setupSettings() {
     // set up tabs

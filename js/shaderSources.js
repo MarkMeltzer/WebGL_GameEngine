@@ -47,6 +47,8 @@ const mainFsSource = `
     uniform sampler2D uTexture;
     uniform sampler2D uShadowmap;
     uniform highp float uShadowBias;
+    uniform bool uRecieveShadow;
+    uniform bool uRecieveLighting;
 
     varying highp vec3 vLighting;
     varying highp vec2 vTextureCoord;
@@ -84,9 +86,16 @@ const mainFsSource = `
     void main() {
         highp vec4 color = texture2D(uTexture, vTextureCoord);
         
-        highp float shadowFactor = inShadow() ? 0.3 : 1.0;
-        
-        gl_FragColor = vec4(color.xyz * vLighting * shadowFactor, color.w);
+        highp float shadowFactor;
+        if (uRecieveShadow) {
+            shadowFactor = inShadow() ? 0.3 : 1.0;
+        } else {
+            shadowFactor = 1.0;
+        }
+
+        highp vec3 Lighting = uRecieveLighting ? vLighting : vec3(1.0, 1.0, 1.0);
+
+        gl_FragColor = vec4(color.xyz * Lighting * shadowFactor, color.w);
     }
 `;
 
@@ -106,7 +115,9 @@ const mainUniformNames = [
     "uLightDirection",
     "uTexture",
     "uShadowmap",
-    "uShadowBias"
+    "uShadowBias",
+    "uRecieveShadow",
+    "uRecieveLighting"
 ];
 
 /**

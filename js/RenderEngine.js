@@ -330,6 +330,18 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
         modelMatrix
     );
 
+    // set wether model should recieve shadows
+    gl.uniform1i(
+        shader.uniformLocations.uRecieveShadow,
+        model.renderSettings.recieveShadow ? 1 : 0
+    );
+
+    // set wether model should recieve lighting
+    gl.uniform1i(
+        shader.uniformLocations.uRecieveLighting,
+        model.renderSettings.recieveLighting ? 1 : 0
+    );
+
     // tell webgl how it should pull information out of vertex position buffer
     {
         const numComponents = 3;

@@ -13,7 +13,9 @@ class Model {
 
         this.renderSettings = {
             render: true,
-            castShadow: true
+            castShadow: true,
+            recieveShadow: true,
+            recieveLighting: true
         };
 
         this.animation = {

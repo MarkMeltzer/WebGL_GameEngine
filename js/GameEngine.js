@@ -6,8 +6,10 @@ var GameEngine = function(canvas, gl) {
     // current scene
     this.scene = null;
     this.loadingState = {
-        "current" : 0,
-        "total" : 0
+        "currentAtomic" : 0,
+        "currentComposite" : 0,
+        "totalAtomic" : 0,
+        "totalComposite" : 0
     }
     this.loadStateOutput = null;
 
@@ -40,6 +42,11 @@ GameEngine.prototype.loadScene2 = function(sceneJson) {
     this.renderEngine.scene = scene;
     this.physicsEngine.scene = scene;
 
+    this.loadingState.totalAtomic = sceneJson.assets.meshes.length + 
+                                    sceneJson.assets.textures.length;
+    this.loadingState.totalComposite = sceneJson.assets.models.length + 
+                                       sceneJson.assets.materials.length + 
+                                       sceneJson.worldObjects.length;
     this.loadAtomicAssets(sceneJson);
 
     this.controller = new Controller()
@@ -82,11 +89,11 @@ GameEngine.prototype.loadAtomicAssets = function(sceneJson) {
             this.scene.assets.meshes[meshData.id] = mesh;
 
             // report loaded object
-            this.loadingState.current += 1;
+            this.loadingState.currentAtomic += 1;
             console.log("Loaded mesh: " + meshData.id);
 
             // continue to loading materials
-            if (this.loadingState.current == this.loadingState.total) {
+            if (this.loadingState.currentAtomic == this.loadingState.totalAtomic) {
                 console.log("Finished loading atomic assets!");
                 this.loadCompositeAssets(sceneJson);
             }
@@ -110,11 +117,11 @@ GameEngine.prototype.loadAtomicAssets = function(sceneJson) {
             this.scene.assets.textures[textureData.id] = texture;
 
             // report loaded object
-            this.loadingState.current += 1;
+            this.loadingState.currentAtomic += 1;
 
             // continue to loading materials
             console.log("Loaded texture: " + textureData.id);
-            if (this.loadingState.current == this.loadingState.total) {
+            if (this.loadingState.currentAtomic == this.loadingState.totalAtomic) {
                 console.log("Finished loading atomic assets!");
                 this.loadCompositeAssets(sceneJson);
             }
@@ -155,6 +162,9 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson) {
 
         this.scene.assets.materials[materialData.id] = material;
 
+
+        // report loaded object
+        this.loadingState.currentComposite += 1;
         console.log("Loaded material: " + materialData.id);
     }
     console.log("Finished loading materials!");
@@ -189,15 +199,19 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson) {
         )
 
         // set other settings if specified
-        if (!modelData.render === undefined) model.renderSettings.render = modelData.render;
-        if (!modelData.castShadow === undefined) model.renderSettings.castShadow = modelData.castShadow;
-        if (!modelData.animateRot === undefined) model.animation.animateRot = modelData.animateRot;
+        if (modelData.render !== undefined) model.renderSettings.render = modelData.render;
+        if (modelData.castShadow !== undefined) model.renderSettings.castShadow = modelData.castShadow;
+        if (modelData.recieveShadow !== undefined) model.renderSettings.recieveShadow = modelData.recieveShadow;
+        if (modelData.recieveLighting !== undefined) model.renderSettings.recieveLighting = modelData.recieveLighting;
+        if (modelData.animateRot !== undefined) model.animation.animateRot = modelData.animateRot;
         if (modelData.rotAxis) model.animation.rotAxis = modelData.rotAxis;
         if (modelData.rotSpeedFactor) model.animation.rotSpeedFactor = modelData.rotSpeedFactor;
         if (!modelData.animateTrans === undefined) model.animation.animateTrans = modelData.animateTrans;
 
         this.scene.assets.models[modelData.id] = model;
 
+        // report loaded object
+        this.loadingState.currentComposite += 1;
         console.log("Loaded model: " + modelData.id);
     }
     console.log("Finished loading models!");
@@ -222,9 +236,11 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson) {
         }
 
         // set the AABB for the worldObject
-        if (wOData.AABB) {
+        if (wOData.AABB && wOData.AABB != "none") {
             worldObject.AABB = new AABB(this.gl);
             worldObject.AABB.setBounds(wOData.AABB);
+        } else if (wOData.AABB && wOData.AABB == "none"){
+            worldObject.AABB = null;
         } else if (worldObject.model && worldObject.model.mesh) {
             worldObject.AABB = new AABB(this.gl);
             worldObject.AABB.setBounds(worldObject.model.getModelAABB())
@@ -233,12 +249,14 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson) {
         // set other settings if specified
         if (wOData.position) worldObject.position = wOData.position;
         if (wOData.rotation) worldObject.rotation = wOData.rotation;
-        if (!wOData.isImmovable === undefined) worldObject.isImmovable = wOData.isImmovable;
-        if (!wOData.hasCollision === undefined) worldObject.hasCollision = wOData.hasCollision;
-        if (!wOData.hasGravity === undefined) worldObject.hasGravity = wOData.hasGravity;
+        if (wOData.isImmovable !== undefined) worldObject.isImmovable = wOData.isImmovable;
+        if (wOData.hasCollision !== undefined) worldObject.hasCollision = wOData.hasCollision;
+        if (wOData.hasGravity !== undefined) worldObject.hasGravity = wOData.hasGravity;
 
         this.scene.worldObjects[wOData.id] = worldObject;
 
+        // report loaded object
+        this.loadingState.currentComposite += 1;
         console.log("Loaded worldObject: " + wOData.id);
     }
     console.log("Finished loading worldObjects!")
