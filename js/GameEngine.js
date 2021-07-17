@@ -9,9 +9,10 @@ var GameEngine = function(canvas, gl) {
         "currentAtomic" : 0,
         "currentComposite" : 0,
         "totalAtomic" : 0,
-        "totalComposite" : 0
+        "totalComposite" : 0,
+        "done" : false
     }
-    this.loadStateOutput = null;
+    this.loadingCallback = null;
 
     // input globals
     this.controller = null;
@@ -35,19 +36,28 @@ var GameEngine = function(canvas, gl) {
     this.rayCastT = null;
 }
 
-GameEngine.prototype.loadScene2 = function(sceneJson) {
+/**
+ * Creates Scene object and sets 'this.scene'. Also sets up the input handeling
+ * for the scene and starts the loading of atomic and composite assets.
+ *
+ * @param {JSON} sceneJson the JSON object to create the scene from.
+ */
+GameEngine.prototype.loadScene = function(sceneJson, callback=null, verbose=false) {
     const scene = new Scene();
     this.scene = scene;
     this.createDefaults();
     this.renderEngine.scene = scene;
     this.physicsEngine.scene = scene;
 
+    // reset the loading state and start loading assets
+    this.loadingState.currentAtomic = 0;
+    this.loadingState.currentComposite = 0;
     this.loadingState.totalAtomic = sceneJson.assets.meshes.length + 
                                     sceneJson.assets.textures.length;
     this.loadingState.totalComposite = sceneJson.assets.models.length + 
                                        sceneJson.assets.materials.length + 
                                        sceneJson.worldObjects.length;
-    this.loadAtomicAssets(sceneJson);
+    this.loadAtomicAssets(sceneJson, verbose=verbose);
 
     this.controller = new Controller()
 
@@ -66,9 +76,11 @@ GameEngine.prototype.loadScene2 = function(sceneJson) {
     this.mouseChange = [0, 0];
     this.keyTracker = this.getKeyTracker();
     this.initInputHandeling();
+
+    this.loadingCallback = callback;
 }
 
-GameEngine.prototype.loadAtomicAssets = function(sceneJson) {
+GameEngine.prototype.loadAtomicAssets = function(sceneJson, verbose=false) {
     // load meshes
     for (var i = 0; i < sceneJson.assets.meshes.length; i++) {
         const meshData = sceneJson.assets.meshes[i];
@@ -90,11 +102,11 @@ GameEngine.prototype.loadAtomicAssets = function(sceneJson) {
 
             // report loaded object
             this.loadingState.currentAtomic += 1;
-            console.log("Loaded mesh: " + meshData.id);
+            if (verbose) console.log("Loaded mesh: " + meshData.id);
 
             // continue to loading materials
             if (this.loadingState.currentAtomic == this.loadingState.totalAtomic) {
-                console.log("Finished loading atomic assets!");
+                if (verbose) console.log("Finished loading atomic assets!");
                 this.loadCompositeAssets(sceneJson);
             }
         });
@@ -120,9 +132,9 @@ GameEngine.prototype.loadAtomicAssets = function(sceneJson) {
             this.loadingState.currentAtomic += 1;
 
             // continue to loading materials
-            console.log("Loaded texture: " + textureData.id);
+            if (verbose) console.log("Loaded texture: " + textureData.id);
             if (this.loadingState.currentAtomic == this.loadingState.totalAtomic) {
-                console.log("Finished loading atomic assets!");
+                if (verbose) console.log("Finished loading atomic assets!");
                 this.loadCompositeAssets(sceneJson);
             }
         }
@@ -131,7 +143,7 @@ GameEngine.prototype.loadAtomicAssets = function(sceneJson) {
     }
 }
 
-GameEngine.prototype.loadCompositeAssets = function(sceneJson) {
+GameEngine.prototype.loadCompositeAssets = function(sceneJson, verbose=false) {
     // load materials
     for (var i = 0; i < sceneJson.assets.materials.length; i++) {
         const materialData = sceneJson.assets.materials[i];
@@ -165,9 +177,9 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson) {
 
         // report loaded object
         this.loadingState.currentComposite += 1;
-        console.log("Loaded material: " + materialData.id);
+        if (verbose) console.log("Loaded material: " + materialData.id);
     }
-    console.log("Finished loading materials!");
+    if (verbose) console.log("Finished loading materials!");
     
     // load models
     for (var i = 0; i < sceneJson.assets.models.length; i++) {
@@ -212,9 +224,9 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson) {
 
         // report loaded object
         this.loadingState.currentComposite += 1;
-        console.log("Loaded model: " + modelData.id);
+        if (verbose) console.log("Loaded model: " + modelData.id);
     }
-    console.log("Finished loading models!");
+    if (verbose) console.log("Finished loading models!");
 
     // load worldObjects
     for (var i = 0; i < sceneJson.worldObjects.length; i++) {
@@ -257,9 +269,13 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson) {
 
         // report loaded object
         this.loadingState.currentComposite += 1;
-        console.log("Loaded worldObject: " + wOData.id);
+        if (verbose) console.log("Loaded worldObject: " + wOData.id);
     }
-    console.log("Finished loading worldObjects!")
+
+    // were all done loading!
+    this.loadingState.done = true;
+    if (this.loadingCallback) this.loadingCallback();
+    if (verbose) console.log("Finished loading worldObjects!")
 }
 
 GameEngine.prototype.createDefaults = function() {
@@ -295,140 +311,6 @@ GameEngine.prototype.createDefaults = function() {
         defaultMeshData.vertexIndices,
         defaultMeshData.textureCoords
     );
-}
-
-/**
- * Creates Scene object and sets 'this.scene'. Also sets up the input handeling
- * for the scene. Also starts the texture and mesh loading.
- *
- * @param {JSON} sceneJson the JSON object to create the scene from.
- */
-GameEngine.prototype.loadScene = function(sceneJson) {
-    // create and set the scene for the game engine
-    this.scene = this.parseSceneJSON(sceneJson);
-
-    // set the scene for the renderengine
-    this.renderEngine.setScene(this.scene);
-
-    // start loading the textures and meshes
-    for (let id in this.scene.worldObjects) {
-        const object = this.scene.worldObjects[id];
-
-        if (!object.model) {
-            continue;
-        }
-
-        if (object.model.texturePath) {
-            this.loadTextureImage(object.model, object.model.texturePath);
-        }
-
-        if (object.type == "obj" && object.model.filePath) {
-            this.loadOBJFile(object, object.model.filePath);
-        }
-    }
-
-    // set the scene for the physicsEngine
-    this.physicsEngine.setScene(this.scene);
-    
-    // set up input handeling
-    this.mouseChange = [0, 0];
-    this.keyTracker = this.getKeyTracker();
-    this.initInputHandeling();
-}
-
-/**
- * Creates a scene object from a JSON object.
- * 
- * @param {JSON} jsonObj the JSON object containing scene data.
- * @return {Scene} the Scene object.
- */
-GameEngine.prototype.parseSceneJSON = function(jsonObj) {
-    var objectDict = {};
-
-    for (var i = 0; i < jsonObj.worldObjects.length; i++) {
-        const objectDescription = jsonObj.worldObjects[i];
-
-        const worldObject = new WorldObject(
-            objectDescription.id,
-            objectDescription.type,
-            objectDescription.position,
-            [0, 0, 0], // TODO actually add support for rotation
-        )
-
-        if (objectDescription.type == "box") {
-            const meshData = createBoxMeshData(
-                objectDescription.sizes[0],
-                objectDescription.sizes[1],
-                objectDescription.sizes[2]
-            );
-
-            var model = new Model(
-                this.gl,
-                null,
-                objectDescription.texture,
-                true,
-                objectDescription.rotAxis,
-                objectDescription.animateTrans,
-                objectDescription.animateRot,
-                objectDescription.rotSpeedFactor
-            );
-
-            const mesh = new Mesh(
-                meshData.vertexPositions,
-                meshData.vertexNormals,
-                meshData.vertexIndices,
-                meshData.textureCoords
-            );
-
-            model.mesh = mesh;
-
-            worldObject.model = model;
-            worldObject.AABB = new AABB(
-                this.gl,
-                objectDescription.sizes[0] / -2,
-                objectDescription.sizes[0] / 2,
-                objectDescription.sizes[1] / -2,
-                objectDescription.sizes[1] / 2,
-                objectDescription.sizes[2] / -2,
-                objectDescription.sizes[2] / 2,
-            )
-        } else {
-            var model = new Model(
-                this.gl,
-                objectDescription.file_path,
-                objectDescription.texture,
-                true,
-                objectDescription.rotAxis,
-                objectDescription.animateTrans,
-                objectDescription.animateRot,
-                objectDescription.rotSpeedFactor
-            )
-
-            worldObject.model = model;
-            worldObject.AABB = new AABB(this.gl);
-        }
-
-        objectDict[worldObject.id] = worldObject;
-    }
-
-    const scene = new Scene();
-    scene.worldObjects = objectDict;
-
-    this.controller = new Controller()
-
-    const cam = new Camera(
-        [0,0,10],
-        45,
-        this.gl.canvas.clientWidth / this.gl.canvas.clientHeight,
-        0.1,
-        100
-    );
-    cam.AABB = new AABB(this.gl, -1, 1, -2.5, 2.5, -1, 1);
-    scene.camera = cam;
-    scene.worldObjects["camera"] = cam;
-    this.controller.parent(cam);
-    
-    return scene;
 }
 
 /**

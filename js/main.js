@@ -3,8 +3,7 @@ debugGlobal2 = null;
 logCounter = 0;
 
 sceneDescriptions = [
-    "scenes/scene1.json",
-    "scenes/scene2.json"
+    "scenes/scene1_v2.json"
 ];
 
 function main() {
@@ -28,13 +27,14 @@ function demo(sceneJson) {
         return;
     }
 
+    // setup engine
     let engine = new GameEngine(canvas, gl);
     debugGlobal = engine;
-    engine.loadScene2(sceneJson);
-    engine.loadStateOutput = document.getElementById("debug_output");
+    engine.loadScene(sceneJson, afterLoading);
     engine.startGameLoop();
 
-        window.setInterval( () => {
+    // set up some output
+    window.setInterval( () => {
         document.getElementById("fps").innerHTML = "fps: "  + (1 / engine.deltaTime).toFixed(2);
     }, 100);
 
@@ -48,12 +48,14 @@ function demo(sceneJson) {
                                                             " items loaded!";
     }, 100);
 
+    console.log("demo() done!")
+}
+
+function afterLoading() {
     setupSettings();
 
     // temporarily set flying to be on by default for the player camera
     document.getElementById("flying_checkbox").click();
-
-    console.log("Main done!")
 }
 
 const assert = function(condition, message) {
@@ -67,20 +69,26 @@ function setupSettings() {
     currentButton = null;
     document.getElementById("shadow_settings_button").click();
 
+    initShadowPanel();
+    initPlayerPanel();
+    initScenePanel();
+    initControllerPanel();
+    initObjectPanel();
+    initPhysicsPanel();
+}
+
+function initShadowPanel() {
     // shadow sliders
     document.getElementById("X_slider").oninput = function() {
         debugGlobal.renderEngine.scene.light[0] = this.value;
-        debugGlobal.scene.worldObjects["light model"].position[0] = this.value;
         document.getElementById("X_value").innerHTML = this.value;
     }
     document.getElementById("Y_slider").oninput = function() {
         debugGlobal.renderEngine.scene.light[1] = this.value;
-        debugGlobal.scene.worldObjects["light model"].position[1] = this.value;
         document.getElementById("Y_value").innerHTML = this.value;
     }
     document.getElementById("Z_slider").oninput = function() {
         debugGlobal.renderEngine.scene.light[2] = this.value;
-        debugGlobal.scene.worldObjects["light model"].position[2] = this.value;
         document.getElementById("Z_value").innerHTML = this.value;
     }
     document.getElementById("light_fov_slider").oninput = function() {
@@ -99,7 +107,9 @@ function setupSettings() {
         debugGlobal.renderEngine.shadowmapSettings.zFar = parseInt(this.value);
         document.getElementById("light_zFar_value").innerHTML = this.value;
     }
+}
 
+function initPlayerPanel() {
     // player sliders
     document.getElementById("player_fov_slider").oninput = function() {
         debugGlobal.renderEngine.scene.camera.fieldOfView = parseInt(this.value);
@@ -113,7 +123,9 @@ function setupSettings() {
         debugGlobal.renderEngine.scene.camera.zFar = parseFloat(this.value);
         document.getElementById("player_zFar_value").innerHTML = this.value;
     }
+}
 
+function initScenePanel() {
     // scene dropdown
     for (var i = 0; i < sceneDescriptions.length; i++){
         const sceneDescription = sceneDescriptions[i];
@@ -125,7 +137,7 @@ function setupSettings() {
     document.getElementById("scene_dropdown").onchange = function() {
         loadJSON(this.value, function(sceneJson) {
             debugGlobal.loadScene(sceneJson);
-            populateObjectDropdown("controller_child_dropdown", true);
+            populateObjectDropdown("controller_child_dropdown");
             populateObjectDropdown("object_dropdown");
         })
     }
@@ -133,19 +145,18 @@ function setupSettings() {
     // scene reload button
     document.getElementById("reload_button").onclick = function() {
         loadJSON(document.getElementById("scene_dropdown").value, function(sceneJson) {
-            debugGlobal.loadScene(sceneJson);
-            populateObjectDropdown("controller_child_dropdown", true);
-            populateObjectDropdown("object_dropdown");
+            debugGlobal.loadScene(sceneJson, () => {
+                populateObjectDropdown("controller_child_dropdown");
+                populateObjectDropdown("object_dropdown");
+            });
         })
     }
+}
 
+function initControllerPanel() {
     // flying checkbox
     document.getElementById("flying_checkbox").onclick = function() {
-        if (this.checked) {
-            debugGlobal.controller.child.flying = true;
-        } else {
-            debugGlobal.controller.child.flying = false;
-        }
+        debugGlobal.controller.child.flying = this.checked;
     }
 
     // controller slider
@@ -163,43 +174,89 @@ function setupSettings() {
     }
 
     // controller child dropdown
-    populateObjectDropdown("controller_child_dropdown", true);
     document.getElementById("controller_child_dropdown").onchange = function() {
-        if (this.value == "camera") {
-            debugGlobal.controller.parent(debugGlobal.scene.camera)
-        } else {
-            debugGlobal.controller.parent(debugGlobal.scene.worldObjects[this.value]);
-        }   
+        debugGlobal.controller.parent(debugGlobal.scene.worldObjects[this.value]);
+        document.getElementById("flying_checkbox").checked = debugGlobal.controller.child.flying;
     }
+    populateObjectDropdown("controller_child_dropdown");
+}
 
+function initObjectPanel() {
     // object render settings dropdown
-    populateObjectDropdown("object_dropdown")
     document.getElementById("object_dropdown").onchange = function() {
-        currentObject = this.value; 
+        const currentObject = debugGlobal.scene.worldObjects[this.value]
+        // render checkbox
+        if (currentObject.model) {
+            document.getElementById("render_checkbox_container").style.display = "inline-block";
+            document.getElementById("render_checkbox").checked = currentObject.model.renderSettings.render;
+        } else {
+            document.getElementById("render_checkbox_container").style.display = "none";
+        }
+
+        // cast shadow checkbox
+        if (currentObject.model) {
+            document.getElementById("shadow_checkbox_container").style.display = "inline-block";
+            document.getElementById("shadow_checkbox").checked = currentObject.model.renderSettings.castShadow;
+        } else {
+            document.getElementById("shadow_checkbox_container").style.display = "none";
+        }
+
+        // recieve shadow checkbox
+        if (currentObject.model) {
+            document.getElementById("recv_shadow_checkbox_container").style.display = "inline-block";
+            document.getElementById("recv_shadow_checkbox").checked = currentObject.model.renderSettings.recieveShadow;
+        } else {
+            document.getElementById("recv_shadow_checkbox_container").style.display = "none";
+        }
+        
+        // recieve lighting checkbox
+        if (currentObject.model) {
+            document.getElementById("recv_lighting_checkbox_container").style.display = "inline-block";
+            document.getElementById("recv_lighting_checkbox").checked = currentObject.model.renderSettings.recieveLighting;
+        } else {
+            document.getElementById("recv_lighting_checkbox_container").style.display = "none";
+        }
+
+        // render AABB
+        if (currentObject.AABB) {
+            document.getElementById("AABB_checkbox_container").style.display = "inline-block";
+            document.getElementById("AABB_checkbox").checked = currentObject.AABB.render;
+        } else {
+            document.getElementById("AABB_checkbox_container").style.display = "none";
+        }
     }
+    populateObjectDropdown("object_dropdown")
 
     // render checkbox
     document.getElementById("render_checkbox").onclick = function() {
         const worldObject = debugGlobal.scene.worldObjects[
             document.getElementById("object_dropdown").value
         ];
-        if (this.checked) {
-            worldObject.model.renderSettings.render = true;
-        } else {
-            worldObject.model.renderSettings.render = false;
-        }
+        worldObject.model.renderSettings.render = this.checked;
     }
 
-    // shadow checkbox
+    // cast shadow checkbox
     document.getElementById("shadow_checkbox").onclick = function() {
         const worldObject = debugGlobal.scene.worldObjects[
             document.getElementById("object_dropdown").value
         ];
-        if (this.checked) {
-            worldObject.model.renderSettings.castShadow = true;
-        } else {
-            worldObject.model.renderSettings.castShadow = false;
-        }
+        worldObject.model.renderSettings.castShadow = this.checked;
+    }
+
+    // recieve shadow checkbox
+    document.getElementById("recv_shadow_checkbox").onclick = function() {
+        const worldObject = debugGlobal.scene.worldObjects[
+            document.getElementById("object_dropdown").value
+        ];
+        worldObject.model.renderSettings.recieveShadow = this.checked;
+    }
+
+    // recieve lighting checkbox
+    document.getElementById("recv_lighting_checkbox").onclick = function() {
+        const worldObject = debugGlobal.scene.worldObjects[
+            document.getElementById("object_dropdown").value
+        ];
+        worldObject.model.renderSettings.recieveLighting = this.checked;
     }
 
     // render AABB
@@ -207,13 +264,11 @@ function setupSettings() {
         const worldObject = debugGlobal.scene.worldObjects[
             document.getElementById("object_dropdown").value
         ];
-        if (this.checked) {
-            worldObject.AABB.render = true;
-        } else {
-            worldObject.AABB.render = false;
-        }
+        worldObject.AABB.render = this.checked;
     }
+}
 
+function initPhysicsPanel() {
     // gravity slider
     document.getElementById("gravity_slider").oninput = function() {
         debugGlobal.physicsEngine.gravity = parseFloat(this.value);
@@ -227,19 +282,11 @@ function setupSettings() {
     }
 }
 
-function populateObjectDropdown(dropdownId, addCamera=false) {
+function populateObjectDropdown(dropdownId) {
     // clear the dropdown list
     const len = document.getElementById(dropdownId).options.length;
     for (var i = len - 1; i >= 0; i--) {
         document.getElementById(dropdownId).remove(i);
-    }
-
-    // add camera
-    if (addCamera) {
-        const option = document.createElement("option");
-        option.value = "camera";
-        option.text = "Player Camera";
-        document.getElementById(dropdownId).add(option);
     }
 
     // add all worldObjects
@@ -250,6 +297,9 @@ function populateObjectDropdown(dropdownId, addCamera=false) {
         option.text = keys[i];
         document.getElementById(dropdownId).add(option);
     }
+
+    // explicitly call the onchange function
+    document.getElementById(dropdownId).onchange();
 }
 
 function openPanel(setting) {

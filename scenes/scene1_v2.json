@@ -13,6 +13,18 @@
                 {
                     "id" : "clothsim",
                     "path" : "objs/cloththing.obj"
+                },
+                {
+                    "id" : "sofaMesh",
+                    "path" : "objs/sofa.obj"
+                },
+                {
+                    "id" : "UV_cube",
+                    "path" : "objs/UV_cube_test.obj"
+                },
+                {
+                    "id" : "plane",
+                    "path" : "objs/plane.obj"
                 }
             ],
             "textures" : [
@@ -25,10 +37,21 @@
                     "id" : "ijsbeerTexture",
                     "type" : "diffuse",
                     "path" : "imgs/ijsbeer.jpg"
-                },{
+                },
+                {
                     "id" : "skyGradientTexture",
                     "type" : "diffuse",
                     "path" : "imgs/skygradient.png"
+                },
+                {
+                    "id" : "UV_cube_Texture",
+                    "type" : "diffuse",
+                    "path" : "imgs/cube_UV_test.png"
+                },
+                {
+                    "id" : "whiteTexture",
+                    "type" : "diffuse",
+                    "path" : "imgs/white.png"
                 }
             ],
             "materials" : [
@@ -43,6 +66,14 @@
                 {
                     "id" : "skyGradient",
                     "diffuseTexture" : "skyGradientTexture"
+                },
+                {
+                    "id" : "UV_cube",
+                    "diffuseTexture" : "UV_cube_Texture"
+                },
+                {
+                    "id" : "white",
+                    "diffuseTexture" : "whiteTexture"
                 }
             ],
             "models" : [
@@ -66,24 +97,38 @@
                     "id" : "clothsim",
                     "mesh" : "clothsim",
                     "animateRot" : true,
-                    "rotAxis" : [1,0,0],
+                    "rotAxis" : [0,1,0],
                     "rotSpeedFactor": 1,
                     "animateTrans" : false
+                },
+                {
+                    "id" : "sofaModel",
+                    "mesh" : "sofaMesh",
+                    "material" : "skyGradient"
+                },
+                {
+                    "id" : "UV_cube",
+                    "mesh" : "UV_cube",
+                    "material" : "UV_cube",
+                    "recieveLighting" : false,
+                    "recieveShadow" : false,
+                    "animateRot" : true,
+                    "rotAxis" : [1,0,0]
+                },
+                {
+                    "id" : "plane",
+                    "mesh" : "plane",
+                    "material": "white"
                 }
             ]
         },
     "worldObjects" : [
         {
-            "id" : "sphereObject",
+            "id" : "sofa",
             "type" : "model",
-            "position" : [0,-5,0],
-            "model" : "sphere"
-        },
-        {
-            "id" : "sphereFloor",
-            "type" : "model",
-            "position" : [0,-10,10],
-            "model" : "sphere"
+            "position" : [-3,-3,0],
+            "rotation" : [0.5,0.5,0],
+            "model" : "sofaModel"
         },
         {
             "id" : "skySphere",
@@ -95,7 +140,7 @@
         {
             "id" : "clothsimObject",
             "type" : "model",
-            "position" : [0, 3, 0],
+            "position" : [4, 0, 0],
             "hasGravity" : true,
             "model" : "clothsim",
             "AABB" : {
@@ -106,6 +151,19 @@
                 "minZ" : -1,
                 "maxZ" : 1
             }
+        },
+        {
+            "id" : "UV_cube",
+            "type" : "model",
+            "position" : [0,0,0],
+            "model" : "UV_cube",
+            "AABB" : "none"
+        },
+        {
+            "id" : "ground_plane",
+            "type" : "model",
+            "position" : [0,-3,0],
+            "model" : "plane"
         }
     ]
 }
