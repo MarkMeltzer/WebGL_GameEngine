@@ -3,7 +3,8 @@ debugGlobal2 = null;
 logCounter = 0;
 
 sceneDescriptions = [
-    "scenes/scene1_v2.json"
+    "scenes/scene1_v2.json",
+    "scenes/scene2_v2.json"
 ];
 
 function main() {
@@ -134,12 +135,23 @@ function initScenePanel() {
         option.text = sceneDescription;
         document.getElementById("scene_dropdown").add(option);
     }
+    document.getElementById("sceneJSONLink").innerHTML = "<a href=\"" +
+                                                         document.getElementById("scene_dropdown").value +
+                                                         "\" target=\"_blank\"> " + 
+                                                         "Click here to see the currently loaded scene JSON!";
+
     document.getElementById("scene_dropdown").onchange = function() {
         loadJSON(this.value, function(sceneJson) {
-            debugGlobal.loadScene(sceneJson);
-            populateObjectDropdown("controller_child_dropdown");
-            populateObjectDropdown("object_dropdown");
+            debugGlobal.loadScene(sceneJson, () => {
+                populateObjectDropdown("controller_child_dropdown");
+                populateObjectDropdown("object_dropdown");
+            });
+
         })
+        document.getElementById("sceneJSONLink").innerHTML = "<a href=\"" +
+                                                             this.value +
+                                                             "\" target=\"_blank\"> " + 
+                                                             "Click here to see the currently loaded scene JSON!";
     }
 
     // scene reload button

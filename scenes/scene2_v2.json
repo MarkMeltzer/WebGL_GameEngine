@@ -1,0 +1,76 @@
+{
+    "assets" :
+        {
+            "meshes" : [
+                {
+                    "id" : "clothsim",
+                    "path" : "objs/cloththing.obj"
+                },
+                {
+                    "id" : "plane",
+                    "path" : "objs/plane.obj"
+                }
+            ],
+            "textures" : [
+                {
+                    "id" : "skyGradientTexture",
+                    "type" : "diffuse",
+                    "path" : "imgs/skygradient.png"
+                },
+                {
+                    "id" : "whiteTexture",
+                    "type" : "diffuse",
+                    "path" : "imgs/white.png"
+                }
+            ],
+            "materials" : [
+                {
+                    "id" : "skyGradient",
+                    "diffuseTexture" : "skyGradientTexture"
+                },
+                {
+                    "id" : "white",
+                    "diffuseTexture" : "whiteTexture"
+                }
+            ],
+            "models" : [
+                {
+                    "id" : "clothsim",
+                    "mesh" : "clothsim",
+                    "material" : "skyGradient",
+                    "animateRot" : true,
+                    "rotAxis" : [0,1,0],
+                    "rotSpeedFactor": 1,
+                    "animateTrans" : false
+                },
+                {
+                    "id" : "plane",
+                    "mesh" : "plane",
+                    "material": "white"
+                }
+            ]
+        },
+    "worldObjects" : [
+        {
+            "id" : "clothsimObject",
+            "type" : "model",
+            "position" : [0, 0, 0],
+            "hasGravity" : true,
+            "model" : "clothsim",
+            "AABB" : {
+                "minX" : -1,
+                "maxX" : 1,
+                "minY" : -1,
+                "maxY" : 1,
+                "minZ" : -1,
+                "maxZ" : 1
+            }
+        },
+        {
+            "id" : "ground_plane",
+            "type" : "model",
+            "position" : [0,-3,0],
+            "model" : "plane"
+        }
+    ]
+}
