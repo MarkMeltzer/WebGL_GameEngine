@@ -304,13 +304,22 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
         worldObject.position
     );
 
-    // // apply the objects rotation
-    // mat4.rotate(
-    //     modelMatrix,
-    //     modelMatrix,
-    //     time * model.animation.rotSpeedFactor,
-    //     model.animation.rotAxis
-    // );
+    // apply the objects rotation
+    mat4.rotateX(
+        modelMatrix,
+        modelMatrix,
+        glMatrix.toRadian(worldObject.rotation[0])
+    );
+    mat4.rotateY(
+        modelMatrix,
+        modelMatrix,
+        glMatrix.toRadian(worldObject.rotation[1])
+    );
+    mat4.rotateZ(
+        modelMatrix,
+        modelMatrix,
+        glMatrix.toRadian(worldObject.rotation[2])
+    );
 
     // animate model translation, if applicable
     if (model.animation.animateTrans) {
