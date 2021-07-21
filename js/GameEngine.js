@@ -1,3 +1,4 @@
+// TODO: use class syntax
 var GameEngine = function(canvas, gl) {
     // remember canvas and gl context
     this.canvas = canvas;
@@ -80,6 +81,7 @@ GameEngine.prototype.loadScene = function(sceneJson, callback=null, verbose=fals
     this.loadingCallback = callback;
 }
 
+// TODO: add function comment
 GameEngine.prototype.loadAtomicAssets = function(sceneJson, verbose=false) {
     // load meshes
     for (var i = 0; i < sceneJson.assets.meshes.length; i++) {
@@ -143,6 +145,7 @@ GameEngine.prototype.loadAtomicAssets = function(sceneJson, verbose=false) {
     }
 }
 
+// TODO: add function comment
 GameEngine.prototype.loadCompositeAssets = function(sceneJson, verbose=false) {
     // load materials
     for (var i = 0; i < sceneJson.assets.materials.length; i++) {
@@ -278,6 +281,7 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson, verbose=false) {
     if (verbose) console.log("Finished loading worldObjects!")
 }
 
+// TODO: add function comment
 GameEngine.prototype.createDefaults = function() {
     const defaultTextureData = new ImageData(
         new Uint8ClampedArray([127, 127, 127, 255,]),
@@ -479,6 +483,7 @@ GameEngine.prototype.loadOBJFile = function(worldObject, url) {
     });
 }
 
+// TODO: add function comment
 GameEngine.prototype.castRay = function() {
     // reset lookingAtObj
     this.lookingAtObj = null;
@@ -509,6 +514,7 @@ GameEngine.prototype.castRay = function() {
     this.rayCastT = minT;
 }
 
+// TODO: add function comment
 GameEngine.prototype.rayAABBIntersect = function(rayO, rayD, AABB) {
     // src: https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
     var tMin = (AABB.minX - rayO[0]) / rayD[0];
@@ -584,6 +590,7 @@ GameEngine.prototype.rayAABBIntersect = function(rayO, rayD, AABB) {
     }
 }
 
+// TODO: what is this function for???
 GameEngine.prototype.logLoadText = function(s) {
     if (this.loadingStateOutput) {
         this.loadingStateOutput.innerHTML = s;

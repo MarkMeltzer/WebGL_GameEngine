@@ -1,3 +1,4 @@
+// TODO: use class syntax
 var Controller = function() {
     // the object which is parented to this controller
     this.child = null;
@@ -17,6 +18,7 @@ var Controller = function() {
     this.jump = this.jump.bind(this);
 }
 
+// TODO: add function comment
 Controller.prototype.moveForward = function(deltaTime) {
     const change = this.movementSpeed * deltaTime;
     this.child.velocity[0] += this.child.front[0] * change;
@@ -28,6 +30,7 @@ Controller.prototype.moveForward = function(deltaTime) {
     }
 }
 
+// TODO: add function comment
 Controller.prototype.moveBackward = function(deltaTime) {
     const change = this.movementSpeed * deltaTime;
     this.child.velocity[0] -= this.child.front[0] * change;
@@ -39,6 +42,7 @@ Controller.prototype.moveBackward = function(deltaTime) {
     }
 }
 
+// TODO: add function comment
 Controller.prototype.moveRight = function(deltaTime) {
     const change = this.movementSpeed * deltaTime;
     this.child.velocity[0] += this.child.right[0] * change;
@@ -50,6 +54,7 @@ Controller.prototype.moveRight = function(deltaTime) {
     }
 }
 
+// TODO: add function comment
 Controller.prototype.moveLeft = function(deltaTime) {
     const change = this.movementSpeed * deltaTime;
     this.child.velocity[0] -= this.child.right[0] * change;
@@ -61,6 +66,7 @@ Controller.prototype.moveLeft = function(deltaTime) {
     }
 }
 
+// TODO: add function comment
 Controller.prototype.jump = function(deltaTime) {
     if (!this.child.airborne && !this.child.flying) {
         this.child.airborne = true;
@@ -69,6 +75,7 @@ Controller.prototype.jump = function(deltaTime) {
     }
 }
 
+// TODO: add function comment
 Controller.prototype.turn = function(mouseChange, deltaTime) {
     const xChange = mouseChange[0] * this.turnSpeed * deltaTime;
     const yChange = mouseChange[1] * this.turnSpeed * deltaTime;
@@ -80,6 +87,7 @@ Controller.prototype.turn = function(mouseChange, deltaTime) {
     }
 }
 
+// TODO: add function comment
 Controller.prototype.parent = function(child) {
     // decouple the old child
     if (this.child) {

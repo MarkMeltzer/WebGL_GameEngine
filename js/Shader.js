@@ -1,3 +1,4 @@
+// TODO: use class syntax
 var Shader = function(
     gl,
     vsSource,
@@ -16,6 +17,7 @@ var Shader = function(
     this.uniformLocations = this.getUniformLocations(uniformNames);
 }
 
+// TODO: add function comment
 Shader.prototype.initShaderProgram = function(vsSource, fsSource) {
     const gl = this.gl;
     
@@ -38,6 +40,7 @@ Shader.prototype.initShaderProgram = function(vsSource, fsSource) {
     return shaderProgram;    
 }
 
+// TODO: add function comment
 Shader.prototype.loadShader = function(type, source) {
     const gl = this.gl;
 
@@ -56,6 +59,7 @@ Shader.prototype.loadShader = function(type, source) {
     return shader;
 }
 
+// TODO: add function comment
 Shader.prototype.getAttribLocations = function(attributeNames) {
     const gl = this.gl;
 
@@ -75,6 +79,7 @@ Shader.prototype.getAttribLocations = function(attributeNames) {
     return attribLocations;
 }
 
+// TODO: add function comment
 Shader.prototype.getUniformLocations = function(uniformNames) {
     const gl = this.gl;
 

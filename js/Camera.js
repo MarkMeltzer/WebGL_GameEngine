@@ -14,6 +14,7 @@ class Camera extends WorldObject {
         this.zFar = zFar;
     }
 
+    // TODO: add function comment
     getProjectionMatrix(out) {
         mat4.perspective(
             out,
@@ -24,6 +25,7 @@ class Camera extends WorldObject {
         );
     }
 
+    // TODO: add function comment
     getViewMatrix = function(out) {
         const target = vec3.create();
         vec3.add(target, this.position, this.front);

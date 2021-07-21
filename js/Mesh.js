@@ -23,10 +23,12 @@ class Mesh {
         this.setBuffers();
     }
 
+    // TODO: add function comment
     getNumVerts() {
         return this.vertIndices.length;
     }
 
+    // TODO: add function comment
     setBuffers() {
         const gl = this.gl;
 

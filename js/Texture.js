@@ -9,6 +9,7 @@ class Texture {
         this.setBuffer();
     }
 
+    // TODO: add function comment
     setBuffer() {
         const gl = this.gl;
 

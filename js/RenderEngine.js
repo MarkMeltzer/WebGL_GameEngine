@@ -94,6 +94,7 @@ RenderEngine.prototype.drawShadowmap = function(time, frameBuffer) {
     **************************************************************************/
 
     // create the projection matrix and set it as uniform in the shader
+    // TODO: if light is directional light/sunlight, this should be a orthographic camera
     const fieldOfView = glMatrix.toRadian(this.shadowmapSettings.fov);
     const aspect = 1;
     const zNear = this.shadowmapSettings.zNear;
@@ -450,6 +451,7 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
     }
 }
 
+// TODO: add function comment
 RenderEngine.prototype.drawAABBs = function(worldObject, cameraMatrix, projectionMatrix) {
     const gl = this.gl;
 
@@ -518,6 +520,7 @@ RenderEngine.prototype.drawAABBs = function(worldObject, cameraMatrix, projectio
     }
 }
 
+// TODO: add function comment
 RenderEngine.prototype.initDepthmap = function() {
     const gl = this.gl;
 
@@ -583,6 +586,7 @@ RenderEngine.prototype.initDepthmap = function() {
     this.shadowmap = depthTexture;
 }
 
+// TODO: add function comment
 RenderEngine.prototype.setScene = function(scene) {
     for (let id in scene.worldObjects) {
         const object = scene.worldObjects[id];

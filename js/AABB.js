@@ -16,7 +16,8 @@ class AABB {
         this.renderBuffer = null;
         this.createRenderBuffer();
     }
-
+    
+    // TODO: add function comment
     createRenderBuffer() {
         const gl = this.gl;
 
@@ -44,7 +45,8 @@ class AABB {
             );
         }
     }
-
+    
+    // TODO: add function comment
     setBounds(AABBBounds) {
         this.bounds = AABBBounds;
         this.createRenderBuffer();

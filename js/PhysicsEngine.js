@@ -1,3 +1,4 @@
+// TODO: use class syntax
 var PhysicsEngine = function() {
     // here is where I would put all my global physics settings and properties
     // if I had any.
@@ -8,10 +9,12 @@ var PhysicsEngine = function() {
     this.scene = null;
 }
 
+// TODO: add function comment
 PhysicsEngine.prototype.setScene = function(scene) {
     this.scene = scene;
 }
 
+// TODO: add function comment
 PhysicsEngine.prototype.updateCollisions = function(deltaTime) {
     // reset collision for all objects
     for (let id in this.scene.worldObjects) {
@@ -79,6 +82,7 @@ PhysicsEngine.prototype.updateCollisions = function(deltaTime) {
     }
 }
 
+// TODO: add function comment
 PhysicsEngine.prototype.checkCollision = function(object1, object2) {
     const AABB1 = object1.getWorldSpaceAABBBounds();
     const AABB2 = object2.getWorldSpaceAABBBounds();
@@ -107,6 +111,7 @@ PhysicsEngine.prototype.checkCollision = function(object1, object2) {
     }
 }
 
+// TODO: add function comment
 PhysicsEngine.prototype.updateDynamics = function(deltaTime) {
     for (let id in this.scene.worldObjects) {
         const obj = this.scene.worldObjects[id];
@@ -142,6 +147,7 @@ PhysicsEngine.prototype.updateDynamics = function(deltaTime) {
     }
 }
 
+// TODO: add function comment
 PhysicsEngine.prototype.update = function(deltaTime) {
     this.updateDynamics(deltaTime);
     this.updateCollisions(deltaTime);

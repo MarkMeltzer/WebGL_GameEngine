@@ -57,6 +57,7 @@ class WorldObject {
         }
     }
 
+    // TODO: add function comment
     updateSpaceVectors() {
         vec3.normalize(this.front, this.front);
 
