@@ -3,7 +3,7 @@
 # WebGL Game engine
 A small WebGL based game engine using vanilla javascript and the glMatrix library for vector and matrix math.
 
-This project is a small hobby project for educational purposes. It is also my first time writing anything more thana couple of lines of javascript, so excuse the less than optimal code :)
+This project is a small hobby project for educational purposes. It is also my first time writing anything more than a couple of lines of javascript, so excuse the less than optimal code :)
 
 # Features
  - Directional shadow mapping
@@ -57,3 +57,8 @@ A short gif demonstrating some of the features.
 3. Implement normal mapping
 4. Implement specular and ambient components of phong-shading
 5. Implement specular mapping
+6. Add support for non-trangulated OBJ files
+
+# Known issues/bugs
+- The AABB's don't update when rotating an object
+- The UV mapping doesn't seem to completely work yet (the top and bottom faces of a cube arne't mapped correctly)
