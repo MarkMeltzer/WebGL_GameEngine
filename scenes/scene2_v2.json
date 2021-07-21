@@ -9,6 +9,10 @@
                 {
                     "id" : "plane",
                     "path" : "objs/plane.obj"
+                },
+                {
+                    "id" : "invSphere",
+                    "path" : "objs/inv_sphere.obj"
                 }
             ],
             "textures" : [
@@ -21,6 +25,11 @@
                     "id" : "whiteTexture",
                     "type" : "diffuse",
                     "path" : "imgs/white.png"
+                },
+                {
+                    "id" : "greenScreenTexture",
+                    "type" : "diffuse",
+                    "path" : "imgs/greenscreen.png"
                 }
             ],
             "materials" : [
@@ -31,6 +40,10 @@
                 {
                     "id" : "white",
                     "diffuseTexture" : "whiteTexture"
+                },
+                {
+                    "id" : "greenScreenMat",
+                    "diffuseTexture" : "greenScreenTexture"
                 }
             ],
             "models" : [
@@ -47,6 +60,15 @@
                     "id" : "plane",
                     "mesh" : "plane",
                     "material": "white"
+                },
+                {
+                    "id" : "invSphere",
+                    "mesh" : "invSphere",
+                    "material" : "greenScreenMat",
+                    "render" : true,
+                    "castShadow" : false,
+                    "recieveShadow" : false,
+                    "recieveLighting" : false
                 }
             ]
         },
@@ -71,6 +93,13 @@
             "type" : "model",
             "position" : [0,-3,0],
             "model" : "plane"
+        },
+        {
+            "id" : "skySphere",
+            "type" : "model",
+            "position" : [0,0,0],
+            "model" : "invSphere",
+            "AABB" : "none"
         }
     ]
 }
