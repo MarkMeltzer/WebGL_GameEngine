@@ -1,4 +1,4 @@
-![Logo](./logo.png)
+![Logo](./logo_150.png)
 
 # WebGL Game engine
 A small WebGL based game engine using vanilla javascript and the glMatrix library for vector and matrix math.
