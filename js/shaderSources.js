@@ -47,6 +47,7 @@ const mainFsSource = `
     uniform sampler2D uTexture;
     uniform sampler2D uShadowmap;
     uniform highp float uShadowBias;
+    uniform highp float uTexScale;
     uniform bool uRecieveShadow;
     uniform bool uRecieveLighting;
 
@@ -84,7 +85,7 @@ const mainFsSource = `
     }
 
     void main() {
-        highp vec4 color = texture2D(uTexture, vTextureCoord);
+        highp vec4 color = texture2D(uTexture, vTextureCoord * uTexScale);
         
         highp float shadowFactor;
         if (uRecieveShadow) {
@@ -117,7 +118,8 @@ const mainUniformNames = [
     "uShadowmap",
     "uShadowBias",
     "uRecieveShadow",
-    "uRecieveLighting"
+    "uRecieveLighting",
+    "uTexScale"
 ];
 
 /**

@@ -175,6 +175,8 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson, verbose=false) {
             normal,
         )
 
+        if (materialData.scale !== undefined) material.scale = materialData.scale;
+
         this.scene.assets.materials[materialData.id] = material;
 
 
@@ -219,9 +221,9 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson, verbose=false) {
         if (modelData.recieveShadow !== undefined) model.renderSettings.recieveShadow = modelData.recieveShadow;
         if (modelData.recieveLighting !== undefined) model.renderSettings.recieveLighting = modelData.recieveLighting;
         if (modelData.animateRot !== undefined) model.animation.animateRot = modelData.animateRot;
-        if (modelData.rotAxis) model.animation.rotAxis = modelData.rotAxis;
-        if (modelData.rotSpeedFactor) model.animation.rotSpeedFactor = modelData.rotSpeedFactor;
-        if (!modelData.animateTrans === undefined) model.animation.animateTrans = modelData.animateTrans;
+        if (modelData.rotAxis !== undefined) model.animation.rotAxis = modelData.rotAxis;
+        if (modelData.rotSpeedFactor !== undefined) model.animation.rotSpeedFactor = modelData.rotSpeedFactor;
+        if (modelData.animateTrans !== undefined) model.animation.animateTrans = modelData.animateTrans;
 
         this.scene.assets.models[modelData.id] = model;
 

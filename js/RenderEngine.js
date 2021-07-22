@@ -1,3 +1,4 @@
+// TODO: use class syntax
 var RenderEngine = function(canvas, gl, opts) {
     console.log("Initing renderengine");
     this.canvas = canvas;
@@ -45,6 +46,7 @@ var RenderEngine = function(canvas, gl, opts) {
     this.scene = null;
 }
 
+// TODO: add function comment
 RenderEngine.prototype.render = function(time) {
     const gl = this.gl;
 
@@ -358,6 +360,12 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
     gl.uniform1i(
         shader.uniformLocations.uRecieveLighting,
         model.renderSettings.recieveLighting ? 1 : 0
+    );
+
+    // set wether model should recieve lighting
+    gl.uniform1f(
+        shader.uniformLocations.uTexScale,
+        model.material.scale
     );
 
     // tell webgl how it should pull information out of vertex position buffer

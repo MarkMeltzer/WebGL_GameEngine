@@ -49,6 +49,16 @@
                     "path" : "imgs/cube_UV_test.png"
                 },
                 {
+                    "id" : "brick1Diff",
+                    "type" : "diffuse",
+                    "path" : "imgs/brick2_col.jpg"
+                },
+                {
+                    "id" : "planks1Diff",
+                    "type" : "diffuse",
+                    "path" : "imgs/planks1_col.jpg"
+                },
+                {
                     "id" : "whiteTexture",
                     "type" : "diffuse",
                     "path" : "imgs/white.png"
@@ -70,6 +80,15 @@
                 {
                     "id" : "UV_cube",
                     "diffuseTexture" : "UV_cube_Texture"
+                },
+                {
+                    "id" : "brick1",
+                    "diffuseTexture" : "brick1Diff"
+                },
+                {
+                    "id" : "planks1",
+                    "diffuseTexture" : "planks1Diff",
+                    "scale" : 8.0
                 },
                 {
                     "id" : "white",
@@ -109,7 +128,7 @@
                 {
                     "id" : "UV_cube",
                     "mesh" : "UV_cube",
-                    "material" : "UV_cube",
+                    "material" : "brick1",
                     "recieveLighting" : false,
                     "recieveShadow" : false,
                     "animateRot" : true,
@@ -118,7 +137,8 @@
                 {
                     "id" : "plane",
                     "mesh" : "plane",
-                    "material": "white"
+                    "material": "planks1",
+                    "recieveLighting" : false
                 }
             ]
         },

@@ -3,5 +3,6 @@ class Material {
         this.id = id;
         this.diffuseTexture = diffuseTexture;
         this.normalTexture = normalTexture;
+        this.scale = 1.0;
     }
 }

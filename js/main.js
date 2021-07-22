@@ -236,6 +236,14 @@ function initObjectPanel() {
         } else {
             document.getElementById("AABB_checkbox_container").style.display = "none";
         }
+
+        // texture scale slider
+        if (currentObject.model && currentObject.model.material) {
+            document.getElementById("matScale_slider_container").style.display = "inline-block";
+            document.getElementById("matScale_slider").value = currentObject.model.material.scale;
+        } else {
+            document.getElementById("matScale_slider_container").style.display = "none";
+        }
     }
     populateObjectDropdown("object_dropdown")
 
@@ -277,6 +285,15 @@ function initObjectPanel() {
             document.getElementById("object_dropdown").value
         ];
         worldObject.AABB.render = this.checked;
+    }
+
+    // texture scale slider
+    document.getElementById("matScale_slider").oninput = function() {
+        const worldObject = debugGlobal.scene.worldObjects[
+            document.getElementById("object_dropdown").value
+        ];
+        worldObject.model.material.scale = parseFloat(this.value);
+        document.getElementById("matScale_value").innerHTML = this.value;
     }
 }
 
