@@ -1,0 +1,388 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 16px;
+    margin: 0;
+    color: #f3f3f3;
+    height: 100vh;
+
+    /* set the scrollbar styling for firefox */
+    scrollbar-color: #69696A #282829;
+    
+    display:grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+.header {
+    padding: 7px;
+    background-color: #666666ff;
+    text-align: center;
+
+    grid-column: span 3;
+}
+
+.menu {
+    padding: 3px;
+    background-color: #4f4f4fff;
+
+    grid-column: span 3;
+}
+
+/************************************************************************/
+/*****************************  Left pane  ******************************/
+/************************************************************************/
+.left-pane {
+    background-color: gray;
+    
+    grid-row: 3;
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+#left-pane-title {
+    padding: 10px;
+    background-color: #009688ff;
+
+    grid-row: 1;
+}
+#left-pane-content {
+    background-color: #303030ff;
+    overflow-y: auto;
+
+    grid-row: 2;
+}
+.radio-list label {
+    padding: 5px;
+    display: block;
+}
+/* .radio-list li {
+    padding-bottom: 10px;
+} */
+.radio-list {
+    list-style: none;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+.object-list-title {
+    margin-bottom: 0px;
+    margin-left: 10px;
+    font-style: italic;
+}
+
+/************************************************************************/
+/*****************************  Middle pane  ****************************/
+/************************************************************************/
+.middle-pane {
+    /* height: 100vh; */
+    background-color: #000000ff;
+
+    grid-row: 3;
+    display: grid;
+    grid-template-rows: auto auto 1fr auto 1fr;
+}
+#stats-title {
+    padding: 5px;
+    background-color: #674ea7ff;
+
+    grid-row: 2;
+}
+#stats-content {
+    padding: 10px;
+    background-color: #4f4f4fff;
+
+    grid-row: 3;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr;
+}
+
+#console-title {
+    padding: 5px;
+    background-color: #85200cff;
+
+    grid-row: 4;
+}
+#console-content {
+    padding: 10px;
+    background-color: #000000ff;
+    overflow-y: auto;
+    width: 100%;
+    /* V this is hardcoded, make this relative 
+       to the canvas size somehow */
+    max-width: 830px; 
+
+    justify-self: center;
+    grid-row: 5;
+}
+#canvas-container {
+    height: 480px;
+    background-image: url(imgs/loading.png);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/************************************************************************/
+/*****************************  Right pane  *****************************/
+/************************************************************************/
+.right-pane {
+    /* height: 100vh; */
+    background-color: rgb(51, 51, 51);
+
+    grid-row: 3;
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+}
+#right-pane-title {
+    padding: 10px;
+    background-color: #a64d79ff;
+
+    grid-row: 1;
+}
+#right-pane-content {
+    padding: 10px;
+    background-color: #303030ff;
+    overflow-y: auto;
+    
+    grid-row: 3;
+}
+
+/* Settings type buttons */
+#settings-type-buttons {
+    background-color: #4f4f4fff;
+
+    grid-row: 2;
+}
+#settings-type-buttons label{
+    padding: 10px;
+}
+#object-settings-button:checked + label, #global-settings-button:checked + label {
+    background-color: rgb(107, 107, 107);
+}
+#object-settings-button:hover + label, #global-settings-button:hover + label {
+    background-color: rgb(128, 128, 128);
+}
+
+.settings-section-title {
+    margin-bottom: 0px;
+    margin-left: 10px;
+    margin-top: 0px;
+    font-style: italic;
+    color: #db6ca3;
+    border-bottom: dashed 1px rgba(219, 108, 163, .5);
+}
+
+/* vec3 sliders */
+.vec3-sliders-container {
+    margin-left: 10px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+.vec3-slider {
+    background-color: transparent;
+    margin-top: 5px;
+    width: 150px;
+    -webkit-appearance: none;
+}
+.vec3-slider-x::-moz-range-track {
+    height: 5px;
+    background-color: rgba(255, 0, 0, 0.5);
+}
+.vec3-slider-x::-webkit-slider-runnable-track {
+    height: 5px;
+    background-color: rgba(255, 0, 0, 0.5);
+}
+.vec3-slider-y::-moz-range-track {
+    height: 5px;
+    background-color: rgba(0, 255, 0, 0.5);
+}
+.vec3-slider-y::-webkit-slider-runnable-track {
+    height: 5px;
+    background-color: rgba(0, 255, 0, 0.5);
+}
+.vec3-slider-x::-webkit-slider-thumb {
+    margin: -5px;
+}
+.vec3-slider-z::-moz-range-track {
+    height: 5px;
+    background-color: rgba(0, 0, 255, 0.5);
+}
+.vec3-slider-z::-webkit-slider-runnable-track {
+    height: 5px;
+    background-color: rgba(0, 0, 255, 0.5);
+}
+.vec3-slider-x::-webkit-slider-thumb {
+    margin: -5px;
+}
+.vec3-slider-x:hover::-moz-range-track {
+    background-color: rgba(255, 0, 0, 0.75);
+}
+.vec3-slider-x:hover::-webkit-slider-runnable-track {
+    background-color: rgba(255, 0, 0, 0.75);
+}
+.vec3-slider-x::-webkit-slider-thumb {
+    margin: -5px;
+}
+.vec3-slider-y:hover::-moz-range-track {
+    background-color: rgba(0, 255, 0, 0.75);
+}
+.vec3-slider-y:hover::-webkit-slider-runnable-track {
+    background-color: rgba(0, 255, 0, 0.75);
+}
+.vec3-slider-z:hover::-moz-range-track {
+    background-color: rgba(0, 0, 255, 0.75);
+}
+.vec3-slider-z:hover::-webkit-slider-runnable-track {
+    background-color: rgba(0, 0, 255, 0.75);
+}
+.vec3-value {
+    padding-left: 15px;
+    padding-right: 15px;
+    margin: 2px;
+}
+.vec3-value-x {
+    background-color: rgba(255, 0, 0, 0.3);
+    border: 2px solid rgba(255, 0, 0, 0.3);
+}
+.vec3-value-y {
+    background-color: rgba(0, 255, 0, 0.3);
+    border: 2px solid rgba(0, 255, 0, 0.3);
+}
+.vec3-value-z {
+    background-color: rgba(0, 0, 255, 0.3);
+    border: 2px solid rgba(0, 0, 255, 0.3);
+}
+
+/* Multiline elements */
+.multiline-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(248px,0.4fr));
+}
+.multiline-container > *{
+    border-right: 2px solid rgba(255, 255, 255, 0.089);
+}
+
+/* checkboxes */
+.checkbox-container {
+    margin-left: 10px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+/* slider */
+.slider-container {
+    margin-left: 10px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    display: inline-block;
+}
+.slider-container:hover > .slider::-moz-range-track{
+    background-color: hsl(330, 60%, 60%);
+}
+.slider-container:hover > .slider::-webkit-slider-runnable-track{
+    background-color: hsl(330, 60%, 60%);
+}
+.slider {
+    background-color: transparent;
+    margin-top: 5px;
+    width: 150px;
+    -webkit-appearance: none;
+}
+.slider::-moz-range-track {
+    height: 5px;
+    background-color: hsl(330, 37%, 48%);
+}
+.slider::-webkit-slider-runnable-track {
+    height: 5px;
+    background-color: hsl(330, 37%, 48%);
+}
+.slider::-webkit-slider-thumb {
+    margin: -5px;
+}
+.slider-value {
+    padding-left: 15px;
+    padding-right: 15px;
+    margin: 2px;
+    margin-right: 3px;
+    float: right;
+    background-color: rgba(166, 77, 121, 0.3);
+    border: 2px solid rgba(166, 77, 121, 0.3);
+}
+
+/* Dropdowns */
+.dropdown-container {
+    margin-left: 10px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+.dropdown-container select {
+    appearance: none;
+    color: #f3f3f3;
+    background-color: hsl(330, 37%, 48%);
+    border: solid 3px hsla(331, 35%, 26%, 0.3);
+    border-radius: 2px;
+}
+.dropdown-container select:hover {
+    color: #ffffff;
+    background-color: hsl(330, 50%, 50%);
+}
+.dropdown-container select:active {
+    color: #ffffff;
+    background-color: #009688ff;
+}
+
+/* buttons */
+.button-container {
+    margin-left: 10px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+.button-container button {
+    appearance: none;
+    color: #f3f3f3;
+    background-color: rgb(166, 77, 121);
+    border: solid 3px rgba(90, 43, 66, 0.3);
+    border-radius: 10px;
+}
+.button-container button:hover {
+    color: #ffffff;
+    background-color: hsl(330, 50%, 50%);
+    border: solid 3px hsla(331, 35%, 26%, 0.3);
+}
+.button-container button:active {
+    color: #ffffff;
+    background-color: #009688ff;
+}
+
+/************************************************************************/
+/*****************************  General  ********************************/
+/************************************************************************/
+
+/* Radio buttons general */
+.radio-button {
+    display: none;
+}
+.radio-button:checked + label {
+    background-color: #009688;
+}
+.radio-button:hover:not(:checked) + label {
+    background-color: #4f4f4fff;
+}
+
+/* Setting the scrollbar styling for chrome, edge etc. */
+*::-webkit-scrollbar {
+    background-color: #282829; 
+}
+*::-webkit-scrollbar-track {
+    background-color: #282829; 
+}
+*::-webkit-scrollbar-thumb {
+    background-color: #69696A; 
+}
+
+label {
+    user-select: none;
+    display: inline-block;
+}
+
+input[type="range"]::-moz-range-thumb {
+    background-color: rgb(156, 156, 156)
+}

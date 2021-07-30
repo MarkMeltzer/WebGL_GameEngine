@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="stylesheet.css">
+    <title>WebGL Game engine</title>
+</head>
+<body>
+    <div class="header">WebGL Game engine by Mark Meltzer</div>
+    <div class="menu">Menu (coming soon)</div>
+
+    <div class="left-pane">
+        <div id="left-pane-title">Object selector</div>
+        <div id="left-pane-content">
+
+            <!-- World objects -->
+            <p class="object-list-title">World Objects</p>
+            <ul class="radio-list" id="world-object-list">
+                <p id="WO-list-loading">Loading...</p>
+            </ul>
+
+            <!-- Models -->
+            <p class="object-list-title">Models</p>
+            <p style="margin-left: 10px;">Coming soon...</p>
+
+            <!-- Materials -->
+            <p class="object-list-title">Materials</p>
+            <p style="margin-left: 10px;">Coming soon...</p>
+
+            <!-- Meshes -->
+            <p class="object-list-title">Meshes</p>
+            <p style="margin-left: 10px;">Coming soon...</p>
+
+            <!-- Textures -->
+            <p class="object-list-title">Textures</p>
+            <p style="margin-left: 10px;">Coming soon...</p>
+        </div>
+    </div>
+        
+    <div class="middle-pane">
+        <div id="canvas-container">
+            <canvas id="glCanvas" width="850" height="480" tabindex="0"></canvas>
+        </div>
+        <div id="stats-title">Statistics</div>
+        <div id="stats-content">
+            <div id="stats-r1c1"></div>
+            <div id="stats-r1c2"></div>
+            <div id="stats-r1c3"></div>
+            <div id="stats-r2c1"></div>
+            <div id="stats-r2c2"></div>
+            <div id="stats-r2c3"></div>
+            <div id="stats-r3c1"></div>
+            <div id="stats-r3c2"></div>
+            <div id="stats-r3c3"></div>
+            <div id="stats-r4c1"></div>
+            <div id="stats-r4c2"></div>
+            <div id="stats-r4c3"></div>
+        </div>
+        <div id="console-title">Console output</div>
+        <div id="console-content"></div>
+    </div>
+
+    <div class="right-pane">
+        <div id="right-pane-title">Settings</div>
+        <div id="settings-type-buttons">
+            <input type="radio" name="settings-type-buttons" class="radio-button" id="object-settings-button">
+            <label for="object-settings-button" class="radio-label" style="float:left">Object settings</label>
+
+            <input type="radio" class="radio-button" name="settings-type-buttons" id="global-settings-button" checked>
+            <label for="global-settings-button" class="radio-label" style="float:right">Global settings</label>
+        </div>
+        <div id="right-pane-content">
+            <!-- Object settings -->
+            <div id="object-settings" style="display: none;">
+                <!-- Transform settings -->
+                <p class="settings-section-title">Transform settings</p>
+                <div class="vec3-sliders-container">
+                    <label>Position: </label>
+                    <span id="pos-x" class="vec3-value vec3-value-x">0.5</span>
+                    <span id="pos-y" class="vec3-value vec3-value-y">0.5</span>
+                    <span id="pos-z" class="vec3-value vec3-value-z">0.5</span>
+                    <br>
+                    <input type="range" class="vec3-slider vec3-slider-x" id="pos-x-slider" min="-20" max="20" step="0.1">
+                    <input type="range" class="vec3-slider vec3-slider-y" id="pos-y-slider" min="-20" max="20" step="0.1">
+                    <input type="range" class="vec3-slider vec3-slider-z" id="pos-z-slider" min="-20" max="20" step="0.1">
+                </div>
+                <div class="vec3-sliders-container">
+                    <label>Rotation: </label>
+                    <span id="rot-x" class="vec3-value vec3-value-x">0.5</span>
+                    <span id="rot-y" class="vec3-value vec3-value-y">0.5</span>
+                    <span id="rot-z" class="vec3-value vec3-value-z">0.5</span>
+                    <br>
+                    <input type="range" class="vec3-slider vec3-slider-x" id="rot-x-slider" min="-180" max="180" step="0.1">
+                    <input type="range" class="vec3-slider vec3-slider-y" id="rot-y-slider" min="-180" max="180" step="0.1">
+                    <input type="range" class="vec3-slider vec3-slider-z" id="rot-z-slider" min="-180" max="180" step="0.1">
+                </div>
+                <br>
+
+                <!-- Render settings -->
+                <p class="settings-section-title">Render settings</p>
+                <div class="checkbox-container">
+                    <label for="render-checkbox">Render: </label>
+                    <input type="checkbox" id="render-checkbox">
+                </div>
+                <div class="checkbox-container">
+                    <label for="cast-shadow-checkbox">Cast Shadow: </label>
+                    <input type="checkbox" id="cast-shadow-checkbox">
+                </div>
+                <div class="checkbox-container">
+                    <label for="recv-shadow-checkbox">Recieve shadow: </label>
+                    <input type="checkbox" id="recv-shadow-checkbox">
+                </div>
+                <div class="checkbox-container">
+                    <label for="recv-lighting-checkbox">Recieve lighting: </label>
+                    <input type="checkbox" id="recv-lighting-checkbox">
+                </div>
+                <div class="checkbox-container">
+                    <label for="render-AABB-checkbox">Render AABB: </label>
+                    <input type="checkbox" id="render-AABB-checkbox">
+                </div>
+                <div class="multiline-container">
+                    <div class="slider-container">
+                        <!-- This should be material property -->
+                        <label>Texture scale: </label>
+                        <br>
+                        <input type="range" class="slider" id="texture-scale-slider" min="0.1" max="10" step="0.1">
+                        <span id="texture-scale" class="slider-value">45</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global settings -->
+            <div id="global-settings" style="display: block;">
+                <!-- Lighting settings -->
+                <p class="settings-section-title">Lighting settings</p>
+                <div class="vec3-sliders-container">
+                    <label>Light position: </label>
+                    <span id="light-x" class="vec3-value vec3-value-x">0.5</span>
+                    <span id="light-y" class="vec3-value vec3-value-y">0.5</span>
+                    <span id="light-z" class="vec3-value vec3-value-z">0.5</span>
+                    <br>
+                    <input type="range" class="vec3-slider vec3-slider-x" id="light-x-slider" min="-100" max="100" step="1">
+                    <input type="range" class="vec3-slider vec3-slider-y" id="light-y-slider" min="-100" max="100" step="1">
+                    <input type="range" class="vec3-slider vec3-slider-z" id="light-z-slider" min="-100" max="100" step="1">
+                </div>
+                <div class="multiline-container">
+                    <div class="slider-container">
+                        <label>Light field of view: </label>
+                        <br>
+                        <input type="range" class="slider" id="light-fov-slider" min="1" max="120" step="1">
+                        <span id="light-fov" class="slider-value">45</span>
+                    </div>
+                    <div class="slider-container">
+                        <label>Shadow bias: </label>
+                        <br>
+                        <input type="range" class="slider" id="shadow-bias-slider" min="0" max="0.0005" step="0.00001">
+                        <span id="shadow-bias" class="slider-value">45</span>
+                    </div>
+                    <div class="slider-container">
+                        <label>Light near clipping plane: </label>
+                        <br>
+                        <input type="range" class="slider" id="light-znear-slider" min="0" max="100">
+                        <span id="light-znear" class="slider-value">45</span>
+                    </div>
+                    <div class="slider-container">
+                        <label>Light far clipping plane: </label>
+                        <br>
+                        <input type="range" class="slider" id="light-zfar-slider" min="0" max="500">
+                        <span id="light-zfar" class="slider-value">45</span>
+                    </div>
+                </div>
+
+                <!-- Player settings -->
+                <p class="settings-section-title">Player settings</p>
+                <div class="multiline-container">
+                    <div class="slider-container">
+                        <label>Field of view: </label>
+                        <br>
+                        <input type="range" class="slider" id="fov-slider" min="1" max="120" step="1">
+                        <span id="fov" class="slider-value">45</span>
+                    </div>
+                    <div class="slider-container">
+                        <label>Near clipping plane: </label>
+                        <br>
+                        <input type="range" class="slider" id="znear-slider" min="0.1" max="100" step="0.1">
+                        <span id="znear" class="slider-value">45</span>
+                    </div>
+                    <div class="slider-container">
+                        <label>Far clipping plane: </label>
+                        <br>
+                        <input type="range" class="slider" id="zfar-slider" min="0.1" max="500" step="0.1">
+                        <span id="zfar" class="slider-value">45</span>
+                    </div>
+                </div>
+
+                <!-- Scene settings -->
+                <p class="settings-section-title">Scene settings</p>
+                <div class="dropdown-container">
+                    <label>Select scene: </label>
+                    <select name="scene" id="scene-dropdown" class="dropdown"></select>
+                </div>
+                <div class="multiline-container">
+                    <div class="button-container">
+                        <button id="reload-button">Reload scene!</button>
+                    </div>
+                    <div class="button-container">
+                        <button id="view-scene-json-button">View scene JSON!</button>
+                    </div>
+                </div>
+
+                <!-- Controller settings -->
+                <p class="settings-section-title">Controller settings</p>
+                <div class="dropdown-container">
+                    <label>Select controller child: </label>
+                    <select name="scene" id="controller_dropdown" class="dropdown"></select>
+                </div>
+                <div class="checkbox-container">
+                    <label for="flying-checkbox">Flying: </label>
+                    <input type="checkbox" id="flying-checkbox">
+                </div>
+                <div class="multiline-container">
+                    <div class="slider-container">
+                        <label>Movement speed: </label>
+                        <br>
+                        <input type="range" class="slider" id="movespeed-slider" min="1" max="100">
+                        <span id="movespeed" class="slider-value">45</span>
+                    </div>
+                    <div class="slider-container">
+                        <label>Mouse sensitivity: </label>
+                        <br>
+                        <input type="range" class="slider" id="sensitivity-slider" min="1" max="100">
+                        <span id="sensitivity" class="slider-value">45</span>
+                    </div>
+                    <div class="slider-container">
+                        <label>Jump height: </label>
+                        <br>
+                        <input type="range" class="slider" id="jump-height-slider" min="1" max="100">
+                        <span id="jump-height" class="slider-value">45</span>
+                    </div>
+                </div>
+
+                <!-- Physics settings -->
+                <p class="settings-section-title">Physics settings</p>
+                <div class="multiline-container">
+                    <div class="slider-container">
+                        <label>Gravity: </label>
+                        <br>
+                        <input type="range" class="slider" id="gravity-slider" min="0" max="0.25" step="0.001">
+                        <span id="gravity" class="slider-value">45</span>
+                    </div>
+                    <div class="slider-container">
+                        <label>Friction factor: </label>
+                        <br>
+                        <input type="range" class="slider" id="friction-slider" min="0" max="1" step="0.01">
+                        <span id="friction" class="slider-value">45</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"
+            integrity="sha512-zhHQR0/H5SEBL3Wn6yYSaTTZej12z0hVZKOv3TwCUXT1z5qeqGcXJLLrbERYRScEDDpYIJhPC1fk31gqR783iQ=="
+            crossorigin="anonymous" defer>
+    </script>
+    <script src="js/GameEngine.js" defer></script>
+    <script src="js/RenderEngine.js" defer></script>
+    <script src="js/Scene.js" defer></script>
+    <script src="js/AABB.js" defer></script>
+    <script src="js/WorldObject.js" defer></script>
+    <script src="js/Camera.js" defer></script>
+    <script src="js/utils.js" defer></script>
+    <script src="js/frontend.js"></script>
+    <script src="js/main.js" defer></script>
+    <script src="js/Shader.js" defer></script>
+    <script src="js/shaderSources.js" defer></script>
+    <script src="js/Controller.js" defer></script>
+    <script src="js/Mesh.js" defer></script>
+    <script src="js/Material.js" defer></script>
+    <script src="js/Model.js" defer></script>
+    <script src="js/PhysicsEngine.js" defer></script>
+    <script src="js/Texture.js" defer></script>
+</body>
+</html>

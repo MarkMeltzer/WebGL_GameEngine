@@ -324,6 +324,7 @@ GameEngine.prototype.createDefaults = function() {
  */
 GameEngine.prototype.startGameLoop = function() {
     const self = this;
+    self.time = 0.0;
     
     var then = 0.0;
     function gameLoop(now) {
