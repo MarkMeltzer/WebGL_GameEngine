@@ -1,3 +1,4 @@
+// TODO: add comments and function comments to this file
 function loadJSON(path, callback) {
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {

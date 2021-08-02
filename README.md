@@ -47,13 +47,16 @@ The scene JSON files have the following general structure:
 
 # Demo
 A short gif demonstrating some of the features.
-![Short demonstration gif](./WebGL_demo.gif)
+![Short demonstration gif](./WebGL_demo2.gif)
+
+
+A live demonstration can be found at [markmeltzer.nl](http://markmeltzer.nl) (may or may not be up to date).
 
 **Note:** when running the code yourself, you need to run a simple webserver or you will get a CORS error.
 
 # To do/next steps
 1. Fix incode todo's relating to readability.
-2. Make textures repeating (or add option to, maybe add scale parameter)
+2. ~~Make textures repeating (or add option to, maybe add scale parameter)~~
 3. Implement normal mapping
       - Load normal textures
       - Calculate tangents in model-loader
