@@ -59,11 +59,7 @@ A live demonstration can be found at [markmeltzer.nl](http://markmeltzer.nl) (ma
 # To do/next steps
 1. Fix incode todo's relating to readability.
 2. ~~Make textures repeating (or add option to, maybe add scale parameter)~~
-3. Implement normal mapping
-      - Load normal textures
-      - Calculate tangents in model-loader
-      - Create default (no normals) normal map and give material a normal setting
-      - Implement the normals in shader
+3. ~~Implement normal mapping~~
 4. Implement specular and ambient components of phong-shading
 5. Implement specular mapping
 6. Add support for non-trangulated OBJ files
