@@ -132,7 +132,7 @@ function setupSceneDropdown() {
         dropdown.remove(i);
     }
 
-    // add all worldObjects
+    // add all scenes
     for (var i = 0; i < sceneDescriptions.length; i++) {
         const option = document.createElement("option");
         option.value = sceneDescriptions[i];
@@ -205,12 +205,13 @@ function populateObjectSelector() {
     while (WOList.firstChild) {
         WOList.removeChild(WOList.firstChild);
     }
+
+    // show the loading text in the dropdown
     const pLoading = document.createElement("p");
     pLoading.setAttribute("id", "WO-list-loading");
     WOList.appendChild(pLoading);
-
-
     document.getElementById("WO-list-loading").style.display = "block";
+
     const WOKeys = Object.keys(gameEngine.scene.worldObjects);
     for (var i = 0; i < WOKeys.length; i++) {
         const li = document.createElement("li");
@@ -239,7 +240,6 @@ function populateObjectSelector() {
         WOList.appendChild(li);
     }
     document.getElementById("WO-list-loading").style.display = "none";
-
 }
 
 /**

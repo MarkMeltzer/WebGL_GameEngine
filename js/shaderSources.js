@@ -2,39 +2,42 @@
  * The GLSL source code for the vertex shader used to render to the canvas.
  */
 const mainVsSource = `
+    // vertex attributes
     attribute vec4 aVertexPosition;
     attribute vec3 aVertexNormal;
     attribute vec2 aTextureCoord;
+    attribute vec3 aVertexTangent;
+    attribute vec3 aVertexBitangent;
 
+    // transformations
     uniform mat4 uProjectionMatrix;
     uniform mat4 uCameraMatrix;
     uniform mat4 uModelViewMatrix;
-
     uniform mat4 uLightSpaceProjection;
     uniform mat4 uLightSpaceCamera;
-
     uniform mat4 uNormalMatrix;
 
-    uniform vec3 uLightDirection;
-
     varying highp vec2 vTextureCoord;
-    varying highp vec3 vLighting;
     varying highp vec4 vLightSpaceVertex;
+    varying highp vec3 vNormal;
+    varying highp vec3 vTangent;
+    varying highp vec3 vBitangent;
 
     void main() {
+        // transform the vertex position
         gl_Position = uProjectionMatrix * uCameraMatrix * uModelViewMatrix * aVertexPosition;
 
-        highp vec3 ambientLight = vec3(0.2, 0.2, 0.2);
-        highp vec3 directionalLightColor = vec3(1, 1, 1);
-        highp vec3 directionalVector = normalize(uLightDirection);
+        // transform the normal
+        vNormal = (uNormalMatrix * vec4(aVertexNormal, 1.0)).xyz;
 
-        highp vec4 transformedNormal = uNormalMatrix * vec4(aVertexNormal, 1.0);
-
-        highp float directional = max(dot(transformedNormal.xyz, directionalVector), 0.0);
-        vLighting = ambientLight + (directionalLightColor * directional);
+        // pass through the tangents    
+        vTangent = (uNormalMatrix * vec4(aVertexTangent, 0.0)).xyz;
+        vBitangent = (uNormalMatrix * vec4(aVertexBitangent, 0.0)).xyz;
         
+        // transform the vertex to lightspace
         vLightSpaceVertex = uLightSpaceProjection * uLightSpaceCamera * uModelViewMatrix * aVertexPosition;
 
+        // pass through the texture coordinate
         vTextureCoord = aTextureCoord;
     }
 `;
@@ -44,16 +47,25 @@ const mainVsSource = `
  * The GLSL source code for the fragment shader used to render to the canvas.
  */
 const mainFsSource = `
-    uniform sampler2D uTexture;
+    // textures
+    uniform sampler2D uTexDiffuse;
+    uniform sampler2D uTexNormal;
     uniform sampler2D uShadowmap;
+
+    // settings
     uniform highp float uShadowBias;
     uniform highp float uTexScale;
     uniform bool uRecieveShadow;
     uniform bool uRecieveLighting;
 
-    varying highp vec3 vLighting;
+    // light
+    uniform highp vec3 uLightDirection;
+
     varying highp vec2 vTextureCoord;
     varying highp vec4 vLightSpaceVertex;
+    varying highp vec3 vNormal;
+    varying highp vec3 vTangent;
+    varying highp vec3 vBitangent;
 
     bool inShadow() {
         // Manually do the perspective division
@@ -85,16 +97,35 @@ const mainFsSource = `
     }
 
     void main() {
-        highp vec4 color = texture2D(uTexture, vTextureCoord * uTexScale);
-        
+        // diffuse color
+        highp vec4 color = texture2D(uTexDiffuse, vTextureCoord * uTexScale);
+
+        // normal
+        highp vec3 normal = texture2D(uTexNormal, vTextureCoord * uTexScale).xyz;
+        normal = (normal * 2.0 - 1.0);
+        highp mat3 TBN = mat3(normalize(vTangent), normalize(vBitangent), normalize(vNormal));
+        normal = normalize(TBN * normal);
+
+        /* ============== lighting ============== */
+        // ambient
+        highp vec3 ambientLight = vec3(0.2, 0.2, 0.2);
+
+        // directional
+        highp vec3 directionalLightColor = vec3(1, 1, 1);
+        highp vec3 directionalVector = normalize(uLightDirection);
+        highp float directional = max(dot(normal, directionalVector), 0.0);
+
+        // final
+        highp vec3 totalLight = ambientLight + (directionalLightColor * directional);
+        highp vec3 Lighting = uRecieveLighting ? totalLight : vec3(1.0, 1.0, 1.0);
+
+        /* ============== shadow ============== */
         highp float shadowFactor;
         if (uRecieveShadow) {
             shadowFactor = inShadow() ? 0.3 : 1.0;
         } else {
             shadowFactor = 1.0;
         }
-
-        highp vec3 Lighting = uRecieveLighting ? vLighting : vec3(1.0, 1.0, 1.0);
 
         gl_FragColor = vec4(color.xyz * Lighting * shadowFactor, color.w);
     }
@@ -104,6 +135,8 @@ const mainAttributeNames = [
     "aVertexPosition",
     "aVertexNormal",
     "aTextureCoord",
+    "aVertexTangent",
+    "aVertexBitangent"
 ];
 
 const mainUniformNames = [
@@ -114,7 +147,8 @@ const mainUniformNames = [
     "uLightSpaceCamera",
     "uNormalMatrix",
     "uLightDirection",
-    "uTexture",
+    "uTexDiffuse",
+    "uTexNormal",
     "uShadowmap",
     "uShadowBias",
     "uRecieveShadow",

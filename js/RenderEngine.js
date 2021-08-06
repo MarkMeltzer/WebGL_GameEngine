@@ -224,11 +224,11 @@ RenderEngine.prototype.drawScene = function(camera, time) {
     );
 
     // set the shadowmap texture uniform
-    gl.activeTexture(gl.TEXTURE1);
+    gl.activeTexture(gl.TEXTURE2);
     gl.bindTexture(gl.TEXTURE_2D, this.shadowmap);
     gl.uniform1i(
         this.mainShader.uniformLocations.uShadowmap,
-        1
+        2
     );
 
     // set the light space transformation uniform for shadowmapping
@@ -416,6 +416,42 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
             );
             gl.enableVertexAttribArray(shader.attribLocations.aVertexNormal);
         }
+
+        // tell webgl how it should pull information out of vertex tangent and bitangent buffers
+        {
+            const numComponents = 3;
+            const type = gl.FLOAT;
+            const normalize = false;
+            const stride = 0;
+            const offset = 0;
+            gl.bindBuffer(gl.ARRAY_BUFFER, model.mesh.buffers.tangent);
+            gl.vertexAttribPointer(
+                shader.attribLocations.aVertexTangent,
+                numComponents,
+                type,
+                normalize,
+                stride,
+                offset
+            );
+            gl.enableVertexAttribArray(shader.attribLocations.aVertexTangent);
+        }
+        {
+            const numComponents = 3;
+            const type = gl.FLOAT;
+            const normalize = false;
+            const stride = 0;
+            const offset = 0;
+            gl.bindBuffer(gl.ARRAY_BUFFER, model.mesh.buffers.bitangent);
+            gl.vertexAttribPointer(
+                shader.attribLocations.aVertexBitangent,
+                numComponents,
+                type,
+                normalize,
+                stride,
+                offset
+            );
+            gl.enableVertexAttribArray(shader.attribLocations.aVertexBitangent);
+        }
     }
         
     if (textures) {
@@ -438,12 +474,26 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
             gl.enableVertexAttribArray(shader.attribLocations.aTextureCoord);
         }
     
-        // set the texture uniform in the shader
+        // set the diffuse texture uniform in the shader
+        const diffuseBuffer = model.material.useDiffuse ? 
+                              model.material.diffuseTexture.buffer : 
+                              this.scene.defaultMaterial.diffuseTexture.buffer
         gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, model.material.diffuseTexture.buffer);
+        gl.bindTexture(gl.TEXTURE_2D, diffuseBuffer);
         gl.uniform1i(
-            shader.uniformLocations.uTexture,
+            shader.uniformLocations.uTexDiffuse,
             0
+        );
+
+        // set the diffuse texture uniform in the shader
+        const normalBuffer = model.material.useNormal ?
+                              model.material.normalTexture.buffer :
+                              this.scene.defaultMaterial.normalTexture.buffer
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, normalBuffer);
+        gl.uniform1i(
+            shader.uniformLocations.uTexNormal,
+            1
         );
     }
 

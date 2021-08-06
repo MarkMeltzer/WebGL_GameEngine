@@ -224,15 +224,39 @@ function parseOBJFile(OBJFile) {
     var outputTexCoords = [];
     var outputNormals = [];
     var outputIndices = [];
+    var outputTangents = [];
+    var outputBitangents = [];
     var indexCounter = 0;
     var indexDict = {};
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i].split(" ");
 
+        // assumption: each face is a triangle
         if (line[0] == "f") {
             line = line.slice(1);
 
             // iterate over vertices in face
+            // TODO: split this up to first collect all verts/vert information
+            //       of a triangle, then calculate the tangent and bitangent,
+            //       then add the same tan and bitan for each vertex
+            const triplet1 = line[0].split("/").map(x => parseInt(x));
+            const triplet2 = line[1].split("/").map(x => parseInt(x));
+            const triplet3 = line[2].split("/").map(x => parseInt(x));
+
+            const verts = [
+                arrayToVec3(inputVertices[triplet1[0] - 1]),
+                arrayToVec3(inputVertices[triplet2[0] - 1]),
+                arrayToVec3(inputVertices[triplet3[0] - 1])
+            ]
+            const texCoords = [
+                arrayToVec2(inputTexCoords[triplet1[1] - 1]),
+                arrayToVec2(inputTexCoords[triplet2[1] - 1]),
+                arrayToVec2(inputTexCoords[triplet3[1] - 1])
+            ]
+
+            // calculate the tangent and bitangent
+            const tangents = calculateTangents(verts, texCoords);
+
             for (var j = 0; j < line.length; j++) {
                 const tripletStr = line[j];
 
@@ -246,6 +270,8 @@ function parseOBJFile(OBJFile) {
                     outputVertices.push(inputVertices[triplet[0] - 1]);
                     outputTexCoords.push(inputTexCoords[triplet[1] - 1]);
                     outputNormals.push(inputNormals[triplet[2] - 1]);
+                    outputTangents.push(tangents[0]);
+                    outputBitangents.push(tangents[1]);
                     outputIndices.push(indexCounter);
 
                     // Associate triplet with index and increment index
@@ -260,8 +286,37 @@ function parseOBJFile(OBJFile) {
         vertexPositions: outputVertices.flat(),
         vertexNormals: outputNormals.flat(),
         vertexIndices: outputIndices.flat(),
-        textureCoords: outputTexCoords.flat()
+        textureCoords: outputTexCoords.flat(),
+        tangents: outputTangents.flat(),
+        bitangents: outputBitangents.flat()
     };
+}
+
+function calculateTangents(verts, texCoords) {
+    // src: https://learnopengl.com/Advanced-Lighting/Normal-Mapping
+    let edge1 = vec3.create();
+    vec3.sub(edge1, verts[1], verts[0]);
+    let edge2 = vec3.create();
+    vec3.sub(edge2, verts[2], verts[0]);
+    let deltaUV1 = vec2.create();
+    vec2.sub(deltaUV1, texCoords[1], texCoords[0]);
+    let deltaUV2 = vec2.create();
+    vec2.sub(deltaUV2, texCoords[2], texCoords[0]);
+
+    const f = 1.0 / (deltaUV1[0] * deltaUV2[1] - deltaUV2[0] * deltaUV1[1]);
+    const tangent = [
+        f * (deltaUV2[1] * edge1[0] - deltaUV1[1] * edge2[0]),
+        f * (deltaUV2[1] * edge1[1] - deltaUV1[1] * edge2[1]),
+        f * (deltaUV2[1] * edge1[2] - deltaUV1[1] * edge2[2])
+    ];
+
+    const bitangent = [
+        f * (-deltaUV2[0] * edge1[0] - deltaUV1[0] * edge2[0]),
+        f * (-deltaUV2[0] * edge1[1] - deltaUV1[0] * edge2[1]),
+        f * (-deltaUV2[0] * edge1[2] - deltaUV1[0] * edge2[2])
+    ];
+
+    return [tangent, bitangent];
 }
 
 function isPowerOf2(value) {
@@ -323,4 +378,12 @@ function arrayEquals(a, b) {
     }
 
     return true;
+}
+
+function arrayToVec3(arr) {
+    return vec3.fromValues(arr[0], arr[1], arr[2]);
+}
+
+function arrayToVec2(arr) {
+    return vec2.fromValues(arr[0], arr[1]);
 }

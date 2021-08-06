@@ -3,7 +3,8 @@ gameEngine = null;
 selectedObject = null;
 sceneDescriptions = [
     "scenes/scene1_v2.json",
-    "scenes/scene2_v2.json"
+    "scenes/scene2_v2.json",
+    "scenes/normal_map_test.json"
 ];
 currentScene = sceneDescriptions[0];
 
@@ -122,7 +123,6 @@ function setupObjectSettings() {
     setupVec3Slider("pos", ["position"], parseFloat, true);
     setupVec3Slider("rot", ["rotation"], parseFloat, true);
 
-
     // render settings
     setupCheckbox("render", ["model", "renderSettings"], "render", true);
     setupCheckbox("cast-shadow", ["model", "renderSettings"], "castShadow", true);
@@ -130,6 +130,8 @@ function setupObjectSettings() {
     setupCheckbox("recv-lighting", ["model", "renderSettings"], "recieveLighting", true);
     setupCheckbox("render-AABB", ["AABB"], "render", true);
     setupSlider("texture-scale", ["model", "material"], "scale", parseFloat, true);
+    setupCheckbox("use-diffuse", ["model", "material"], "useDiffuse", true);
+    setupCheckbox("use-normal", ["model", "material"], "useNormal", true);
 }
 
 onload = main;

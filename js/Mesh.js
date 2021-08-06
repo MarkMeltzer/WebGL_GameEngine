@@ -4,6 +4,8 @@ class Mesh {
         id,
         vertPositions,
         vertNormals,
+        vertTangents,
+        vertBitangents,
         vertIndices,
         texCoords
     ) {
@@ -11,6 +13,8 @@ class Mesh {
         this.id = id;
         this.vertPositions = vertPositions;
         this.vertNormals = vertNormals;
+        this.vertTangents = vertTangents;
+        this.vertBitangents = vertBitangents;
         this.vertIndices = vertIndices;
         this.texCoords = texCoords;
 
@@ -18,6 +22,8 @@ class Mesh {
             index: null,
             normal: null,
             position: null,
+            tangent: null,
+            bitangent: null,
             texCoord: null
         };
         this.setBuffers();
@@ -61,6 +67,26 @@ class Mesh {
             gl.STATIC_DRAW
         );
         this.buffers.texCoord = textureCoordBuffer;
+
+        // vertex tangents
+        const tangentBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, tangentBuffer);
+        gl.bufferData(
+            gl.ARRAY_BUFFER,
+            new Float32Array(this.vertTangents),
+            gl.STATIC_DRAW
+        );
+        this.buffers.tangent = tangentBuffer;
+
+        // vertex bitangents
+        const bitangentBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, bitangentBuffer);
+        gl.bufferData(
+            gl.ARRAY_BUFFER,
+            new Float32Array(this.vertBitangents),
+            gl.STATIC_DRAW
+        );
+        this.buffers.bitangent = bitangentBuffer;
 
         // vertex indices
         const indexBuffer = gl.createBuffer();

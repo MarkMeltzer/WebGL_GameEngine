@@ -8,6 +8,7 @@ This project is a small hobby project for educational purposes. It is also my fi
 # Features
  - Directional shadow mapping
  - Lambertian Shading
+ - Normal mapping
  - Simple .OBJ loading
  - Scene loading from custom JSON files
  - Axis-aligned bounding box based physics
@@ -18,7 +19,8 @@ This project is a small hobby project for educational purposes. It is also my fi
 ```
 .
 ├── js
-|   ├── main.js           # starts the game engine and contains js for handling the frontend such as the settings panel
+|   ├── main.js           # starts the game engine and sets up the frontend
+|   ├── frontend.js       # contains code for setting managing the frontend
 |   ├── GameEngine.js     # contains main game loop, the render- and physicsengine, handles loading of assets and other game logic
 |   ├── RenderEngine.js   # handles the rendering of the scene to the html canvas using WebGL
 |   ├── PhysicsEngine.js  # handles physics such as dynamics and collision
@@ -28,7 +30,7 @@ This project is a small hobby project for educational purposes. It is also my fi
 ├── imgs          # textures
 ├── objs          # meshes in OBJ format
 ├── scenes        # scenes files in JSON format
-└── test.html     # the HTML file containing the canvas and settings panel
+└── index.html     # the HTML file containing the canvas and settings panel
 ```
 ## Scene structure
 The scene JSON files have the following general structure:
@@ -68,4 +70,4 @@ A live demonstration can be found at [markmeltzer.nl](http://markmeltzer.nl) (ma
 
 # Known issues/bugs
 - The AABB's don't update when rotating an object
-- The UV mapping doesn't seem to completely work yet (the top and bottom faces of a cube arne't mapped correctly)
+- The UV mapping doesn't seem to completely work yet (the top and bottom faces of a cube aren't mapped correctly)

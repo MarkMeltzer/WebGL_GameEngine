@@ -89,14 +89,16 @@ GameEngine.prototype.loadAtomicAssets = function(sceneJson, verbose=false) {
 
         loadOBJ(meshData.path, (OBJFile) => {
             // parse the obj file and create mesh object
-            const vertexhData = parseOBJFile(OBJFile);
+            const vertexData = parseOBJFile(OBJFile);
             const mesh = new Mesh(
                 this.gl,
                 meshData.id,
-                vertexhData.vertexPositions,
-                vertexhData.vertexNormals,
-                vertexhData.vertexIndices,
-                vertexhData.textureCoords
+                vertexData.vertexPositions,
+                vertexData.vertexNormals,
+                vertexData.tangents,
+                vertexData.bitangents,
+                vertexData.vertexIndices,
+                vertexData.textureCoords
             );
 
             // add mesh object to scene
@@ -296,11 +298,16 @@ GameEngine.prototype.createDefaults = function() {
         "diffuse",
         defaultTextureData
     );
+    const defaultNormalMapData = new ImageData(
+        new Uint8ClampedArray([127, 127, 255, 255,]),
+        1,
+        1
+    );
     const defaultNormal = new Texture(
         this.gl,
         "defaultTexture",
         "normal",
-        defaultTextureData
+        defaultNormalMapData
     );
     this.scene.defaultMaterial = new Material(
         "defaultMaterial",

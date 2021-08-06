@@ -1,0 +1,95 @@
+{
+    "assets": {
+        "meshes": [
+            {
+                "id": "UV_cube",
+                "path": "objs/UV_cube_test.obj"
+            },
+            {
+                "id": "plane",
+                "path": "objs/plane.obj"
+            }
+        ],
+        "textures": [
+            {
+                "id": "brick1Diff",
+                "type": "diffuse",
+                "path": "imgs/brick2_col.jpg"
+            },
+            {
+                "id": "brick1Norm",
+                "type": "normal",
+                "path": "imgs/brick2_norm.jpg"
+            },
+            {
+                "id": "planks1Diff",
+                "type": "diffuse",
+                "path": "imgs/planks1_col.jpg"
+            },
+            {
+                "id": "planks1Norm",
+                "type": "normal",
+                "path": "imgs/planks1_norm.jpg"
+            }
+        ],
+        "materials": [
+            {
+                "id": "brick1",
+                "diffuseTexture": "brick1Diff",
+                "normalTexture" : "brick1Norm",
+                "scale": 3.0
+            },
+            {
+                "id": "planks1",
+                "diffuseTexture": "planks1Diff",
+                "normalTexture" : "planks1Norm",
+                "scale": 8.0
+            }
+        ],
+        "models": [
+            {
+                "id": "UV_cube",
+                "mesh": "UV_cube",
+                "material": "brick1",
+                "animateRot" : false,
+                "rotAxis" : [1,1,0],
+                "rotSpeedFactor": 1,
+                "recieveShadow" : false
+            },
+            {
+                "id": "plane",
+                "mesh": "plane",
+                "material": "planks1",
+                "recieveLighting": false
+            }
+        ]
+    },
+    "worldObjects": [
+        {
+            "id": "UV_cube",
+            "type": "model",
+            "position": [
+                0,
+                -0.4,
+                5.8
+            ],
+            "rotation": [
+                45,
+                45,
+                0
+            ],
+            "model": "UV_cube",
+            "AABB": "none"
+        },
+        {
+            "id": "ground_plane",
+            "type": "model",
+            "position": [
+                0,
+                -3,
+                0
+            ],
+            "model": "plane"
+        }
+    ]
+}
