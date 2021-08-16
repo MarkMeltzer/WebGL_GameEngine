@@ -223,6 +223,12 @@ RenderEngine.prototype.drawScene = function(camera, time) {
         this.scene.light
     );
 
+    // set the camera position in the shader
+    gl.uniform3fv(
+        this.mainShader.uniformLocations.uCameraPos, 
+        this.scene.camera.position
+    );
+
     // set the shadowmap texture uniform
     gl.activeTexture(gl.TEXTURE2);
     gl.bindTexture(gl.TEXTURE_2D, this.shadowmap);
@@ -362,10 +368,28 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
         model.renderSettings.recieveLighting ? 1 : 0
     );
 
-    // set wether model should recieve lighting
+    // set wether the texture scale
     gl.uniform1f(
         shader.uniformLocations.uTexScale,
         model.material.scale
+    );
+
+    // set the specular exponent of the material
+    gl.uniform1f(
+        shader.uniformLocations.uSpecExp,
+        model.material.specularExponent
+    );
+
+    // set the specular strength of the material
+    gl.uniform1f(
+        shader.uniformLocations.uSpecStrength,
+        model.material.specularStrength
+    );
+
+    // set the specular strength of the material
+    gl.uniform1f(
+        shader.uniformLocations.uDiffStrength,
+        model.material.diffuseStrength
     );
 
     // tell webgl how it should pull information out of vertex position buffer

@@ -130,6 +130,9 @@ function setupObjectSettings() {
     setupCheckbox("recv-lighting", ["model", "renderSettings"], "recieveLighting", true);
     setupCheckbox("render-AABB", ["AABB"], "render", true);
     setupSlider("texture-scale", ["model", "material"], "scale", parseFloat, true);
+    setupSlider("diffuse-strength", ["model", "material"], "diffuseStrength", parseFloat, true);
+    setupSlider("specular-strength", ["model", "material"], "specularStrength", parseFloat, true);
+    setupSlider("specular-exponent", ["model", "material"], "specularExponent", parseFloat, true);
     setupCheckbox("use-diffuse", ["model", "material"], "useDiffuse", true);
     setupCheckbox("use-normal", ["model", "material"], "useNormal", true);
 }

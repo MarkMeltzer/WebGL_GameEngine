@@ -56,28 +56,28 @@ function setupVec3Slider(elementId, path, parseFunc, objectSetting=false) {
     } else {
         sliderX.parentElement.style.display = "block";
 
-        sliderXValue.innerHTML = object[0];
+        sliderXValue.innerHTML = parseFunc(object[0]).toFixed(2);
         sliderX.setAttribute("value", object[0]);
 
-        sliderYValue.innerHTML = object[1];
+        sliderYValue.innerHTML = parseFunc(object[1]).toFixed(2);
         sliderY.setAttribute("value", object[1]);
 
-        sliderZValue.innerHTML = object[2];
+        sliderZValue.innerHTML = parseFunc(object[2]).toFixed(2);
         sliderZ.setAttribute("value", object[2]);
     }
 
     // make sliders change value in engine
     sliderX.oninput = function() {
         object[0] = parseFunc(this.value);
-        sliderXValue.innerHTML = this.value;
+        sliderXValue.innerHTML = parseFunc(this.value).toFixed(2);
     }
     sliderY.oninput = function() {
         object[1] = parseFunc(this.value);
-        sliderYValue.innerHTML = this.value;
+        sliderYValue.innerHTML = parseFunc(this.value).toFixed(2);
     }
     sliderZ.oninput = function() {
         object[2] = parseFunc(this.value);
-        sliderZValue.innerHTML = this.value;
+        sliderZValue.innerHTML = parseFunc(this.value).toFixed(2);
     }
 }
 

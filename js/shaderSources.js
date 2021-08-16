@@ -22,6 +22,7 @@ const mainVsSource = `
     varying highp vec3 vNormal;
     varying highp vec3 vTangent;
     varying highp vec3 vBitangent;
+    varying highp vec3 vFragWorldSpacePos;
 
     void main() {
         // transform the vertex position
@@ -36,6 +37,9 @@ const mainVsSource = `
         
         // transform the vertex to lightspace
         vLightSpaceVertex = uLightSpaceProjection * uLightSpaceCamera * uModelViewMatrix * aVertexPosition;
+
+        // transform and pass the world space position
+        vFragWorldSpacePos = (uModelViewMatrix * aVertexPosition).xyz;
 
         // pass through the texture coordinate
         vTextureCoord = aTextureCoord;
@@ -55,17 +59,24 @@ const mainFsSource = `
     // settings
     uniform highp float uShadowBias;
     uniform highp float uTexScale;
+    uniform highp float uSpecStrength;
+    uniform highp float uSpecExp;
+    uniform highp float uDiffStrength;
     uniform bool uRecieveShadow;
     uniform bool uRecieveLighting;
 
     // light
     uniform highp vec3 uLightDirection;
 
+    // camera
+    uniform highp vec3 uCameraPos;
+
     varying highp vec2 vTextureCoord;
     varying highp vec4 vLightSpaceVertex;
     varying highp vec3 vNormal;
     varying highp vec3 vTangent;
     varying highp vec3 vBitangent;
+    varying highp vec3 vFragWorldSpacePos;
 
     bool inShadow() {
         // Manually do the perspective division
@@ -110,13 +121,20 @@ const mainFsSource = `
         // ambient
         highp vec3 ambientLight = vec3(0.2, 0.2, 0.2);
 
-        // directional
+        // diffuse
         highp vec3 directionalLightColor = vec3(1, 1, 1);
         highp vec3 directionalVector = normalize(uLightDirection);
-        highp float directional = max(dot(normal, directionalVector), 0.0);
+        highp float diffuseAmmount = max(dot(normal, directionalVector), 0.0);
+        highp vec3 diffuse = uDiffStrength * diffuseAmmount * directionalLightColor;
+
+        // specular
+        highp vec3 viewDir = normalize(uCameraPos - vFragWorldSpacePos);
+        highp vec3 reflectedLightDir = reflect(-directionalVector, normal);
+        highp float specAmount = pow(max(dot(viewDir, reflectedLightDir),0.0), uSpecExp);
+        highp vec3 specular = uSpecStrength * specAmount * directionalLightColor;
 
         // final
-        highp vec3 totalLight = ambientLight + (directionalLightColor * directional);
+        highp vec3 totalLight = ambientLight + diffuse + specular;
         highp vec3 Lighting = uRecieveLighting ? totalLight : vec3(1.0, 1.0, 1.0);
 
         /* ============== shadow ============== */
@@ -153,7 +171,11 @@ const mainUniformNames = [
     "uShadowBias",
     "uRecieveShadow",
     "uRecieveLighting",
-    "uTexScale"
+    "uTexScale",
+    "uCameraPos",
+    "uSpecExp",
+    "uSpecStrength",
+    "uDiffStrength"
 ];
 
 /**

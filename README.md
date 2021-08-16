@@ -7,7 +7,8 @@ This project is a small hobby project for educational purposes. It is also my fi
 
 # Features
  - Directional shadow mapping
- - Lambertian Shading
+ - Lambertian diffuse Shading
+ - Specular shading
  - Normal mapping
  - Simple .OBJ loading
  - Scene loading from custom JSON files
@@ -60,7 +61,7 @@ A live demonstration can be found at [markmeltzer.nl](http://markmeltzer.nl) (ma
 1. Fix incode todo's relating to readability.
 2. ~~Make textures repeating (or add option to, maybe add scale parameter)~~
 3. ~~Implement normal mapping~~
-4. Implement specular and ambient components of phong-shading
+4. ~~Implement specular and ambient components of phong-shading~~
 5. Implement specular mapping
 6. Add support for non-trangulated OBJ files
 
