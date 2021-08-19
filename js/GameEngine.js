@@ -106,12 +106,12 @@ GameEngine.prototype.loadAtomicAssets = function(sceneJson, verbose=false) {
 
             // report loaded object
             this.loadingState.currentAtomic += 1;
-            if (verbose) console.log("Loaded mesh: " + meshData.id);
+            if (verbose) printToConsole("......Loaded mesh: " + meshData.id);
 
             // continue to loading materials
             if (this.loadingState.currentAtomic == this.loadingState.totalAtomic) {
-                if (verbose) console.log("Finished loading atomic assets!");
-                this.loadCompositeAssets(sceneJson);
+                if (verbose) printToConsole("Finished loading atomic assets!");
+                this.loadCompositeAssets(sceneJson, verbose=verbose);
             }
         });
     }
@@ -136,10 +136,10 @@ GameEngine.prototype.loadAtomicAssets = function(sceneJson, verbose=false) {
             this.loadingState.currentAtomic += 1;
 
             // continue to loading materials
-            if (verbose) console.log("Loaded texture: " + textureData.id);
+            if (verbose) printToConsole("......Loaded texture: " + textureData.id);
             if (this.loadingState.currentAtomic == this.loadingState.totalAtomic) {
-                if (verbose) console.log("Finished loading atomic assets!");
-                this.loadCompositeAssets(sceneJson);
+                if (verbose) printToConsole("Finished loading atomic assets!");
+                this.loadCompositeAssets(sceneJson, verbose=verbose);
             }
         }
         image.crossOrigin = "";
@@ -181,12 +181,11 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson, verbose=false) {
 
         this.scene.assets.materials[materialData.id] = material;
 
-
         // report loaded object
         this.loadingState.currentComposite += 1;
-        if (verbose) console.log("Loaded material: " + materialData.id);
+        if (verbose) printToConsole("......Loaded material: " + materialData.id);
     }
-    if (verbose) console.log("Finished loading materials!");
+    if (verbose) printToConsole("Finished loading materials!");
     
     // load models
     for (var i = 0; i < sceneJson.assets.models.length; i++) {
@@ -231,9 +230,9 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson, verbose=false) {
 
         // report loaded object
         this.loadingState.currentComposite += 1;
-        if (verbose) console.log("Loaded model: " + modelData.id);
+        if (verbose) printToConsole("......Loaded model: " + modelData.id);
     }
-    if (verbose) console.log("Finished loading models!");
+    if (verbose) printToConsole("Finished loading models!");
 
     // load worldObjects
     for (var i = 0; i < sceneJson.worldObjects.length; i++) {
@@ -276,13 +275,13 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson, verbose=false) {
 
         // report loaded object
         this.loadingState.currentComposite += 1;
-        if (verbose) console.log("Loaded worldObject: " + wOData.id);
+        if (verbose) printToConsole("......Loaded worldObject: " + wOData.id);
     }
 
     // were all done loading!
     this.loadingState.done = true;
     if (this.loadingCallback) this.loadingCallback();
-    if (verbose) console.log("Finished loading worldObjects!")
+    if (verbose) printToConsole("Finished loading worldObjects!")
 }
 
 // TODO: add function comment

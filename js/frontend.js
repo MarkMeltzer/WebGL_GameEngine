@@ -123,7 +123,6 @@ function setupSceneDropdown() {
 
     dropdown.onchange = function() {
         loadSceneAndRefreshFrontend(this.value);
-        printToConsole("Loading scene: " + this.value);
     };
 
     // clear the dropdown list
@@ -178,6 +177,9 @@ function setupObjectDropdown() {
  * @param {boolean} startNewGameLoop wether to start a new game loop
  */
 function loadSceneAndRefreshFrontend(scene, startNewGameLoop=false) {
+    printToConsole("========================");
+    printToConsole("Loading scene: " + scene);
+    printToConsole("========================");
     loadJSON(scene, (sceneJson) => {
         gameEngine.loadScene(sceneJson, () => {
             populateObjectSelector();
@@ -190,7 +192,7 @@ function loadSceneAndRefreshFrontend(scene, startNewGameLoop=false) {
             // set up the settings in the right pane
             setupGlobalSettings();
             setupObjectSettings();
-        });
+        }, true);
     });
     currentScene = scene;
 }
