@@ -1,45 +1,105 @@
 {
-    "worldObjects": [
-      {
-        "id": "floor",
-        "type": "box",
-        "position": [0, -2, 0],
-        "texture": "imgs/darkgrey.png",
-        "sizes" : [100, 0.1, 200],
-        "rotAxis" : [1, 1, 0],
-        "rotSpeedFactor" : 1,
-        "animateRot": false
-      },
-      {
-        "id": "rotating box",
-        "type": "box",
-        "position": [0, 2, 0],
-        "texture": "imgs/white.png",
-        "sizes" : [1, 1, 1],
-        "rotAxis" : [1, 0, 1],
-        "rotSpeedFactor" : 0.5,
-        "animateRot": true,
-        "animateTrans": true
-      },
-      {
-        "id": "sphere",
-        "type": "obj",
-        "file_path":  "objs/sphere.obj",
-        "texture": "imgs/texture.png",
-        "position": [0, 0, 0],
-        "rotAxis" : [1, 1, 0],
-        "rotSpeedFactor" : 1,
-        "animateRot": true
-      },
-      {
-        "id": "light model",
-        "type": "box",
-        "texture": "imgs/yellow.png",
-        "position": [20,5,10],
-        "sizes" : [1, 1, 1],
-        "rotAxis" : [0, 1, 0],
-        "rotSpeedFactor" : 2,
-        "animateRot": false
-      }
+    "assets" :
+        {
+            "meshes" : [
+                {
+                    "id" : "clothsim",
+                    "path" : "objs/cloththing.obj"
+                },
+                {
+                    "id" : "plane",
+                    "path" : "objs/plane.obj"
+                },
+                {
+                    "id" : "invSphere",
+                    "path" : "objs/inv_sphere.obj"
+                }
+            ],
+            "textures" : [
+                {
+                    "id" : "skyGradientTexture",
+                    "type" : "diffuse",
+                    "path" : "imgs/skygradient.png"
+                },
+                {
+                    "id" : "whiteTexture",
+                    "type" : "diffuse",
+                    "path" : "imgs/white.png"
+                },
+                {
+                    "id" : "greenScreenTexture",
+                    "type" : "diffuse",
+                    "path" : "imgs/greenscreen.png"
+                }
+            ],
+            "materials" : [
+                {
+                    "id" : "skyGradient",
+                    "diffuseTexture" : "skyGradientTexture"
+                },
+                {
+                    "id" : "white",
+                    "diffuseTexture" : "whiteTexture"
+                },
+                {
+                    "id" : "greenScreenMat",
+                    "diffuseTexture" : "greenScreenTexture"
+                }
+            ],
+            "models" : [
+                {
+                    "id" : "clothsim",
+                    "mesh" : "clothsim",
+                    "material" : "skyGradient",
+                    "animateRot" : true,
+                    "rotAxis" : [0,1,0],
+                    "rotSpeedFactor": 1,
+                    "animateTrans" : false
+                },
+                {
+                    "id" : "plane",
+                    "mesh" : "plane",
+                    "material": "white"
+                },
+                {
+                    "id" : "invSphere",
+                    "mesh" : "invSphere",
+                    "material" : "greenScreenMat",
+                    "render" : true,
+                    "castShadow" : false,
+                    "recieveShadow" : false,
+                    "recieveLighting" : false
+                }
+            ]
+        },
+    "worldObjects" : [
+        {
+            "id" : "clothsimObject",
+            "type" : "model",
+            "position" : [0, 0, 0],
+            "hasGravity" : true,
+            "model" : "clothsim",
+            "AABB" : {
+                "minX" : -1,
+                "maxX" : 1,
+                "minY" : -1,
+                "maxY" : 1,
+                "minZ" : -1,
+                "maxZ" : 1
+            }
+        },
+        {
+            "id" : "ground_plane",
+            "type" : "model",
+            "position" : [0,-3,0],
+            "model" : "plane"
+        },
+        {
+            "id" : "skySphere",
+            "type" : "model",
+            "position" : [0,0,0],
+            "model" : "invSphere",
+            "AABB" : "none"
+        }
     ]
-  }
+}

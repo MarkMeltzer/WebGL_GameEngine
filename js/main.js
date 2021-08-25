@@ -1,12 +1,9 @@
 // globals
 gameEngine = null;
 selectedObject = null;
-sceneDescriptions = [
-    "scenes/scene1_v2.json",
-    "scenes/scene2_v2.json",
-    "scenes/normal_map_test.json"
-];
-currentScene = sceneDescriptions[0];
+
+// init scenes
+initScenes();
 
 function main() {
     // initialize WebGL
@@ -60,6 +57,11 @@ function main() {
             gameEngine.loadingState.totalComposite) + 
             " items loaded!";
     }, 100);
+    window.setInterval( () => {
+        document.getElementById("stats-r1c2").innerHTML = 
+            "Current scene: " + 
+            currentScene;
+    }, 1000);
 }
 
 /**
@@ -89,11 +91,28 @@ function setupGlobalSettings() {
     // scene setttings
     setupSceneDropdown();
     document.getElementById("view-scene-json-button").onclick = function() {
-        window.open(currentScene);
+        const blob = new Blob([JSON.stringify(gameEngine.scene)], {type:"application/json"});
+        window.open(URL.createObjectURL(blob));
     }
     document.getElementById("reload-button").onclick = function() {
         loadSceneAndRefreshFrontend(currentScene);
         printToConsole("Reloaded scene!");
+    }
+    document.getElementById("save-scene-text").setAttribute("placeholder", "Scene name")
+    document.getElementById("save-scene-button").onclick = saveScene;
+    document.getElementById("clear-local-button").onclick = function() {
+        // check to be sure
+        let confirmed = confirm("Are you sure you want to delete all locally stored scenes?");
+        if (!confirmed) { return }
+
+        // clear localStorage and reload default scene
+        localStorage.clear();
+        sceneDescriptions = sceneDescriptions.filter(
+            scenePath => scenePath.split("/")[0] != "localStorage"
+        );
+        currentScene = sceneDescriptions[0];
+        loadSceneAndRefreshFrontend(currentScene);
+        printToConsole("Cleared all locally stored scenes!");
     }
 
     // controller settings

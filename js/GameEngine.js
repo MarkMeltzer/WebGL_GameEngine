@@ -93,6 +93,7 @@ GameEngine.prototype.loadAtomicAssets = function(sceneJson, verbose=false) {
             const mesh = new Mesh(
                 this.gl,
                 meshData.id,
+                meshData.path,
                 vertexData.vertexPositions,
                 vertexData.vertexNormals,
                 vertexData.tangents,
@@ -125,6 +126,7 @@ GameEngine.prototype.loadAtomicAssets = function(sceneJson, verbose=false) {
             const texture = new Texture(
                 this.gl,
                 textureData.id,
+                textureData.path,
                 textureData.type,
                 image
             );
@@ -160,7 +162,6 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson, verbose=false) {
             console.log("Missing texture when creating material\n\tmaterial: " +
                         materialData.id + "\n\ttexture: " + materialData.diffuseTexture);
         }
-        if (!diffuse) diffuse = this.scene.defaultMaterial.diffuseTexture;
 
         // if texture isn't specified or can't be found, use the default textures
         var normal = this.scene.assets.textures[materialData.normalTexture];
@@ -169,7 +170,6 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson, verbose=false) {
             console.log("Missing texture when creating material\n\tmaterial: " +
                         materialData.id + "\n\ttexture: " + materialData.normalTexture);
         }
-        if (!normal) normal = this.scene.defaultMaterial.normalTexture;
 
         const material = new Material(
             materialData.id,
@@ -207,8 +207,7 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson, verbose=false) {
             console.log("Missing material when creating model\n\tmodel: " +
                         modelData.id + "\n\tmaterial: " + modelData.material);
         }
-        if (!material) material = this.scene.defaultMaterial;
-
+        
         const model = new Model(
             this.gl,
             modelData.id,
@@ -294,6 +293,7 @@ GameEngine.prototype.createDefaults = function() {
     const defaultDiffuse = new Texture(
         this.gl,
         "defaultTexture",
+        "none",
         "diffuse",
         defaultTextureData
     );
@@ -305,6 +305,7 @@ GameEngine.prototype.createDefaults = function() {
     const defaultNormal = new Texture(
         this.gl,
         "defaultTexture",
+        "none",
         "normal",
         defaultNormalMapData
     );
@@ -314,15 +315,17 @@ GameEngine.prototype.createDefaults = function() {
         defaultNormal
     );
 
-    const defaultMeshData = createBoxMeshData(1, 1, 1);
-    this.scene.defaultMesh = new Mesh(
-        this.gl,
-        "defaultMesh",
-        defaultMeshData.vertexPositions,
-        defaultMeshData.vertexNormals,
-        defaultMeshData.vertexIndices,
-        defaultMeshData.textureCoords
-    );
+    // TODO: fix this to also create tangents/bitangents
+    // const defaultMeshData = createBoxMeshData(1, 1, 1);
+    // this.scene.defaultMesh = new Mesh(
+    //     this.gl,
+    //     "defaultMesh",
+    //     "none",
+    //     defaultMeshData.vertexPositions,
+    //     defaultMeshData.vertexNormals,
+    //     defaultMeshData.vertexIndices,
+    //     defaultMeshData.textureCoords
+    // );
 }
 
 /**

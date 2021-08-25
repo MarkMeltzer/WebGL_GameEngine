@@ -11,9 +11,9 @@ This project is a small hobby project for educational purposes. It is also my fi
  - Specular shading
  - Normal mapping
  - Simple .OBJ loading
- - Scene loading from custom JSON files
+ - Saving and loading scenes from JSON files
  - Axis-aligned bounding box based physics
- - Settings panel
+ - Custom frontend
 
 # Structure
 ## File structure
@@ -68,3 +68,5 @@ A live demonstration can be found at [markmeltzer.nl](http://markmeltzer.nl) (ma
 # Known issues/bugs
 - The AABB's don't update when rotating an object
 - The UV mapping doesn't seem to completely work yet (the top and bottom faces of a cube aren't mapped correctly)
+- Some object fields are saved but not loaded
+- Default cube needs their own tangents

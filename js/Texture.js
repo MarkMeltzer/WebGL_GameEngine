@@ -1,7 +1,8 @@
 class Texture {
-    constructor(gl, id, type, data) {
+    constructor(gl, id, path, type, data) {
         this.gl = gl;
         this.id = id;
+        this.path = path;
         this.type = type;   // diffuse, normal
         this.data = data;
 
@@ -33,6 +34,14 @@ class Texture {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
             gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        }
+    }
+
+    toJSON() {
+        return {
+            "id" : this.id,
+            "type" : this.type,
+            "path" : this.path
         }
     }
 }

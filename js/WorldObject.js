@@ -67,4 +67,29 @@ class WorldObject {
         vec3.cross(this.up, this.right, this.front);
         vec3.normalize(this.up, this.up);
     }
+
+    toJSON() {
+        const returnObj = {
+            "id" : this.id,
+            "type" : this.type,
+            "position" : this.position,
+            "velocity" : this.velocity,
+            "rotation" : this.rotation,
+            "hasCollision" : this.hasCollision,
+            "hasGravity" : this.hasGravity,
+            "isImmovable" : this.isImmovable,
+        }
+
+        if (this.model) {
+            returnObj["model"] = this.model.id;
+        }
+
+        if (this.AABB == null) {
+            returnObj["AABB"] = "none";
+        } else {
+            returnObj["AABB"] = this.AABB;
+        }
+
+        return returnObj;
+    }
 }

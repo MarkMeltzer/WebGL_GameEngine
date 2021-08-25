@@ -77,4 +77,28 @@ class Model {
             "maxZ" : maxZ,
         }
     }
+
+    toJSON() {
+        const returnObj = {
+            "id" : this.id,
+            "render" : this.renderSettings.render,
+            "castShadow" : this.renderSettings.castShadow,
+            "recieveShadow" : this.renderSettings.recieveShadow,
+            "recieveLighting" : this.renderSettings.recieveLighting,
+            "animateRot" : this.animation.animateRot,
+            "rotAxis" : this.animation.rotAxis,
+            "rotSpeedFactor" : this.animation.rotSpeedFactor,
+            "animateTrans" : this.animation.animateTrans
+        }
+
+        if (this.material) {
+            returnObj["material"] = this.material.id;
+        }
+
+        if (this.mesh) {
+            returnObj["mesh"] = this.mesh.id;
+        }
+
+        return returnObj;
+    }
 }

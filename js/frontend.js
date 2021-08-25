@@ -176,11 +176,13 @@ function setupObjectDropdown() {
  * @param {string} scene path to the scene
  * @param {boolean} startNewGameLoop wether to start a new game loop
  */
-function loadSceneAndRefreshFrontend(scene, startNewGameLoop=false) {
+function loadSceneAndRefreshFrontend(scenePath, startNewGameLoop=false) {
     printToConsole("========================");
-    printToConsole("Loading scene: " + scene);
+    printToConsole("Loading scene: " + scenePath);
     printToConsole("========================");
-    loadJSON(scene, (sceneJson) => {
+    
+    // what to do with scene JSON
+    function handeSceneJSON(sceneJson) {
         gameEngine.loadScene(sceneJson, () => {
             populateObjectSelector();
             
@@ -193,8 +195,18 @@ function loadSceneAndRefreshFrontend(scene, startNewGameLoop=false) {
             setupGlobalSettings();
             setupObjectSettings();
         }, true);
-    });
-    currentScene = scene;
+    }
+
+    // search in localStorage
+    if (scenePath.split("/")[0] == "localStorage") {
+        const key = scenePath.slice("localStorage".length + 1);
+        handeSceneJSON(JSON.parse(localStorage.getItem(key)));
+    } else {
+        // load from server
+        loadJSON(scenePath, handeSceneJSON);
+    }
+
+    currentScene = scenePath;
 }
 
 /**
@@ -273,4 +285,57 @@ function printToConsole(string) {
         }
     }
     return object;
+}
+
+/**
+ * Saves the current scene to local storage.
+ * 
+ * @returns 
+ */
+function saveScene() {
+    let saveName = document.getElementById("save-scene-text").value;
+    if (saveName.length < 1 || saveName.length > 12) {
+        printToConsole("ERROR: Enter scene name no longer than 12 characters!");
+        return;
+    }
+
+    printToConsole("Saving " + saveName + " to local storage!");
+
+    // if this is the first time saving this scene, add it to scene list
+    let scenePath = "localStorage/" + saveName;
+    if (!sceneDescriptions.includes(scenePath)) {
+        sceneDescriptions.push(scenePath);
+        currentScene = sceneDescriptions.slice(-1);
+
+        // save the scene to local storage
+        localStorage.setItem(saveName, JSON.stringify(gameEngine.scene));
+
+        // refresh the frontend (for example for the scene dropdown)
+        loadSceneAndRefreshFrontend(scenePath);
+    } else {
+        // save the scene to local storage
+        localStorage.setItem(saveName, JSON.stringify(gameEngine.scene));
+    }
+
+}
+
+/**
+ * Load the information of all available scenes.
+ */
+function initScenes() {
+    // the hardcoded list of scenes on the server
+    sceneDescriptions = [
+        "scenes/scene1.json",
+        "scenes/scene1_modified.json",
+        "scenes/scene2.json",
+        "scenes/normal_map_test.json"
+    ];
+
+    // add the scenes stored in the users localStorage
+    const keys = Object.keys(localStorage);
+    for (let i = 0; i < keys.length; i++) {
+        sceneDescriptions.push("localStorage/" + keys[i]);
+    }
+
+    currentScene = sceneDescriptions[0];
 }

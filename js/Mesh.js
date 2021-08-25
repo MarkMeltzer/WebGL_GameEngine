@@ -2,6 +2,7 @@ class Mesh {
     constructor(
         gl,
         id,
+        path,
         vertPositions,
         vertNormals,
         vertTangents,
@@ -11,6 +12,7 @@ class Mesh {
     ) {
         this.gl = gl;
         this.id = id;
+        this.path = path;
         this.vertPositions = vertPositions;
         this.vertNormals = vertNormals;
         this.vertTangents = vertTangents;
@@ -97,5 +99,13 @@ class Mesh {
             gl.STATIC_DRAW
         );
         this.buffers.index = indexBuffer;
+    }
+
+    // TODO: add function comment
+    toJSON() {
+        return {
+            "id" : this.id,
+            "path" : this.path
+        }
     }
 }

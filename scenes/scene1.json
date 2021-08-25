@@ -1,103 +1,189 @@
 {
-  "worldObjects": [
-    {
-      "id": "floor",
-      "type": "box",
-      "position": [0, -2, 0],
-      "texture": "imgs/pastelgreen.png",
-      "sizes" : [100, 0.1, 200],
-      "rotAxis" : [1, 1, 0],
-      "rotSpeedFactor" : 1,
-      "animateRot": false
-    },
-    {
-      "id": "flying box",
-      "type": "box",
-      "position": [0, 2, 0],
-      "texture": "imgs/texture.png",
-      "sizes" : [1, 1, 1],
-      "rotAxis" : [1, 0, 1],
-      "rotSpeedFactor" : 0.5,
-      "animateRot": true,
-      "animateTrans": true
-    },
-    {
-      "id": "pillar",
-      "type": "box",
-      "position": [-2, 0, 0],
-      "texture": "imgs/pastelgreen.png",
-      "sizes" : [1, 5, 1],
-      "rotAxis" : [1, 0, 1],
-      "rotSpeedFactor" : 1,
-      "animateRot": false
-    },
-    {
-      "id": "textured box",
-      "type": "box",
-      "position": [1.5, -1.5, -10],
-      "texture": "imgs/texture.png",
-      "sizes" : [1, 1, 1],
-      "rotAxis" : [1, 1, 0],
-      "rotSpeedFactor" : 1,
-      "animateRot": false
-    },
-    {
-      "id": "color texture box",
-      "type": "box",
-      "position": [-5, 2, -1.5],
-      "texture": "imgs/colors.png",
-      "sizes" : [0.5, 0.5, 0.5],
-      "rotAxis" : [1, 1, 0],
-      "rotSpeedFactor" : 1,
-      "animateRot": false
-    },
-    {
-      "id": "ijsbeer",
-      "type": "box",
-      "position": [10, 2, 0],
-      "texture": "imgs/ijsbeer.jpg",
-      "sizes" : [10, 5, 0.5],
-      "rotAxis" : [0, 1, 0],
-      "rotSpeedFactor" : 2,
-      "animateRot": false
-    },
-    {
-      "id": "crownring thing",
-      "type": "obj",
-      "file_path":  "objs/testOBJ.obj",
-      "texture": "imgs/lighterpurple.png",
-      "position": [0, 0, 1],
-      "rotAxis" : [1, 1, 1],
-      "rotSpeedFactor" : 1,
-      "animateRot": true
-    },
-    {
-      "id": "sphere",
-      "type": "obj",
-      "file_path":  "objs/sphere.obj",
-      "position": [-5, 3, 0],
-      "rotAxis" : [1, 1, 0],
-      "rotSpeedFactor" : 1,
-      "animateRot": false
-    },
-    {
-      "id": "clothsim",
-      "type": "obj",
-      "file_path":  "objs/cloththing.obj",
-      "position": [-5, 1, 0],
-      "rotAxis" : [0, 1, 0],
-      "rotSpeedFactor" : 1,
-      "animateRot": true
-    },
-    {
-      "id": "light model",
-      "type": "box",
-      "texture": "imgs/yellow.png",
-      "position": [20,5,10],
-      "sizes" : [1, 1, 1],
-      "rotAxis" : [0, 1, 0],
-      "rotSpeedFactor" : 2,
-      "animateRot": false
-    } 
-  ]
+    "assets" :
+        {
+            "meshes" : [
+                {
+                    "id" : "sphere",
+                    "path" : "objs/sphere.obj"
+                },
+                {
+                    "id" : "invSphere",
+                    "path" : "objs/inv_sphere.obj"
+                },
+                {
+                    "id" : "clothsim",
+                    "path" : "objs/cloththing.obj"
+                },
+                {
+                    "id" : "sofaMesh",
+                    "path" : "objs/sofa.obj"
+                },
+                {
+                    "id" : "UV_cube",
+                    "path" : "objs/UV_cube_test.obj"
+                },
+                {
+                    "id" : "plane",
+                    "path" : "objs/plane.obj"
+                }
+            ],
+            "textures" : [
+                {
+                    "id" : "colorTexture",
+                    "type" : "diffuse",
+                    "path" : "imgs/colors.png"
+                },
+                {
+                    "id" : "ijsbeerTexture",
+                    "type" : "diffuse",
+                    "path" : "imgs/ijsbeer.jpg"
+                },
+                {
+                    "id" : "skyGradientTexture",
+                    "type" : "diffuse",
+                    "path" : "imgs/skygradient.png"
+                },
+                {
+                    "id" : "UV_cube_Texture",
+                    "type" : "diffuse",
+                    "path" : "imgs/cube_UV_test.png"
+                },
+                {
+                    "id" : "brick1Diff",
+                    "type" : "diffuse",
+                    "path" : "imgs/brick2_col.jpg"
+                },
+                {
+                    "id" : "planks1Diff",
+                    "type" : "diffuse",
+                    "path" : "imgs/planks1_col.jpg"
+                },
+                {
+                    "id" : "whiteTexture",
+                    "type" : "diffuse",
+                    "path" : "imgs/white.png"
+                }
+            ],
+            "materials" : [
+                {
+                    "id" : "colorMat",
+                    "diffuseTexture" : "colorTexture"
+                },
+                {
+                    "id" : "ijsbeerMat",
+                    "diffuseTexture" : "ijsbeerTexture"
+                },
+                {
+                    "id" : "skyGradient",
+                    "diffuseTexture" : "skyGradientTexture"
+                },
+                {
+                    "id" : "UV_cube",
+                    "diffuseTexture" : "UV_cube_Texture"
+                },
+                {
+                    "id" : "brick1",
+                    "diffuseTexture" : "brick1Diff"
+                },
+                {
+                    "id" : "planks1",
+                    "diffuseTexture" : "planks1Diff",
+                    "scale" : 8.0
+                },
+                {
+                    "id" : "white",
+                    "diffuseTexture" : "whiteTexture"
+                }
+            ],
+            "models" : [
+                {
+                    "id" : "sphere",
+                    "mesh" : "sphere",
+                    "material" : "colorMat",
+                    "render" : true,
+                    "castShadow" : true
+                },
+                {
+                    "id" : "invSphere",
+                    "mesh" : "invSphere",
+                    "material" : "skyGradient",
+                    "render" : true,
+                    "castShadow" : false,
+                    "recieveShadow" : false,
+                    "recieveLighting" : false
+                },
+                {
+                    "id" : "clothsim",
+                    "mesh" : "clothsim",
+                    "animateRot" : true,
+                    "rotAxis" : [0,1,0],
+                    "rotSpeedFactor": 1,
+                    "animateTrans" : false
+                },
+                {
+                    "id" : "sofaModel",
+                    "mesh" : "sofaMesh",
+                    "material" : "skyGradient"
+                },
+                {
+                    "id" : "UV_cube",
+                    "mesh" : "UV_cube",
+                    "material" : "brick1",
+                    "recieveLighting" : false,
+                    "recieveShadow" : false,
+                    "animateRot" : true,
+                    "rotAxis" : [1,0,0]
+                },
+                {
+                    "id" : "plane",
+                    "mesh" : "plane",
+                    "material": "planks1",
+                    "recieveLighting" : false
+                }
+            ]
+        },
+    "worldObjects" : [
+        {
+            "id" : "sofa",
+            "type" : "model",
+            "position" : [-3,-3,0],
+            "rotation" : [0,90,0],
+            "model" : "sofaModel"
+        },
+        {
+            "id" : "skySphere",
+            "type" : "model",
+            "position" : [0,0,0],
+            "model" : "invSphere",
+            "AABB" : "none"
+        },
+        {
+            "id" : "clothsimObject",
+            "type" : "model",
+            "position" : [4, 0, 0],
+            "hasGravity" : true,
+            "model" : "clothsim",
+            "AABB" : {
+                "minX" : -1,
+                "maxX" : 1,
+                "minY" : -1,
+                "maxY" : 1,
+                "minZ" : -1,
+                "maxZ" : 1
+            }
+        },
+        {
+            "id" : "UV_cube",
+            "type" : "model",
+            "position" : [0,0,0],
+            "model" : "UV_cube",
+            "AABB" : "none"
+        },
+        {
+            "id" : "ground_plane",
+            "type" : "model",
+            "position" : [0,-3,0],
+            "model" : "plane"
+        }
+    ]
 }

@@ -51,4 +51,8 @@ class AABB {
         this.bounds = AABBBounds;
         this.createRenderBuffer();
     }
+
+    toJSON() {
+        return this.bounds;
+    }
 }

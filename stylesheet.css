@@ -352,6 +352,21 @@ body {
     background-color: #009688ff;
 }
 
+/* forms */
+.form-container {
+    margin-left: 10px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+.form-container button {
+    appearance: none;
+    color: #f3f3f3;
+    background-color: rgb(166, 77, 121);
+    border: solid 3px rgba(90, 43, 66, 0.3);
+    border-radius: 10px;
+}
+
+
 /************************************************************************/
 /*****************************  General  ********************************/
 /************************************************************************/

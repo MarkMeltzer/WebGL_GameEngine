@@ -298,6 +298,7 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
   
     // for readability of the code
     const model = worldObject.model;
+    const material = model.material != null ? model.material : this.scene.defaultMaterial;
 
     // use sinus and cosinus for some simple animation
     const sinAnim = Math.sin(time) / 2 + 0.5;
@@ -371,25 +372,25 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
     // set wether the texture scale
     gl.uniform1f(
         shader.uniformLocations.uTexScale,
-        model.material.scale
+        material.scale
     );
 
     // set the specular exponent of the material
     gl.uniform1f(
         shader.uniformLocations.uSpecExp,
-        model.material.specularExponent
+        material.specularExponent
     );
 
     // set the specular strength of the material
     gl.uniform1f(
         shader.uniformLocations.uSpecStrength,
-        model.material.specularStrength
+        material.specularStrength
     );
 
     // set the specular strength of the material
     gl.uniform1f(
         shader.uniformLocations.uDiffStrength,
-        model.material.diffuseStrength
+        material.diffuseStrength
     );
 
     // tell webgl how it should pull information out of vertex position buffer
@@ -499,8 +500,8 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
         }
     
         // set the diffuse texture uniform in the shader
-        const diffuseBuffer = model.material.useDiffuse ? 
-                              model.material.diffuseTexture.buffer : 
+        const diffuseBuffer = material.useDiffuse && material.diffuseTexture != null ? 
+                              material.diffuseTexture.buffer : 
                               this.scene.defaultMaterial.diffuseTexture.buffer
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, diffuseBuffer);
@@ -509,9 +510,9 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
             0
         );
 
-        // set the diffuse texture uniform in the shader
-        const normalBuffer = model.material.useNormal ?
-                              model.material.normalTexture.buffer :
+        // set the normal texture uniform in the shader
+        const normalBuffer = material.useNormal && material.normalTexture != null ?
+                              material.normalTexture.buffer :
                               this.scene.defaultMaterial.normalTexture.buffer
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, normalBuffer);

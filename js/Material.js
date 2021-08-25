@@ -11,4 +11,25 @@ class Material {
         this.useDiffuse = true;
         this.useNormal = true;
     }
+
+    toJSON() {
+        const returnObj = {
+            "id" : this.id,
+            "scale" : this.scale,
+            "specularExponent" : this.specularExponent,
+            "specularStrength" : this.specularStrength,
+            "useDiffuse" : this.useDiffuse,
+            "useNormal" : this.useNormal,
+        }
+
+        if (this.diffuseTexture) {
+            returnObj["diffuseTexture"] = this.diffuseTexture.id;
+        }
+
+        if (this.normalTexture) {
+            returnObj["normalTexture"] = this.normalTexture.id;
+        }
+
+        return returnObj;
+    }
 }
