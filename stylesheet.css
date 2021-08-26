@@ -63,9 +63,32 @@ body {
     margin-bottom: 0px;
 }
 .object-list-title {
+    grid-row: 1;
+    grid-column: 2;
+    color: hsl(174, 100%, 38%);
     margin-bottom: 0px;
-    margin-left: 10px;
     font-style: italic;
+    display: inline-block;
+    border-bottom: dashed 1px rgba(0, 148, 133, 0.65);
+    /* this is kinda hardcoded, fix in future */
+    width: 90%;
+}
+.object-add-button {
+    margin: 5px;
+    appearance: none;
+    color: #f3f3f3;
+    background-color: hsl(174, 100%, 29%);
+    border: solid 3px rgba(90, 43, 66, 0.3);
+    border-radius: 8px;
+}
+.object-add-button:hover {
+    color: #ffffff;
+    background-color: hsl(174, 100%, 40%);
+    border: solid 3px hsla(331, 35%, 26%, 0.3);
+}
+.object-add-button:active {
+    color: #ffffff;
+    background-color: rgb(166, 77, 121);
 }
 
 /************************************************************************/
@@ -91,7 +114,7 @@ body {
 
     grid-row: 3;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: auto auto auto;
     grid-template-rows: 1fr 1fr 1fr 1fr;
 }
 
@@ -365,7 +388,15 @@ body {
     border: solid 3px rgba(90, 43, 66, 0.3);
     border-radius: 10px;
 }
-
+.form-container button:hover {
+    color: #ffffff;
+    background-color: hsl(330, 50%, 50%);
+    border: solid 3px hsla(331, 35%, 26%, 0.3);
+}
+.form-container button:active {
+    color: #ffffff;
+    background-color: #009688ff;
+}
 
 /************************************************************************/
 /*****************************  General  ********************************/

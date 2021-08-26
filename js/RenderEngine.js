@@ -296,7 +296,7 @@ RenderEngine.prototype.drawScene = function(camera, time) {
 RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, textures) {
     const gl = this.gl;
   
-    // for readability of the code
+    // fall back to defaults if no material is defined
     const model = worldObject.model;
     const material = model.material != null ? model.material : this.scene.defaultMaterial;
 

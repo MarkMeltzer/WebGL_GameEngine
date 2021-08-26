@@ -80,7 +80,9 @@ class WorldObject {
             "isImmovable" : this.isImmovable,
         }
 
-        if (this.model) {
+        if (this.model == null) {
+            returnObj["model"] = "none";
+        } else if (this.model.id != "defaultModel") {
             returnObj["model"] = this.model.id;
         }
 

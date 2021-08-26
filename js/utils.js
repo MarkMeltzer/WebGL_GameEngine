@@ -32,137 +32,167 @@ function loadOBJ(path, callback) {
 
 
 function createBoxMeshData(width, height, depth) {
+    // Vertex coordinates
     const positions = [
-        // Front face
-        -width / 2, -height / 2,  depth / 2,
-        -width / 2, height / 2, depth / 2,
+        -width / 2, height / 2, -depth / 2,
         width / 2, height / 2, depth / 2,
-        width / 2, -height / 2, depth / 2,
-        
-        // Back face
-        -width / 2, -height / 2, -depth / 2,
-        width / 2, -height / 2, -depth / 2,
-        width / 2, height / 2, -depth / 2,
-        -width / 2, height / 2, -depth / 2,
-        
-        // Top face
-        -width / 2, height / 2, -depth / 2,
         width / 2, height / 2, -depth / 2,
         width / 2, height / 2, depth / 2,
-        -width / 2, height / 2, depth / 2,
-        
-        // Bottom face
-        -width / 2, -height / 2, -depth / 2,
         -width / 2, -height / 2, depth / 2,
         width / 2, -height / 2, depth / 2,
-        width / 2, -height / 2, -depth / 2,
-        
-        // Right face
-        width / 2, height / 2, -depth / 2,
-        width / 2, -height / 2, -depth / 2,
-        width / 2, -height / 2, depth / 2,
-        width / 2, height / 2, depth / 2,
-        
-        // Left face
-        -width / 2, height / 2, -depth / 2,
         -width / 2, height / 2, depth / 2,
+        -width / 2, -height / 2, -depth / 2,
+        -width / 2, -height / 2, depth / 2,
+        width / 2, -height / 2, -depth / 2,
         -width / 2, -height / 2, depth / 2,
         -width / 2, -height / 2, -depth / 2,
-    ];
+        width / 2, height / 2, -depth / 2,
+        width / 2, -height / 2, depth / 2,
+        width / 2, -height / 2, -depth / 2,
+        -width / 2, height / 2, -depth / 2,
+        width / 2, -height / 2, -depth / 2,
+        -width / 2, -height / 2, -depth / 2,
+        -width / 2, height / 2, depth / 2,
+        -width / 2, height / 2, depth / 2,
+        -width / 2, height / 2, -depth / 2,
+        width / 2, -height / 2, depth / 2,
+        width / 2, height / 2, depth / 2,
+        width / 2, height / 2, -depth / 2
+    ]
 
-    // Vertex normals
+    // vertex normals
     const normals = [
-        // Front
-         0.0,  0.0,  1.0,
-         0.0,  0.0,  1.0,
-         0.0,  0.0,  1.0,
-         0.0,  0.0,  1.0,
-    
-        // Back
-         0.0,  0.0, -1.0,
-         0.0,  0.0, -1.0,
-         0.0,  0.0, -1.0,
-         0.0,  0.0, -1.0,
-    
-        // Top
-         0.0,  1.0,  0.0,
-         0.0,  1.0,  0.0,
-         0.0,  1.0,  0.0,
-         0.0,  1.0,  0.0,
-    
-        // Bottom
-         0.0, -1.0,  0.0,
-         0.0, -1.0,  0.0,
-         0.0, -1.0,  0.0,
-         0.0, -1.0,  0.0,
-    
-        // Right
-         1.0,  0.0,  0.0,
-         1.0,  0.0,  0.0,
-         1.0,  0.0,  0.0,
-         1.0,  0.0,  0.0,
-    
-        // Left
-        -1.0,  0.0,  0.0,
-        -1.0,  0.0,  0.0,
-        -1.0,  0.0,  0.0,
-        -1.0,  0.0,  0.0
-    ];
+        0, 1, 0,
+        0, 1, 0,
+        0, 1, 0,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        0, -1, 0,
+        0, -1, 0,
+        0, -1, 0,
+        1, 0, 0,
+        1, 0, 0,
+        1, 0, 0,
+        0, 0, -1,
+        0, 0, -1,
+        0, 0, -1,
+        0, 1, 0,
+        0, 0, 1,
+        -1, 0, 0,
+        0, -1, 0,
+        1, 0, 0,
+        0, 0, -1
+    ]
 
     // Texture coordinates
     const textureCoords = [
-        // Front
-        1.0,  1.0,
-        1.0,  0.0,
-        0.0,  0.0,  
-        0.0,  1.0,
-    
-        // Back
-        0.0,  0.0,  
-        1.0,  0.0,
-        1.0,  1.0,
-        0.0,  1.0,
-    
-        // Top
-        0.0,  0.0,  
-        1.0,  0.0,
-        1.0,  1.0,
-        0.0,  1.0,
-    
-        // Bottom
-        0.0,  0.0,  
-        1.0,  0.0,
-        1.0,  1.0,
-        0.0,  1.0,
-    
-        // Right
-        0.0,  0.0,  
-        1.0,  0.0,
-        1.0,  1.0,
-        0.0,  1.0,
-    
-        // Left
-        0.0,  0.0,  
-        1.0,  0.0,
-        1.0,  1.0,
-        0.0,  1.0,
-    ];
+        0.875, 0.5,
+        0.625, 0.75,
+        0.625, 0.5,
+        0.625, 0.75,
+        0.375, 1,
+        0.375, 0.75,
+        0.625, 0,
+        0.375, 0.25,
+        0.375, 0,
+        0.375, 0.5,
+        0.125, 0.75,
+        0.125, 0.5,
+        0.625, 0.5,
+        0.375, 0.75,
+        0.375, 0.5,
+        0.625, 0.25,
+        0.375, 0.5,
+        0.375, 0.25,
+        0.875, 0.75,
+        0.625, 1,
+        0.625, 0.25,
+        0.375, 0.75,
+        0.625, 0.75,
+        0.625, 0.5
+    ]
 
-    // Face->vertex indices
+    // vertex indices, each index represents a vertex and each 3 represent a triangle
     const indices = [
-        0,  1,  2,      0,  2,  3,    // front
-        4,  5,  6,      4,  6,  7,    // back
-        8,  9,  10,     8,  10, 11,   // top
-        12, 13, 14,     12, 14, 15,   // bottom
-        16, 17, 18,     16, 18, 19,   // right
-        20, 21, 22,     20, 22, 23,   // left
-    ];
+        0, 1, 2,
+        3, 4, 5,
+        6, 7, 8,
+        9, 10, 11,
+        12, 13, 14,
+        15, 16, 17,
+        0, 18, 1,
+        3, 19, 4,
+        6, 20, 7,
+        9, 21, 10,
+        12, 22, 13,
+        15, 23, 16
+    ]
+    
+    const tangents = [
+        -8, 0, 0,
+        -8, 0, 0,
+        -8, 0, 0,
+        0, 8, 0,
+        0, 8, 0,
+        0, 8, 0,
+        0, 8, 0,
+        0, 8, 0,
+        0, 8, 0,
+        8, 0, 0,
+        8, 0, 0,
+        8, 0, 0,
+        0, 8, 0,
+        0, 8, 0,
+        0, 8, 0,
+        0, 8, 0,
+        0, 8, 0,
+        0, 8, 0,
+        -8, 0, 0,
+        0, 8, 0,
+        0, 8, 0,
+        8, 0, 0,
+        0, 8, 0,
+        0, 8, 0
+    ]
+
+    const bitangents = [
+        16, 0, 8,
+        16, 0, 8,
+        16, 0, 8,
+        -8, -16, 0,
+        -8, -16, 0,
+        -8, -16, 0,
+        0, -16, -8,
+        0, -16, -8,
+        0, -16, -8,
+        -16, 0, 8,
+        -16, 0, 8,
+        -16, 0, 8,
+        0, -16, 8,
+        0, -16, 8,
+        0, -16, 8,
+        8, -16, 0,
+        8, -16, 0,
+        8, -16, 0,
+        0, 0, 8,
+        -8, 0, 0,
+        0, 0, -8,
+        0, 0, 8,
+        0, 0, 8,
+        8, 0, 0
+    ]
 
     return {
         vertexPositions: positions,
         vertexNormals: normals,
         vertexIndices: indices,
-        textureCoords: textureCoords
+        textureCoords: textureCoords,
+        tangents: tangents,
+        bitangents: bitangents
     };
 }
 

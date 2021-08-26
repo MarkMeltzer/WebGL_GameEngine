@@ -1,4 +1,79 @@
 /**
+ * Load new scene and refresh the frontend.
+ * 
+ * @param {string} scene path to the scene
+ * @param {boolean} startNewGameLoop wether to start a new game loop
+ */
+ function loadSceneAndRefreshFrontend(scenePath, startNewGameLoop=false) {
+    printToConsole("========================");
+    printToConsole("Loading scene: " + scenePath);
+    printToConsole("========================");
+    
+    // what to do with scene JSON
+    function handeSceneJSON(sceneJson) {
+        gameEngine.loadScene(sceneJson, () => {
+            setupObjectSelector();
+            
+            // if relevant, start new game loop
+            if (startNewGameLoop) {
+                gameEngine.startGameLoop();
+            }
+            
+            // set up the settings in the right pane
+            setupGlobalSettings();
+            setupObjectSettings();
+
+        }, true);
+    }
+
+    // load from localStorage
+    if (scenePath.split("/")[0] == "localStorage") {
+        const key = scenePath.slice("localStorage".length + 1);
+        handeSceneJSON(JSON.parse(localStorage.getItem(key)));
+    } else {
+        // load from server
+        loadJSON(scenePath, handeSceneJSON);
+    }
+
+    currentScene = scenePath;
+}
+
+/**
+ * Sets up the object selector in the left pane.
+ */
+function setupObjectSelector() {
+    // set up the "add new" buttons
+    document.getElementById("worldObject-add-button").onclick = () => {
+        const id = gameEngine.boundAddNewWorldObject();
+        populateObjectSelector();
+        selectObject("world-object-list", id);
+    }
+
+    populateObjectSelector();
+}
+
+/**
+ * Selects and object from a given object list (be that worldObject,
+ * model, material etc.).
+ * 
+ * @param {string} objectListId the id of the unordered list 
+ * @param {string} objectId the id the of the object to select
+ */
+function selectObject(objectListId, objectId) {
+    const list = document.getElementById(objectListId);
+
+    for (let i = 0; i < list.childElementCount; i++) {
+        const input = list.childNodes[i].getElementsByTagName("input")[0];
+        if (input != null && input.id == objectId) {
+            input.click();
+            return;
+        }
+    }
+
+    console.log("ERROR: no id " + objectId + " found in " + objectListId);
+}
+
+/**
  * Links an html checkbox to a setting in the game engine.
  * 
  * @param {string} elementId the checkbox html element
@@ -168,45 +243,6 @@ function setupObjectDropdown() {
         option.text = keys[i];
         dropdown.add(option);
     }
-}
-
-/**
- * Load new scene and refresh the frontend.
- * 
- * @param {string} scene path to the scene
- * @param {boolean} startNewGameLoop wether to start a new game loop
- */
-function loadSceneAndRefreshFrontend(scenePath, startNewGameLoop=false) {
-    printToConsole("========================");
-    printToConsole("Loading scene: " + scenePath);
-    printToConsole("========================");
-    
-    // what to do with scene JSON
-    function handeSceneJSON(sceneJson) {
-        gameEngine.loadScene(sceneJson, () => {
-            populateObjectSelector();
-            
-            // if relevant, start new game loop
-            if (startNewGameLoop) {
-                gameEngine.startGameLoop();
-            }
-            
-            // set up the settings in the right pane
-            setupGlobalSettings();
-            setupObjectSettings();
-        }, true);
-    }
-
-    // search in localStorage
-    if (scenePath.split("/")[0] == "localStorage") {
-        const key = scenePath.slice("localStorage".length + 1);
-        handeSceneJSON(JSON.parse(localStorage.getItem(key)));
-    } else {
-        // load from server
-        loadJSON(scenePath, handeSceneJSON);
-    }
-
-    currentScene = scenePath;
 }
 
 /**

@@ -4,7 +4,7 @@ var GameEngine = function(canvas, gl) {
     this.canvas = canvas;
     this.gl = gl;
 
-    // current scene
+    // scene loading
     this.scene = null;
     this.loadingState = {
         "currentAtomic" : 0,
@@ -21,20 +21,23 @@ var GameEngine = function(canvas, gl) {
     this.keyTracker = null;
     this.boundUpdateMousePosition = this.updateMousePosition.bind(this);
 
-    // keep track of time
+    // time variables
     this.time = 0.0;
     this.deltaTime = 0.0;
 
-    // set render settings and create render engine
+    // initiate sub-engines
     const opts = {
         clearColor: [0.75, 0.88, 0.92, 1.0]
     };
     this.renderEngine = new RenderEngine(canvas, gl, opts);
-
     this.physicsEngine = new PhysicsEngine();
 
+    // raycasting variables
     this.lookingAtObj = null;
     this.rayCastT = null;
+
+    // bind "add new" functions
+    this.boundAddNewWorldObject = this.addNewWorldObject.bind(this);
 }
 
 /**
@@ -207,7 +210,7 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson, verbose=false) {
             console.log("Missing material when creating model\n\tmodel: " +
                         modelData.id + "\n\tmaterial: " + modelData.material);
         }
-        
+
         const model = new Model(
             this.gl,
             modelData.id,
@@ -243,22 +246,32 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson, verbose=false) {
         )
         
         // set the model for the worldObject if a model is specified and loaded
-        if (wOData.model) {
+        if (wOData.model && wOData.model != "none") {
+            // model is specified
             if (!this.scene.assets.models[wOData.model]) {
-                console.log("Missing mdoel when creating worldObject\n\tworldObject: " +
+                console.log("Missing model when creating worldObject\n\tworldObject: " +
                             wOData.id + "\n\tmodel: " + wOData.model);
             } else {
                 worldObject.model = this.scene.assets.models[wOData.model];
             }
+        } else if (wOData.model && wOData.model == "none") {
+            // model is explicitely set to none
+            worldObject.model = null;
+        } else {
+            // no model is specified and default model is used
+            worldObject.model = this.scene.defaultModel;
         }
 
         // set the AABB for the worldObject
         if (wOData.AABB && wOData.AABB != "none") {
+            // AABB bounds are specified
             worldObject.AABB = new AABB(this.gl);
             worldObject.AABB.setBounds(wOData.AABB);
         } else if (wOData.AABB && wOData.AABB == "none"){
+            // AABB is explicitely set to none
             worldObject.AABB = null;
         } else if (worldObject.model && worldObject.model.mesh) {
+            // AABB bounds are created from model
             worldObject.AABB = new AABB(this.gl);
             worldObject.AABB.setBounds(worldObject.model.getModelAABB())
         }
@@ -315,17 +328,25 @@ GameEngine.prototype.createDefaults = function() {
         defaultNormal
     );
 
-    // TODO: fix this to also create tangents/bitangents
-    // const defaultMeshData = createBoxMeshData(1, 1, 1);
-    // this.scene.defaultMesh = new Mesh(
-    //     this.gl,
-    //     "defaultMesh",
-    //     "none",
-    //     defaultMeshData.vertexPositions,
-    //     defaultMeshData.vertexNormals,
-    //     defaultMeshData.vertexIndices,
-    //     defaultMeshData.textureCoords
-    // );
+    const defaultMeshData = createBoxMeshData(3, 3, 3);
+    this.scene.defaultMesh = new Mesh(
+        this.gl,
+        "defaultMesh",
+        "none",
+        defaultMeshData.vertexPositions,
+        defaultMeshData.vertexNormals,
+        defaultMeshData.tangents,
+        defaultMeshData.bitangents,
+        defaultMeshData.vertexIndices,
+        defaultMeshData.textureCoords
+    );
+
+    this.scene.defaultModel = new Model(
+        this.gl, 
+        "defaultModel",
+        this.scene.defaultMesh,
+        this.scene.defaultMaterial
+    );
 }
 
 /**
@@ -607,4 +628,25 @@ GameEngine.prototype.logLoadText = function(s) {
     if (this.loadingStateOutput) {
         this.loadingStateOutput.innerHTML = s;
     }
+}
+
+/**
+ * Adds a new default worldObject to the scene.
+ */
+GameEngine.prototype.addNewWorldObject = function() {
+    const id = Math.floor(Math.random() * 100000).toString();
+    const worldObject = new WorldObject(
+        id,
+        "model",
+        [0,0,0],
+        [0,0,0],
+        true,
+        true,
+        true
+    );
+    worldObject.model = this.scene.defaultModel;
+
+    this.scene.worldObjects[id] = worldObject;
+
+    return id;
 }
