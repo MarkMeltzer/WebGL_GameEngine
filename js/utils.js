@@ -417,3 +417,24 @@ function arrayToVec3(arr) {
 function arrayToVec2(arr) {
     return vec2.fromValues(arr[0], arr[1]);
 }
+
+function clearDropdown(dropdown) {
+    const len = dropdown.options.length;
+    for (var i = len - 1; i >= 0; i--) {
+        dropdown.remove(i);
+    }
+}
+
+function fillDropdown(dropdown, items, selectValue=null) {
+    for (var i = 0; i < items.length; i++) {
+        const option = document.createElement("option");
+        option.value = items[i];
+        option.text = items[i];
+
+        if (selectValue && option.value == selectValue) {
+            option.selected = true;
+        }
+
+        dropdown.add(option);
+    }
+}

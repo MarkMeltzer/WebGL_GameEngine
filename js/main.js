@@ -116,7 +116,7 @@ function setupGlobalSettings() {
     }
 
     // controller settings
-    setupObjectDropdown();
+    setupControllerDropdown();
     setupCheckbox("flying", ["controller", "child"], "flying");
     setupSlider("movespeed", ["controller"], "movementSpeed", parseInt);
     setupSlider("sensitivity", ["controller"], "turnSpeed", parseInt);
@@ -141,6 +141,9 @@ function setupObjectSettings() {
     // transform settings
     setupVec3Slider("pos", ["position"], parseFloat, true);
     setupVec3Slider("rot", ["rotation"], parseFloat, true);
+
+    // sub objects
+    setupObjectDropdown("model-dropdown", ["assets", "models"], [], "model");
 
     // render settings
     setupCheckbox("render", ["model", "renderSettings"], "render", true);

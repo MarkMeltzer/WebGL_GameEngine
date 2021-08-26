@@ -19,10 +19,12 @@
                 gameEngine.startGameLoop();
             }
             
+            // reset the selected object
+            selectedObject = null;
+
             // set up the settings in the right pane
             setupGlobalSettings();
             setupObjectSettings();
-
         }, true);
     }
 
@@ -46,6 +48,7 @@ function setupObjectSelector() {
     document.getElementById("worldObject-add-button").onclick = () => {
         const id = gameEngine.boundAddNewWorldObject();
         populateObjectSelector();
+        setupControllerDropdown();
         selectObject("world-object-list", id);
     }
 
@@ -220,7 +223,7 @@ function setupSceneDropdown() {
 /**
  * Setup the dropdown to change the controller child.
  */
-function setupObjectDropdown() {
+function setupControllerDropdown() {
     const dropdown = document.getElementById("controller_dropdown");
 
     dropdown.onchange = function() {
@@ -230,20 +233,61 @@ function setupObjectDropdown() {
     };
 
     // clear the dropdown list
-    const len = dropdown.options.length;
-    for (var i = len - 1; i >= 0; i--) {
-        dropdown.remove(i);
-    }
+    clearDropdown(dropdown);
 
     // add all worldObjects
     const keys = Object.keys(gameEngine.scene.worldObjects);
-    for (var i = 0; i < keys.length; i++) {
-        const option = document.createElement("option");
-        option.value = keys[i];
-        option.text = keys[i];
-        dropdown.add(option);
+    fillDropdown(dropdown, keys);
+}
+
+/**
+ * Set up a dropdown to change the child object of another object.
+ * 
+ * @param {string} dropdownId id of the dropdown element
+ * @param {object} objectPoolPath where to search for the new child object
+ * @param {array} pathToParent the path to the parent object
+ * @param {string} fieldToChange the field of the parent to be changed
+ */
+function setupObjectDropdown(dropdownId, objectPoolPath, pathToParent, fieldToChange) {
+    const dropdown = document.getElementById(dropdownId);
+    const objectPool = objectPathToObject(gameEngine.scene, objectPoolPath);
+    const parentObject = objectPathToObject(
+        gameEngine.scene.worldObjects[selectedObject],
+        pathToParent
+    );
+
+    if (parentObject == null) {
+        dropdown.parentElement.style.display = "none";
+        return;
+    } else {
+        dropdown.parentElement.style.display = "block";
+
+        var selectedValue = parentObject[fieldToChange] == null ? 
+                            "none" : parentObject[fieldToChange].id;
+    }
+
+    populateObjectDropdown(dropdownId, objectPool, selectValue=selectedValue);
+
+    dropdown.onchange = function() {
+        if (this.value == "none") {
+            parentObject[fieldToChange] = null;
+        } else {
+            parentObject[fieldToChange] = objectPool[this.value];
+        }
     }
 }
+
+function populateObjectDropdown(dropdownId, objectsToList, selectValue) {
+    const dropdown = document.getElementById(dropdownId);
+    
+    clearDropdown(dropdown);
+    const option = document.createElement("option");
+    option.value = "none";
+    option.text = "none";
+    dropdown.add(option);
+    fillDropdown(dropdown, Object.keys(objectsToList), selectedValue=selectValue);
+}
+
 
 /**
  * Populate the object selector in the left pane with objects from the scene.
