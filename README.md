@@ -64,9 +64,12 @@ A live demonstration can be found at [markmeltzer.nl](http://markmeltzer.nl) (ma
 4. ~~Implement specular and ambient components of phong-shading~~
 5. Implement specular mapping
 6. Add support for non-trangulated OBJ files
+7. Add scale and allow rotation/scale to be applied.
+8. Add the option to "upload" new textures and meshes to localStorage.
 
 # Known issues/bugs
 - The AABB's don't update when rotating an object
 - The UV mapping doesn't seem to completely work yet (the top and bottom faces of a cube aren't mapped correctly)
 - Some object fields are saved but not loaded
-- Default cube needs their own tangents
+- ~~Default cube needs their own tangents~~
+- There is some stuttering when moving the controller and turning the camera at the same time.
