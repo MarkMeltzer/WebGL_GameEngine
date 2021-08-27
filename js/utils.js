@@ -438,3 +438,16 @@ function fillDropdown(dropdown, items, selectValue=null) {
         dropdown.add(option);
     }
 }
+
+function getTypeOfObject(object) {
+    const name = object.constructor.name;
+    return name[0].toLowerCase() + name.slice(1);
+}
+
+function hideElement(elementId) {
+    document.getElementById(elementId).style.display = "none";
+}
+
+function showElement(elementId) {
+    document.getElementById(elementId).style.display = "block";
+}

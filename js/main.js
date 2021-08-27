@@ -27,7 +27,18 @@ function main() {
 
     // set up the statistics in the middle pane
     setupStats();
-}
+
+    document.addEventListener("keydown", (e)=> {
+        if (e.key == "f") {
+            const div = document.getElementById("fullscreen-div");
+            if (div.style.display == "none") {
+                div.style.display = "block";
+            } else {
+                div.style.display = "none";
+            }
+        }
+    })
+;}
 
 /**
  * Set up the statistics monitoring in the middle pane.
@@ -40,7 +51,7 @@ function main() {
 
     window.setInterval( () => {
         document.getElementById("stats-r2c1").innerHTML = 
-            selectedObject ? "Selected object: " + selectedObject : "Selected object: None";
+            selectedObject ? "Selected object: " + selectedObject.id : "Selected object: None";
     }, 100);
 
     window.setInterval( () => {
@@ -81,7 +92,6 @@ function setupGlobalSettings() {
     setupSlider("shadow-bias", ["renderEngine", "shadowmapSettings"], "bias", parseFloat);
     setupSlider("light-znear", ["renderEngine", "shadowmapSettings"], "zNear", parseInt);
     setupSlider("light-zfar", ["renderEngine", "shadowmapSettings"], "zFar", parseInt);
-    
     
     // player settings 
     setupSlider("fov", ["renderEngine", "scene", "camera"], "fieldOfView", parseInt);
@@ -131,32 +141,71 @@ function setupGlobalSettings() {
  * Set up settings object settings in the right pane.
  */
 function setupObjectSettings() {
-    // display the right pane when clicking the button
+    // display the correct pane when clicking the button
     document.getElementById("object-settings-button").onclick = function() {
         this.checked = true;
         document.getElementById("object-settings").style.display = "block";
         document.getElementById("global-settings").style.display = "none";
     }
 
-    // transform settings
-    setupVec3Slider("pos", ["position"], parseFloat, true);
-    setupVec3Slider("rot", ["rotation"], parseFloat, true);
+    // hide all settings
+    hideElement("transform-settings");
+    hideElement("sub-objects-worldObject");
+    hideElement("sub-objects-model");
+    hideElement("sub-objects-material");
+    hideElement("render-settings");
+    hideElement("material-settings");
+    hideElement("mesh-settings");
+    hideElement("texture-settings");
 
-    // sub objects
-    setupObjectDropdown("model-dropdown", ["assets", "models"], [], "model");
+    // only show and set up the relevant settings
+    const objectType = getTypeOfObject(selectedObject);
+    if (objectType == "worldObject" || objectType == "camera") {
+        // transform settings
+        showElement("transform-settings");
+        setupVec3Slider("pos", ["position"], parseFloat, true);
+        setupVec3Slider("rot", ["rotation"], parseFloat, true);
+        
+        // sub objects
+        showElement("sub-objects-worldObject");
+        setupObjectDropdown("model", ["assets", "models"], [], "model");
+        
+        // AABB settings
+        setupCheckbox("render-AABB", ["AABB"], "render", true);
+    } else if(objectType == "model") {
+        // model/render settings
+        showElement("render-settings");
+        setupCheckbox("render", ["renderSettings"], "render", true);
+        setupCheckbox("cast-shadow", ["renderSettings"], "castShadow", true);
+        setupCheckbox("recv-shadow", ["renderSettings"], "recieveShadow", true);
+        setupCheckbox("recv-lighting", ["renderSettings"], "recieveLighting", true);
 
-    // render settings
-    setupCheckbox("render", ["model", "renderSettings"], "render", true);
-    setupCheckbox("cast-shadow", ["model", "renderSettings"], "castShadow", true);
-    setupCheckbox("recv-shadow", ["model", "renderSettings"], "recieveShadow", true);
-    setupCheckbox("recv-lighting", ["model", "renderSettings"], "recieveLighting", true);
-    setupCheckbox("render-AABB", ["AABB"], "render", true);
-    setupSlider("texture-scale", ["model", "material"], "scale", parseFloat, true);
-    setupSlider("diffuse-strength", ["model", "material"], "diffuseStrength", parseFloat, true);
-    setupSlider("specular-strength", ["model", "material"], "specularStrength", parseFloat, true);
-    setupSlider("specular-exponent", ["model", "material"], "specularExponent", parseFloat, true);
-    setupCheckbox("use-diffuse", ["model", "material"], "useDiffuse", true);
-    setupCheckbox("use-normal", ["model", "material"], "useNormal", true);
+        // sub objects
+        showElement("sub-objects-model");
+        setupObjectDropdown("mesh", ["assets", "meshes"], [], "mesh");
+        setupObjectDropdown("material", ["assets", "materials"], [], "material");
+    } else if(objectType == "material") {
+        // material settings
+        showElement("material-settings");
+        setupSlider("texture-scale", [], "scale", parseFloat, true);
+        setupSlider("diffuse-strength", [], "diffuseStrength", parseFloat, true);
+        setupSlider("specular-strength", [], "specularStrength", parseFloat, true);
+        setupSlider("specular-exponent", [], "specularExponent", parseFloat, true);
+        setupCheckbox("use-diffuse", [], "useDiffuse", true);
+        setupCheckbox("use-normal", [], "useNormal", true);
+
+        // sub objects
+        showElement("sub-objects-material");
+        setupObjectDropdown("diffuse", ["assets", "textures"], [], "diffuseTexture");
+        setupObjectDropdown("normal", ["assets", "textures"], [], "normalTexture");
+    } else if(objectType == "mesh") {
+        // mesh settings
+        showElement("mesh-settings");
+    } else if(objectType == "texture") {
+        // texture settings
+        showElement("texture-settings");
+        setUpImagePreview("texture-preview", [], "data");
+    }
 }
 
 onload = main;

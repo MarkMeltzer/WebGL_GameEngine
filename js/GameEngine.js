@@ -38,6 +38,8 @@ var GameEngine = function(canvas, gl) {
 
     // bind "add new" functions
     this.boundAddNewWorldObject = this.addNewWorldObject.bind(this);
+    this.boundAddNewModel = this.addNewModel.bind(this);
+    this.boundAddNewMaterial = this.addNewMaterial.bind(this);
 }
 
 /**
@@ -633,7 +635,7 @@ GameEngine.prototype.logLoadText = function(s) {
 /**
  * Adds a new default worldObject to the scene.
  */
-GameEngine.prototype.addNewWorldObject = function() {
+ GameEngine.prototype.addNewWorldObject = function() {
     const id = Math.floor(Math.random() * 100000).toString();
     const worldObject = new WorldObject(
         id,
@@ -647,6 +649,39 @@ GameEngine.prototype.addNewWorldObject = function() {
     worldObject.model = this.scene.defaultModel;
 
     this.scene.worldObjects[id] = worldObject;
+
+    return id;
+}
+
+/**
+ * Adds a new default model to the scene.
+ */
+ GameEngine.prototype.addNewModel = function() {
+    const id = Math.floor(Math.random() * 100000).toString();
+    const model = new Model(
+        this.gl, 
+        id,
+        this.scene.defaultMesh,
+        this.scene.defaultMaterial
+    );
+
+    this.scene.assets.models[id] = model;
+
+    return id;
+}
+
+/**
+ * Adds a new default material to the scene.
+ */
+ GameEngine.prototype.addNewMaterial = function() {
+    const id = Math.floor(Math.random() * 100000).toString();
+    const material = new Material(
+        id,
+        this.scene.defaultDiffuse,
+        this.scene.defaultNormal
+    );
+
+    this.scene.assets.materials[id] = material;
 
     return id;
 }

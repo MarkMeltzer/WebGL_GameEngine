@@ -24,7 +24,6 @@
 
             // set up the settings in the right pane
             setupGlobalSettings();
-            setupObjectSettings();
         }, true);
     }
 
@@ -47,12 +46,26 @@ function setupObjectSelector() {
     // set up the "add new" buttons
     document.getElementById("worldObject-add-button").onclick = () => {
         const id = gameEngine.boundAddNewWorldObject();
-        populateObjectSelector();
+        populateObjectSelector("worldObject", gameEngine.scene.worldObjects);
         setupControllerDropdown();
-        selectObject("world-object-list", id);
+        selectObject("worldObject-list", id);
+    }
+    document.getElementById("model-add-button").onclick = () => {
+        const id = gameEngine.boundAddNewModel();
+        populateObjectSelector("model", gameEngine.scene.assets.models);
+        selectObject("model-list", id);
+    }
+    document.getElementById("material-add-button").onclick = () => {
+        const id = gameEngine.boundAddNewMaterial();
+        populateObjectSelector("material", gameEngine.scene.assets.materials);
+        selectObject("material-list", id);
     }
 
-    populateObjectSelector();
+    populateObjectSelector("worldObject", gameEngine.scene.worldObjects);
+    populateObjectSelector("model", gameEngine.scene.assets.models);
+    populateObjectSelector("material", gameEngine.scene.assets.materials);
+    populateObjectSelector("mesh", gameEngine.scene.assets.meshes);
+    populateObjectSelector("texture", gameEngine.scene.assets.textures);
 }
 
 /**
@@ -89,7 +102,7 @@ function setupCheckbox(elementId, path, field, objectSetting=false) {
 
     // follow the path of objects to the setting, if there's no such
     // setting hide the checkbox container
-    const start = objectSetting ? gameEngine.scene.worldObjects[selectedObject] : gameEngine;
+    const start = objectSetting ? selectedObject : gameEngine;
     var object = objectPathToObject(start, path);
 
     if (object == null || object[field] == null) {
@@ -108,7 +121,7 @@ function setupCheckbox(elementId, path, field, objectSetting=false) {
 
 
 /**
- * Links an html checkbox to a setting in the game engine.
+ * Links a set of 3 sliders to a setting in the game engine.
  * 
  * @param {string} elementId the checkbox html element
  * @param {array} path the path to the object containing the setting
@@ -125,7 +138,7 @@ function setupVec3Slider(elementId, path, parseFunc, objectSetting=false) {
 
     // follow the path of objects to the setting, if there's no such
     // setting hide the slider container
-    const start = objectSetting ? gameEngine.scene.worldObjects[selectedObject] : gameEngine;
+    const start = objectSetting ? selectedObject : gameEngine;
     var object = objectPathToObject(start, path);
 
     if (object == null) {
@@ -160,7 +173,7 @@ function setupVec3Slider(elementId, path, parseFunc, objectSetting=false) {
 }
 
 /**
- * Links an html checkbox to a setting in the game engine.
+ * Links an html slider to a setting in the game engine.
  * 
  * @param {string} elementId the checkbox html element
  * @param {array} path the path to the object containing the setting field
@@ -174,7 +187,7 @@ function setupSlider(elementId, path, field, parseFunc, objectSetting=false) {
 
     // follow the path of objects to the setting, if there's no such
     // setting hide the slider container
-    const start = objectSetting ? gameEngine.scene.worldObjects[selectedObject] : gameEngine;
+    const start = objectSetting ? selectedObject : gameEngine;
     var object = objectPathToObject(start, path);
 
     if (object == null || object[field] == null) {
@@ -193,6 +206,27 @@ function setupSlider(elementId, path, field, parseFunc, objectSetting=false) {
     }
 }
 
+function setUpImagePreview(elementId, pathToParent, imageDataField) {
+    const container = document.getElementById(elementId);
+
+    const object = objectPathToObject(selectedObject, pathToParent);
+    if (object == null) {
+        container.style.display = "none";
+        return;
+    } 
+
+    // show and clear the container
+    container.style.display = "block";
+    const img = object[imageDataField];
+    while (container.firstChild) {
+        container.removeChild(container.firstChild);
+    }
+
+    // set the new image as child
+    img.setAttribute("class", "img-preview");
+    container.appendChild(img);
+}
+
 /**
  * Setup the dropdown to change scenes.
  */
@@ -204,18 +238,10 @@ function setupSceneDropdown() {
     };
 
     // clear the dropdown list
-    const len = dropdown.options.length;
-    for (var i = len - 1; i >= 0; i--) {
-        dropdown.remove(i);
-    }
+    clearDropdown(dropdown);
 
     // add all scenes
-    for (var i = 0; i < sceneDescriptions.length; i++) {
-        const option = document.createElement("option");
-        option.value = sceneDescriptions[i];
-        option.text = sceneDescriptions[i];
-        dropdown.add(option);
-    }
+    fillDropdown(dropdown, sceneDescriptions);
 
     dropdown.value = currentScene;
 }
@@ -243,31 +269,32 @@ function setupControllerDropdown() {
 /**
  * Set up a dropdown to change the child object of another object.
  * 
- * @param {string} dropdownId id of the dropdown element
+ * @param {string} dropdownName name of the dropdown element
  * @param {object} objectPoolPath where to search for the new child object
  * @param {array} pathToParent the path to the parent object
  * @param {string} fieldToChange the field of the parent to be changed
  */
-function setupObjectDropdown(dropdownId, objectPoolPath, pathToParent, fieldToChange) {
-    const dropdown = document.getElementById(dropdownId);
+function setupObjectDropdown(dropdownName, objectPoolPath, pathToParent, fieldToChange) {
+    const dropdown = document.getElementById(dropdownName + "-dropdown");
     const objectPool = objectPathToObject(gameEngine.scene, objectPoolPath);
     const parentObject = objectPathToObject(
-        gameEngine.scene.worldObjects[selectedObject],
+        selectedObject,
         pathToParent
     );
 
     if (parentObject == null) {
-        dropdown.parentElement.style.display = "none";
+        dropdown.parentElement.parentElement.style.display = "none";
         return;
     } else {
-        dropdown.parentElement.style.display = "block";
+        dropdown.parentElement.parentElement.style.display = "grid";
 
         var selectedValue = parentObject[fieldToChange] == null ? 
                             "none" : parentObject[fieldToChange].id;
     }
 
-    populateObjectDropdown(dropdownId, objectPool, selectValue=selectedValue);
+    populateObjectDropdown(dropdownName + "-dropdown", objectPool, selectValue=selectedValue);
 
+    // change the child object on change of the dropdown
     dropdown.onchange = function() {
         if (this.value == "none") {
             parentObject[fieldToChange] = null;
@@ -275,8 +302,22 @@ function setupObjectDropdown(dropdownId, objectPoolPath, pathToParent, fieldToCh
             parentObject[fieldToChange] = objectPool[this.value];
         }
     }
+
+    // clicking the button should select the current child object
+    const button = document.getElementById(dropdownName + "-button");
+    button.onclick = function() {
+        selectObject(dropdownName + "-list", dropdown.value);
+    }
 }
 
+
+/**
+ * Populates a dropdown menu with all objects of a certain type.
+ * 
+ * @param {string} dropdownId id of the dropdown element
+ * @param {array} objectsToList list of objects to appear in the dropdown
+ * @param {string} selectValue which value to be selected after populating
+ */
 function populateObjectDropdown(dropdownId, objectsToList, selectValue) {
     const dropdown = document.getElementById(dropdownId);
     
@@ -292,48 +333,54 @@ function populateObjectDropdown(dropdownId, objectsToList, selectValue) {
 /**
  * Populate the object selector in the left pane with objects from the scene.
  */
-function populateObjectSelector() {
-    const WOList = document.getElementById("world-object-list")
+function populateObjectSelector(listName, objectPool) {
+    const objectList = document.getElementById(listName + "-list")
 
     // clean the object list
-    while (WOList.firstChild) {
-        WOList.removeChild(WOList.firstChild);
+    while (objectList.firstChild) {
+        objectList.removeChild(objectList.firstChild);
     }
 
-    // show the loading text in the dropdown
-    const pLoading = document.createElement("p");
-    pLoading.setAttribute("id", "WO-list-loading");
-    WOList.appendChild(pLoading);
-    document.getElementById("WO-list-loading").style.display = "block";
-
-    const WOKeys = Object.keys(gameEngine.scene.worldObjects);
-    for (var i = 0; i < WOKeys.length; i++) {
+    // create and insert all the objects
+    const keys = Object.keys(objectPool);
+    for (var i = 0; i < keys.length; i++) {
         const li = document.createElement("li");
 
-        // create and insert input element
+        // create and insert input element into list item
         const input = document.createElement("input");
         input.setAttribute("type", "radio");
         input.setAttribute("class", "radio-button")
         input.setAttribute("name", "objects");
-        input.setAttribute("id", WOKeys[i]);
+        input.setAttribute("id", keys[i]);
         input.onclick = function() {
-            selectedObject = this.id;
+            // set the selected object
+            if (listName == "worldObject") {
+                selectedObject = gameEngine.scene.worldObjects[this.id];
+            } else if (listName == "model") {
+                selectedObject = gameEngine.scene.assets.models[this.id];
+            } else if (listName == "material") {
+                selectedObject = gameEngine.scene.assets.materials[this.id];
+            } else if (listName == "mesh") {
+                selectedObject = gameEngine.scene.assets.meshes[this.id];
+            } else if (listName == "texture") {
+                selectedObject = gameEngine.scene.assets.textures[this.id];
+            }
+
             setupObjectSettings();
             document.getElementById("object-settings-button").onclick();
         }
         li.appendChild(input)
 
-        // create and insert label element
+        // create and insert label element into list item
         const label = document.createElement("label");
-        label.setAttribute("for", WOKeys[i]);
+        label.setAttribute("for", keys[i]);
         label.setAttribute("class", "radio-label");
-        label.appendChild(document.createTextNode(WOKeys[i]));
+        label.appendChild(document.createTextNode(keys[i]));
         li.appendChild(label);
 
         // insert list item into list
-        WOList.appendChild(li);
+        objectList.appendChild(li);
     }
-    document.getElementById("WO-list-loading").style.display = "none";
 }
 
 /**
@@ -406,7 +453,6 @@ function initScenes() {
     // the hardcoded list of scenes on the server
     sceneDescriptions = [
         "scenes/scene1.json",
-        "scenes/scene1_modified.json",
         "scenes/scene2.json",
         "scenes/normal_map_test.json"
     ];

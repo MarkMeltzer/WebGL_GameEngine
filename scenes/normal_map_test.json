@@ -2,64 +2,64 @@
     "assets": {
         "meshes": [
             {
-                "id": "UV_cube",
+                "id": "UV_cube_test.obj",
                 "path": "objs/UV_cube_test.obj"
             },
             {
-                "id": "plane",
+                "id": "plane.obj",
                 "path": "objs/plane.obj"
             }
         ],
         "textures": [
             {
-                "id": "brick1Diff",
+                "id": "brick2_col.jpg",
                 "type": "diffuse",
                 "path": "imgs/brick2_col.jpg"
             },
             {
-                "id": "brick1Norm",
+                "id": "brick2_norm.jpg",
                 "type": "normal",
                 "path": "imgs/brick2_norm.jpg"
             },
             {
-                "id": "planks1Diff",
+                "id": "planks1_col.jpg",
                 "type": "diffuse",
                 "path": "imgs/planks1_col.jpg"
             },
             {
-                "id": "planks1Norm",
+                "id": "planks1_norm.jpg",
                 "type": "normal",
                 "path": "imgs/planks1_norm.jpg"
             }
         ],
         "materials": [
             {
-                "id": "brick1",
-                "diffuseTexture": "brick1Diff",
-                "normalTexture" : "brick1Norm",
+                "id": "brick1Mat",
+                "diffuseTexture": "brick2_col.jpg",
+                "normalTexture" : "brick2_norm.jpg",
                 "scale": 3.0
             },
             {
-                "id": "planks1",
-                "diffuseTexture": "planks1Diff",
-                "normalTexture" : "planks1Norm",
+                "id": "planks1Mat",
+                "diffuseTexture": "planks1_col.jpg",
+                "normalTexture" : "planks1_norm.jpg",
                 "scale": 8.0
             }
         ],
         "models": [
             {
-                "id": "UV_cube",
-                "mesh": "UV_cube",
-                "material": "brick1",
+                "id": "UV_cubeModel",
+                "mesh": "UV_cube_test.obj",
+                "material": "brick1Mat",
                 "animateRot" : false,
                 "rotAxis" : [1,1,0],
                 "rotSpeedFactor": 1,
                 "recieveShadow" : false
             },
             {
-                "id": "plane",
-                "mesh": "plane",
-                "material": "planks1",
+                "id": "planeModel",
+                "mesh": "plane.obj",
+                "material": "planks1Mat",
                 "recieveLighting": false
             }
         ]
@@ -78,7 +78,7 @@
                 45,
                 0
             ],
-            "model": "UV_cube",
+            "model": "UV_cubeModel",
             "AABB": "none"
         },
         {
@@ -89,7 +89,7 @@
                 -3,
                 0
             ],
-            "model": "plane"
+            "model": "planeModel"
         }
     ]
 }

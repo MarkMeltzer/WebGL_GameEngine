@@ -3,63 +3,63 @@
         {
             "meshes" : [
                 {
-                    "id" : "sphere",
+                    "id" : "sphere.obj",
                     "path" : "objs/sphere.obj"
                 },
                 {
-                    "id" : "invSphere",
+                    "id" : "inv_sphere.obj",
                     "path" : "objs/inv_sphere.obj"
                 },
                 {
-                    "id" : "clothsim",
+                    "id" : "cloththing.obj",
                     "path" : "objs/cloththing.obj"
                 },
                 {
-                    "id" : "sofaMesh",
+                    "id" : "sofa.obj",
                     "path" : "objs/sofa.obj"
                 },
                 {
-                    "id" : "UV_cube",
+                    "id" : "UV_cube_test.obj",
                     "path" : "objs/UV_cube_test.obj"
                 },
                 {
-                    "id" : "plane",
+                    "id" : "plane.obj",
                     "path" : "objs/plane.obj"
                 }
             ],
             "textures" : [
                 {
-                    "id" : "colorTexture",
+                    "id" : "colors.png",
                     "type" : "diffuse",
                     "path" : "imgs/colors.png"
                 },
                 {
-                    "id" : "ijsbeerTexture",
+                    "id" : "ijsbeer.jpg",
                     "type" : "diffuse",
                     "path" : "imgs/ijsbeer.jpg"
                 },
                 {
-                    "id" : "skyGradientTexture",
+                    "id" : "skygradient.png",
                     "type" : "diffuse",
                     "path" : "imgs/skygradient.png"
                 },
                 {
-                    "id" : "UV_cube_Texture",
+                    "id" : "cube_UV_test.png",
                     "type" : "diffuse",
                     "path" : "imgs/cube_UV_test.png"
                 },
                 {
-                    "id" : "brick1Diff",
+                    "id" : "brick2_col.jpg",
                     "type" : "diffuse",
                     "path" : "imgs/brick2_col.jpg"
                 },
                 {
-                    "id" : "planks1Diff",
+                    "id" : "planks1_col.jpg",
                     "type" : "diffuse",
                     "path" : "imgs/planks1_col.jpg"
                 },
                 {
-                    "id" : "whiteTexture",
+                    "id" : "white.png",
                     "type" : "diffuse",
                     "path" : "imgs/white.png"
                 }
@@ -67,54 +67,54 @@
             "materials" : [
                 {
                     "id" : "colorMat",
-                    "diffuseTexture" : "colorTexture"
+                    "diffuseTexture" : "colors.png"
                 },
                 {
                     "id" : "ijsbeerMat",
-                    "diffuseTexture" : "ijsbeerTexture"
+                    "diffuseTexture" : "ijsbeer.jpg"
                 },
                 {
-                    "id" : "skyGradient",
-                    "diffuseTexture" : "skyGradientTexture"
+                    "id" : "skyGradientMat",
+                    "diffuseTexture" : "skygradient.png"
                 },
                 {
-                    "id" : "UV_cube",
-                    "diffuseTexture" : "UV_cube_Texture"
+                    "id" : "UV_cubeMat",
+                    "diffuseTexture" : "cube_UV_test.png"
                 },
                 {
-                    "id" : "brick1",
-                    "diffuseTexture" : "brick1Diff"
+                    "id" : "brick1Mat",
+                    "diffuseTexture" : "brick2_col.jpg"
                 },
                 {
-                    "id" : "planks1",
-                    "diffuseTexture" : "planks1Diff",
+                    "id" : "planks1Mat",
+                    "diffuseTexture" : "planks1_col.jpg",
                     "scale" : 8.0
                 },
                 {
-                    "id" : "white",
-                    "diffuseTexture" : "whiteTexture"
+                    "id" : "whiteMat",
+                    "diffuseTexture" : "white.png"
                 }
             ],
             "models" : [
                 {
-                    "id" : "sphere",
-                    "mesh" : "sphere",
+                    "id" : "sphereModel",
+                    "mesh" : "sphere.obj",
                     "material" : "colorMat",
                     "render" : true,
                     "castShadow" : true
                 },
                 {
-                    "id" : "invSphere",
-                    "mesh" : "invSphere",
-                    "material" : "skyGradient",
+                    "id" : "invSphereModel",
+                    "mesh" : "inv_sphere.obj",
+                    "material" : "skyGradientMat",
                     "render" : true,
                     "castShadow" : false,
                     "recieveShadow" : false,
                     "recieveLighting" : false
                 },
                 {
-                    "id" : "clothsim",
-                    "mesh" : "clothsim",
+                    "id" : "clothsimModel",
+                    "mesh" : "cloththing.obj",
                     "animateRot" : true,
                     "rotAxis" : [0,1,0],
                     "rotSpeedFactor": 1,
@@ -122,22 +122,22 @@
                 },
                 {
                     "id" : "sofaModel",
-                    "mesh" : "sofaMesh",
-                    "material" : "skyGradient"
+                    "mesh" : "sofa.obj",
+                    "material" : "skyGradientMat"
                 },
                 {
-                    "id" : "UV_cube",
-                    "mesh" : "UV_cube",
-                    "material" : "brick1",
+                    "id" : "UV_cubeModel",
+                    "mesh" : "UV_cube_test.obj",
+                    "material" : "brick1Mat",
                     "recieveLighting" : false,
                     "recieveShadow" : false,
                     "animateRot" : true,
                     "rotAxis" : [1,0,0]
                 },
                 {
-                    "id" : "plane",
-                    "mesh" : "plane",
-                    "material": "planks1",
+                    "id" : "planeModel",
+                    "mesh" : "plane.obj",
+                    "material": "planks1Mat",
                     "recieveLighting" : false
                 }
             ]
@@ -154,7 +154,7 @@
             "id" : "skySphere",
             "type" : "model",
             "position" : [0,0,0],
-            "model" : "invSphere",
+            "model" : "invSphereModel",
             "AABB" : "none"
         },
         {
@@ -162,7 +162,7 @@
             "type" : "model",
             "position" : [4, 0, 0],
             "hasGravity" : true,
-            "model" : "clothsim",
+            "model" : "clothsimModel",
             "AABB" : {
                 "minX" : -1,
                 "maxX" : 1,
@@ -176,14 +176,14 @@
             "id" : "UV_cube",
             "type" : "model",
             "position" : [0,0,0],
-            "model" : "UV_cube",
+            "model" : "UV_cubeModel",
             "AABB" : "none"
         },
         {
             "id" : "ground_plane",
             "type" : "model",
             "position" : [0,-3,0],
-            "model" : "plane"
+            "model" : "planeModel"
         }
     ]
 }
