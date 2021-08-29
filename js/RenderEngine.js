@@ -331,6 +331,13 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
         glMatrix.toRadian(worldObject.rotation[2])
     );
 
+    // apply the objects scale
+    mat4.scale(
+        modelMatrix,
+        modelMatrix,
+        worldObject.scale
+    )
+
     // animate model translation, if applicable
     if (model.animation.animateTrans) {
         mat4.translate(
@@ -349,6 +356,13 @@ RenderEngine.prototype.drawModel = function(worldObject, time, shader, normals, 
             model.animation.rotAxis
             );
     }
+
+    // set whether the object should be highlighted
+    // set the specular exponent of the material
+    gl.uniform3fv(
+        shader.uniformLocations.uHighlight,
+        worldObject.selected ? [50, 0, 0] : [0, 0, 0]
+    );
 
     // set the model matrix uniform in the shader
     gl.uniformMatrix4fv(

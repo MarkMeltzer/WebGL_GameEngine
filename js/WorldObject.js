@@ -4,6 +4,7 @@ class WorldObject {
         type,
         position = [0, 0, 0],
         rotation = [0, -90, 0],
+        scale = [1, 1, 1],
         isImmovable = true,
         hasCollision = true,
         hasGravity = true
@@ -13,12 +14,14 @@ class WorldObject {
 
         // state
         this.position = position;
+        this.scale = scale;
         this.velocity = [0, 0, 0];
         this.rotation = rotation;
         this.newRotation = rotation.slice();
         this.isColliding = false;
         this.airborne = true;
         this.flying = false;
+        this.selected = false;
 
         // WorldObject space
         this.front = vec3.fromValues(0, 0, -1);
@@ -75,6 +78,7 @@ class WorldObject {
             "position" : this.position,
             "velocity" : this.velocity,
             "rotation" : this.rotation,
+            "scale" : this.scale,
             "hasCollision" : this.hasCollision,
             "hasGravity" : this.hasGravity,
             "isImmovable" : this.isImmovable,

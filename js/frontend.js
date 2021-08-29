@@ -76,6 +76,10 @@ function setupObjectSelector() {
  * @param {string} objectId the id the of the object to select
  */
 function selectObject(objectListId, objectId) {
+    if (objectId == "none") {
+        return;
+    }
+
     const list = document.getElementById(objectListId);
 
     for (let i = 0; i < list.childElementCount; i++) {
@@ -353,9 +357,14 @@ function populateObjectSelector(listName, objectPool) {
         input.setAttribute("name", "objects");
         input.setAttribute("id", keys[i]);
         input.onclick = function() {
+            if (selectedObject && selectedObject.selected) {
+                selectedObject.selected = false;
+            }
+
             // set the selected object
             if (listName == "worldObject") {
                 selectedObject = gameEngine.scene.worldObjects[this.id];
+                selectedObject.selected = true;
             } else if (listName == "model") {
                 selectedObject = gameEngine.scene.assets.models[this.id];
             } else if (listName == "material") {

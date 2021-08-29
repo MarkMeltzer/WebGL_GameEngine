@@ -281,6 +281,7 @@ GameEngine.prototype.loadCompositeAssets = function(sceneJson, verbose=false) {
         // set other settings if specified
         if (wOData.position) worldObject.position = wOData.position;
         if (wOData.rotation) worldObject.rotation = wOData.rotation;
+        if (wOData.scale) worldObject.scale = wOData.scale;
         if (wOData.isImmovable !== undefined) worldObject.isImmovable = wOData.isImmovable;
         if (wOData.hasCollision !== undefined) worldObject.hasCollision = wOData.hasCollision;
         if (wOData.hasGravity !== undefined) worldObject.hasGravity = wOData.hasGravity;
@@ -642,6 +643,7 @@ GameEngine.prototype.logLoadText = function(s) {
         "model",
         [0,0,0],
         [0,0,0],
+        [1,1,1],
         true,
         true,
         true

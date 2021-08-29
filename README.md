@@ -73,3 +73,4 @@ A live demonstration can be found at [markmeltzer.nl](http://markmeltzer.nl) (ma
 - Some object fields are saved but not loaded
 - ~~Default cube needs their own tangents~~
 - There is some stuttering when moving the controller and turning the camera at the same time.
+- There is no way to give an existing worldModel the default mesh (manually add to list and create setter function in GameEngine).

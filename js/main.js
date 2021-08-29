@@ -150,6 +150,7 @@ function setupObjectSettings() {
 
     // hide all settings
     hideElement("transform-settings");
+    hideElement("AABB-settings");
     hideElement("sub-objects-worldObject");
     hideElement("sub-objects-model");
     hideElement("sub-objects-material");
@@ -165,12 +166,14 @@ function setupObjectSettings() {
         showElement("transform-settings");
         setupVec3Slider("pos", ["position"], parseFloat, true);
         setupVec3Slider("rot", ["rotation"], parseFloat, true);
+        setupVec3Slider("scale", ["scale"], parseFloat, true);
         
         // sub objects
         showElement("sub-objects-worldObject");
         setupObjectDropdown("model", ["assets", "models"], [], "model");
         
         // AABB settings
+        showElement("AABB-settings");
         setupCheckbox("render-AABB", ["AABB"], "render", true);
     } else if(objectType == "model") {
         // model/render settings

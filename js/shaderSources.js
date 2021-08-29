@@ -64,6 +64,7 @@ const mainFsSource = `
     uniform highp float uDiffStrength;
     uniform bool uRecieveShadow;
     uniform bool uRecieveLighting;
+    uniform highp vec3 uHighlight;
 
     // light
     uniform highp vec3 uLightDirection;
@@ -145,7 +146,7 @@ const mainFsSource = `
             shadowFactor = 1.0;
         }
 
-        gl_FragColor = vec4(color.xyz * Lighting * shadowFactor, color.w);
+        gl_FragColor = vec4(color.xyz * Lighting * shadowFactor, color.w) + vec4(uHighlight, 0);
     }
 `;
 
@@ -175,7 +176,8 @@ const mainUniformNames = [
     "uCameraPos",
     "uSpecExp",
     "uSpecStrength",
-    "uDiffStrength"
+    "uDiffStrength",
+    "uHighlight"
 ];
 
 /**

@@ -105,6 +105,16 @@
                             <input type="range" class="vec3-slider vec3-slider-y" id="rot-y-slider" min="-180" max="180" step="0.1">
                             <input type="range" class="vec3-slider vec3-slider-z" id="rot-z-slider" min="-180" max="180" step="0.1">
                         </div>
+                        <div class="vec3-sliders-container">
+                            <label>Scale: </label>
+                            <span id="scale-x" class="vec3-value vec3-value-x">0.5</span>
+                            <span id="scale-y" class="vec3-value vec3-value-y">0.5</span>
+                            <span id="scale-z" class="vec3-value vec3-value-z">0.5</span>
+                            <br>
+                            <input type="range" class="vec3-slider vec3-slider-x" id="scale-x-slider" min="0" max="20" step="0.1">
+                            <input type="range" class="vec3-slider vec3-slider-y" id="scale-y-slider" min="0" max="20" step="0.1">
+                            <input type="range" class="vec3-slider vec3-slider-z" id="scale-z-slider" min="0" max="20" step="0.1">
+                        </div>
                         <br>
                     </div>
     
@@ -162,6 +172,13 @@
                         </div>
                     </div>
     
+                    <div id="AABB-settings">
+                        <div class="checkbox-container">
+                            <label for="render-AABB-checkbox">Render AABB: </label>
+                            <input type="checkbox" id="render-AABB-checkbox">
+                        </div>
+                    </div>
+
                     <!-- Render settings -->
                     <div id="render-settings">
                         <p class="settings-section-title">Render settings</p>
@@ -180,10 +197,6 @@
                         <div class="checkbox-container">
                             <label for="recv-lighting-checkbox">Recieve lighting: </label>
                             <input type="checkbox" id="recv-lighting-checkbox">
-                        </div>
-                        <div class="checkbox-container">
-                            <label for="render-AABB-checkbox">Render AABB: </label>
-                            <input type="checkbox" id="render-AABB-checkbox">
                         </div>
                     </div>
     
