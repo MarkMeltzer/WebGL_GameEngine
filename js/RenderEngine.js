@@ -267,13 +267,11 @@ RenderEngine.prototype.drawScene = function(camera, time) {
         gl.useProgram(this.mainShader.program);
         const worldObject = this.scene.worldObjects[id];
         
-        if (!worldObject.model || 
-            !worldObject.model.mesh ||
-            !worldObject.model.renderSettings.render) {
-            continue;
+        if (worldObject.model && 
+            worldObject.model.mesh &&
+            worldObject.model.renderSettings.render) {
+            this.drawModel(worldObject, time, this.mainShader, true, true);
         }
-
-        this.drawModel(worldObject, time, this.mainShader, true, true);
 
         // draw the AABBs
         if (worldObject.AABB && worldObject.AABB.render) {

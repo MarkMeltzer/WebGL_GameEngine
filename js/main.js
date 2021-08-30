@@ -28,6 +28,7 @@ function main() {
     // set up the statistics in the middle pane
     setupStats();
 
+    // ignore this
     document.addEventListener("keydown", (e)=> {
         if (e.key == "f") {
             const div = document.getElementById("fullscreen-div");
